@@ -227,4 +227,12 @@ body{display:block;padding:0;margin:0;}
 
 /* .inputOpacity{width:0;height:0;opacity: 0;} */
 
+.pwdSure_box{width:100%;}
+.pwdSure_box .selectType_type{width:30%;}
+.pwdSure_box .selectType_content{width:70%}
 
+.sendInfo_box{width:100%;}
+.sendInfo_box ul{}
+.sendInfo_box ul li{width:100%;overflow: hidden;}
+.sendInfo_box ul li h3{width:30%;float: left;text-align:right;padding:5px 5px;font-weight: bold;}
+.sendInfo_box ul li span{width:70%;float: left;padding:5px 5px;}

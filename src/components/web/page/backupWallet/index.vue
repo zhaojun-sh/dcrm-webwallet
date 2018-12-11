@@ -90,6 +90,10 @@ export default {
         $('.qrcodeView_black').show()
       }
     })
+
+    if (!that.$store.state.privateKey) {
+      that.$router.push('/importWallet')
+    }
   },
   methods: {
     qrcode (cont, id) {
@@ -121,6 +125,10 @@ export default {
         that.qrcode(that.privateKey, 'privateQrcode')
       }
     }
+  },
+  destroyed () {
+    const that = this
+    that.$store.commit('storePrivateKey', '')
   }
 }
 </script>

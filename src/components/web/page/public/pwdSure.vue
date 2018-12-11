@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div class="newwallet_box">
+    <div class="pwdSure_box">
 
-      <div class="newWallet_title flex-c">
+      <!-- <div class="newWallet_title flex-c">
         <h3 class="title">Import wallet</h3>
-      </div>
+      </div> -->
 
       <div class="flex-bc selectType_box">
         <div class="selectType_type flex-ai-c">
@@ -63,9 +63,9 @@
         </div>
       </div>
 
-      <div class="createInfo_tip pb-20">
+      <!-- <div class="createInfo_tip pb-20">
         <h3 class="h3">Fusion DCRM Wallet does not hold your keys for you. We cannot access accounts, recover keys, reset passwords,<br/>nor reverse transactions. Protect your keys & always check that you are on correct URL. You are responsible for your security.</h3>
-      </div>
+      </div> -->
 
     </div>
   </div>
@@ -79,7 +79,7 @@
 import wallet from '../../../../assets/js/wallet'
 export default {
   name: 'createWallet',
-  // props: ['wAdress'],
+  props: ['sendDataPage'],
   data () {
     return {
       password: '',
@@ -88,10 +88,7 @@ export default {
       showPwdBtn: false,
       fileData: '',
       privateKey: '',
-      publicKey: '',
       checkAddress: '',
-      downloadURL: '',
-      downloadName: ''
     }
   },
   mounted () {
@@ -105,41 +102,27 @@ export default {
       that.password = ''
       $('#fileUpload').val('')
       that.privateKey = ''
-      that.publicKey = ''
       that.checkAddress = ''
-      that.downloadName = ''
-      that.downloadURL = ''
     })
     $('#fileUpload').change(function () {
       let reader = new FileReader()
       let _this = this
       reader.onload = function (onLoadEvent) {
         that.fileData = onLoadEvent.currentTarget.result
-        // that.downloadName = $(_this)[0].files[0].name
-        // that.downloadName = that.$$.getBlob('text/json;charset=UTF-8', that.fileData)
         that.showPwd = that.walletRequirePass(that.fileData)
       }
       reader.readAsText($(this)[0].files[0])
     })
   },
   methods: {
-    goBackupWallet () {
-      let that = this
-      that.setStore()
-      that.sendInfoToParent()
-      that.$router.push('/backupWallet')
-    },
     inputFileBtn () {
       let that = this
       let walletData
       try{
         walletData = wallet.getWalletFromPrivKeyFile(that.fileData, that.password)
-        that.checkAddress = walletData.getChecksumAddressString()
         that.privateKey = walletData.getPrivateKeyString()
-        that.downloadName = walletData.getV3Filename()
-        that.downloadURL = that.$$.getBlob('text/json;charset=UTF-8', that.fileData)
-        // console.log(that.checkAddress)
-        that.goBackupWallet()
+        that.checkAddress = walletData.getChecksumAddressString()
+        that.signSendData()
       } catch (e) {
         that.$$.layerMsg({
           tip: e,
@@ -147,19 +130,17 @@ export default {
           bgColor: '#ea4b40',
           icon: require('../../../../assets/image/Prompt.svg')
         })
-        // that.showPwdBtn = false
       }
     },
     inputPwdBtn () {
       let that = this
       let walletData
       try {
+        console.log(1)
         walletData = new wallet(new Buffer(that.fixPkey(that.privateKey), 'hex'))
+        that.privateKey = walletData.getPrivateKeyString()
         that.checkAddress = walletData.getChecksumAddressString()
-        console.log(that.publicKey)
-        that.downloadURL = ''
-        that.downloadName = ''
-        that.goBackupWallet()
+        that.signSendData()
       } catch (e) {
         that.$$.layerMsg({
           tip: e,
@@ -167,20 +148,46 @@ export default {
           bgColor: '#ea4b40',
           icon: require('../../../../assets/image/Prompt.svg')
         })
-        // that.showPwdBtn = false
       }
     },
-    sendInfoToParent () {
-      let that = this
-      that.$emit('setAddress', that.checkAddress)
+    signSendData () {
+      const that = this
+      if (that.checkAddress !== that.sendDataPage.from) {
+        that.$$.layerMsg({
+          tip: 'Account error!',
+          time: 3000,
+          bgColor: '#ea4b40',
+          icon: require('../../../../assets/image/Prompt.svg')
+        })
+        // $('#privateSure').modal('hide')
+        $('#sendInfo').modal('hide')
+        return
+      }
+      let rawTx = {
+        nonce: that.sendDataPage.nonce,
+        gasPrice: Number(that.sendDataPage.gasPrice),//Number类型 
+        gasLimit: Number(that.sendDataPage.gasLimit),
+        from: that.sendDataPage.from,
+        to: that.sendDataPage.to,
+        value: Number(that.sendDataPage.value),//Number类型
+      }
+      let Tx = require('ethereumjs-tx')
+      let privateKey = new Buffer(that.fixPkey(that.privateKey), 'hex')
+      let tx = new Tx(rawTx)
+      tx.sign(privateKey)
+      let serializedTx = tx.serialize()
+      let serializedTxString = serializedTx.toString('hex')
+      serializedTxString = serializedTxString.indexOf('0x') === 0 ? serializedTxString : ('0x' + serializedTxString)
+      that.sendSignData(serializedTxString)
     },
-    setStore () {
+    sendSignData (data) {
       let that = this
-      that.$store.commit('storePrivateKey', that.privateKey)
-      // that.$store.commit('storePubliceKey', that.publicKey)
-      that.$store.commit('storeAddress', that.checkAddress)
-      that.$store.commit('storeKeystoreURL', that.downloadURL)
-      that.$store.commit('storeDownload', that.downloadName)
+      that.$emit('sendSignData', data)
+      that.password = ''
+      $('#fileUpload').val('')
+      that.privateKey = ''
+      that.checkAddress = ''
+      that.showPwdBtn = false
     },
     changePrv () {
       let that = this

@@ -20,6 +20,8 @@ import lockOut from '@/components/web/page/lilo/lockOut'
 
 import dapp from '@/components/web/page/dapp/index'
 
+import pwdSure from '@/components/web/page/public/pwdSure'
+
 import backupWallet from '@/components/web/page/backupWallet/index'
 
 Vue.use(Router)
@@ -78,7 +80,13 @@ const routers = new Router({
                 }, {
                   path: '/Transfer/tranSend',
                   name: 'tranSend',
-                  component: tranSend
+                  component: tranSend,
+                  children: [
+                    {
+                      path: '/',
+                      component: pwdSure
+                    }
+                  ]
                 }
               ]
             }, {

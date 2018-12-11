@@ -36,9 +36,6 @@ export default {
   data () {
     return {
       password: '',
-      privateKey: '',
-      publicKey: '',
-      addressInfo: '',
       walletInit: ''
     }
   },

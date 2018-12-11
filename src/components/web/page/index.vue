@@ -54,7 +54,7 @@ export default {
     let that = this
     // that.topSetViewFlag = topSetViewFlag
     that.$$.showSearchTop()
-    if (!that.$store.state.storePrivateKey) {
+    if (!that.$store.state.addressInfo) {
       that.$router.push('/')
     }
     $(function () {
