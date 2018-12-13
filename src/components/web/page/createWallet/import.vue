@@ -156,7 +156,6 @@ export default {
       try {
         walletData = new wallet(new Buffer(that.fixPkey(that.privateKey), 'hex'))
         that.checkAddress = walletData.getChecksumAddressString()
-        console.log(that.publicKey)
         that.downloadURL = ''
         that.downloadName = ''
         that.goBackupWallet()
@@ -181,6 +180,7 @@ export default {
       that.$store.commit('storeAddress', that.checkAddress)
       that.$store.commit('storeKeystoreURL', that.downloadURL)
       that.$store.commit('storeDownload', that.downloadName)
+      sessionStorage.setItem('localFromAddress', that.checkAddress)
     },
     changePrv () {
       let that = this

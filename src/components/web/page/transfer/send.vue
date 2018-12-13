@@ -9,7 +9,7 @@
 
         <h3 class="mt-20">Amount:</h3>
         <div class="receiveAddress_pwd">
-          <input type="text" class="input-text amount" v-model="sendAmound" id="amountShow" @change="changeAmount" />
+          <input type="text" class="input-text amount" v-model="sendAmound" id="amountShow" />
           <label v-html="selectData" class="currency"></label>
         </div>
 
@@ -24,7 +24,7 @@
           <h3 class="title">History:</h3>
         </hgroup>
         <div class="tableHistory_table">
-          <table class="table table-bordered table-hover">
+          <table class="table table-bordered table-hover table-striped">
             <thead>
               <tr>
                 <th width='5%'>Status</th>
@@ -164,7 +164,8 @@ export default {
       dataPage: '',
       serializedTx: '',
       maxFee: '',
-      netWorkInfo: ''
+      netWorkInfo: '',
+      refreshHistory: null
     }
   },
   watch: {
@@ -179,11 +180,17 @@ export default {
     that.walletAdress = that.$store.state.addressInfo
     that.sendAmound = that.$$.thousandBit('0', 2)
     that.getSendHistory()
-    setInterval(() => {
+    that.refreshHistory = setInterval(() => {
       that.getSendHistory()
     }, 20000)
   },
   methods: {
+    // refreshHistory () {
+    //   const that = this
+    //   setInterval(() => {
+    //     that.getSendHistory()
+    //   }, 20000)
+    // },
     privateSure () {
       const that = this
       if (!that.toAddress) {
@@ -256,6 +263,7 @@ export default {
         Web3 = new Web3(new Web3.providers.HttpProvider(that.$$.baseUrl))
       }
       that.web3Set = Web3
+      console.log(that.web3Set)
     },
     setBaseSendData () {
       const that = this
@@ -317,7 +325,7 @@ export default {
     sendDatabase (data) {
       const that = this
       $.ajax({
-        url: that.$$.serverURL + '/send/create',
+        url: that.$$.serverURL + '/transfer/create',
         datatype: 'json',
         type: 'post',
         data: {
@@ -340,7 +348,7 @@ export default {
     getSendHistory () {
       const that = this
       $.ajax({
-        url: that.$$.serverURL + '/send/history',
+        url: that.$$.serverURL + '/transfer/history',
         datatype: 'json',
         type: 'post',
         data: {
@@ -395,6 +403,11 @@ export default {
     //     }
     //   })
     // },
+  },
+  beforeDestroy () {
+    const that = this
+    clearInterval(that.refreshHistory)
+    that.refreshHistory = null
   }
 }
 </script>

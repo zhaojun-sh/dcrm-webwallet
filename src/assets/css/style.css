@@ -123,17 +123,17 @@ body{display:block;padding:0;margin:0;}
 .tableHistory_table{width:100%;margin-top:10px;margin-bottom:50px;}
 .tableHistory_table table{width:100%;}
 .tableHistory_table table thead tr th{color:#999999;border-bottom:none;}
-.tableHistory_table table tbody tr td{color:#333;font-size:16px;}
+.tableHistory_table table tbody tr td{color:#333;font-size:16px;line-height:34px;}
 .tableHistory_table table tbody tr td .red{color:#ff5959;}
 
 .moreInfo_box{width:100%;position:relative;}
 .moreInfo_box .moreInfo_hax{width:100%;max-width:300px;cursor:pointer;}
 .moreInfo_box .list{width:95%;background:#fff;border:1px solid #eee;display:none;}
-.moreInfo_box .list li{width:100%;word-break: break-all;border-bottom:1px solid #eee;padding:10px;}
+.moreInfo_box .list li{width:100%;word-break: break-all;border-bottom:1px solid #eee;padding:10px;line-height: 24px;}
 .moreInfo_box .list li:last-child{border-bottom:none}
 /* .moreInfo_box:hover .list{display:block;z-index:99;} */
 .moreInfo_box .list li:hover{background: #eee;}
-.moreInfo_box .arrow{width:11px;height:6px;background:url('../image/Expand.svg') center no-repeat;background-size:100%;display: block;position:absolute;top:12px;right:0;margin-top:-3px;}
+.moreInfo_box .arrow{width:11px;height:6px;background:url('../image/Expand.svg') center no-repeat;background-size:100%;display: block;position:absolute;top:17px;right:0;margin-top:-3px;}
 
 .contView_box{width:100%;background:#fff;overflow:hidden;padding:0 48px 63px;position: absolute;top:88px;right:0;left: 0;bottom: 0;overflow: auto;}
 .dappView_title{width:100%;text-align:center;margin:35px 0 5px;}

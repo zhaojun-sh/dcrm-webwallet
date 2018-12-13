@@ -21,7 +21,7 @@
           <h3 class="title">History:</h3>
         </hgroup>
         <div class="tableHistory_table">
-          <table class="table table-bordered table-hover">
+          <table class="table table-bordered table-hover table-striped">
             <thead>
               <tr>
                 <th>Status</th>
@@ -42,7 +42,7 @@
                     <span v-html="item.txhax" :title="item.info" class="ellipsis moreInfo_hax"></span>
                     <ul class="list">
                       <li  v-html="item.txhax"></li>
-                      <li  v-html="item.to_address"></li>
+                      <li  v-html="item.from_address"></li>
                     </ul>
                     <i class="arrow"></i>
                   </div>
@@ -72,7 +72,6 @@
 
 <script>
 import QRCode from 'qrcodejs2'
-import { setTimeout } from 'timers';
 export default {
   name: 'receive',
   props: ['selectData'],
@@ -82,7 +81,8 @@ export default {
       walletAdress: '',
       privateKey: '',
       publicKey: '',
-      historyData: []
+      historyData: [],
+      refreshHistory: null
     }
   },
   watch: {
@@ -110,6 +110,9 @@ export default {
     $(function () {
       $("[data-toggle='tooltip']").tooltip()
     })
+    that.refreshHistory = setInterval(() => {
+      that.getSendHistory()
+    }, 20000)
   },
   methods: {
     pageRefresh () {
@@ -175,7 +178,7 @@ export default {
     getSendHistory () {
       const that = this
       $.ajax({
-        url: that.$$.serverURL + '/send/history',
+        url: that.$$.serverURL + '/transfer/receiveHistory',
         datatype: 'json',
         type: 'post',
         data: {
@@ -184,12 +187,20 @@ export default {
         success: function (res) {
           console.log(res)
           if (res.msg === 'success' && res.info.length > 0) {
+            that.historyData = []
             for (let i = 0; i < res.info.length; i++) {
               res.info[i].date = that.$$.timeChange({date: res.info[i].date, type:'yyyy-mm-dd hh:mm'})
-              res.info[i].value = that.$$.thousandBit(res.info[i].value)
-              that.getStatus(res.info[i])
+              res.info[i].value = that.$$.thousandBit(res.info[i].value, 10)
+              // res.info[i].value = res.info[i].value
+              if (res.info[i].txhax) {
+                res.info[i].status = 'success'
+              } else {
+                res.info[i].status = 'failure'
+              }
+              // res.info[i].value = that.$$.thousandBit(res.info[i].value)
+              // that.getStatus(res.info[i])
             }
-            // that.historyData = res.info.reverse()
+            that.historyData = res.info
           } else {
 
           }
@@ -223,6 +234,11 @@ export default {
       console.log(that.historyData)
       // console.log(statusData)
     },
+  },
+  beforeDestroy () {
+    const that = this
+    clearInterval(that.refreshHistory)
+    that.refreshHistory = null
   }
 }
 </script>

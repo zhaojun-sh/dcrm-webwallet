@@ -34,7 +34,7 @@ $$.bigNumber = (num) => {
 }
 
 $$.timeChange = (data) => {
-  let time = data.date ? new Date(Date.parse(data.date)) : new Date()
+  let time = data.date ? new Date(data.date) : new Date()
   let formatType = data.format ? data.format : '/'
   let Y = time.getFullYear()
   let M = (time.getMonth() + 1) < 10 ? ('0' + (time.getMonth() + 1)) : (time.getMonth() + 1)

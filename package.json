@@ -31,7 +31,8 @@
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
-    "web3": "^0.20.0"
+    "web3": "^0.20.0",
+    "xhr2-cookies": "^1.1.0"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",

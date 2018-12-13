@@ -16,9 +16,11 @@ app.all('*',function(req,res,next){
 app.use(bodyParser.json({limit:'50mb'}))
 app.use(bodyParser.urlencoded({limit:'50mb',extended:true}))
 
-let sendInfo = require('./server/sendInfo')
+let transferInfo = require('./server/transferInfo')
+let lilo = require('./server/lilo')
 
-app.use('/send', sendInfo)
+app.use('/transfer', transferInfo)
+app.use('/lilo', lilo)
 
 let server = app.listen(8081, function () {
   console.log('success')

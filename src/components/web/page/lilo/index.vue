@@ -5,11 +5,8 @@
       <div class="biticonSelect_box">
         <div class="logo"><img src="../../../../assets/image/Fusion.svg"></div>
         <div class="arrow flex-c"><i class="i"></i></div>
-        <select class="select" v-model="selectVal">
-          <option>FSN</option>
-          <option>BTC</option>
-          <option>ETH</option>
-          <option>BNB</option>
+        <select class="select" v-model="selectVal" @change="selectCoin">
+          <option v-for="(item, index) in selectOption" :key="index" :value="item.value" v-html="item.name"></option>
         </select>
       </div>
     </div>
@@ -24,7 +21,7 @@
     <div class="transferCont_absolute">
       <div class="transferCont_box">
         <transition name="fade">
-          <router-view :selectData="selectVal"></router-view>
+          <router-view :selectData="selectDataPage"></router-view>
         </transition>
       </div>
     </div>
@@ -32,19 +29,42 @@
 </template>
 
 <script>
+// import Web3 from '../../../../assets/js/lilo'
 export default {
   name: 'Transfer',
   data () {
     return {
       // selectData: '',
-      selectVal: ''
+      selectVal: '',
+      selectOption: [],
+      selectDataPage: {}
     }
   },
   mounted () {
-    let that = this
-    that.selectVal = 'FSN'
+    const that = this
+    that.selectVal = 'http://47.92.255.230:8111'
+    that.selectOption = [
+      {value: '',name: 'FSN'},
+      {value: '',name: 'BTC'},
+      {value: 'http://47.92.255.230:8111',name: 'ETH'},
+      {value: '',name: 'BNB'},
+    ]
+    for (let i = 0; i < that.selectOption.length; i++) {
+      if (that.selectOption[i].value === that.selectVal) {
+        that.selectDataPage = that.selectOption[i]
+      }
+    }
+    // that.setWeb3()
   },
   methods: {
+    selectCoin () {
+      const that = this
+      for (let i = 0; i < that.selectOption.length; i++) {
+        if (that.selectOption[i].value === that.selectVal) {
+          that.selectDataPage = that.selectOption[i]
+        }
+      }
+    }
   }
 }
 </script>
