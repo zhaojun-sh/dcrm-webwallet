@@ -57,7 +57,7 @@ router.post('/history', function (req, res) {
     msg: 'error',
     info: ''
   }
-  TransferModel.find({from_address: req.body.from_address}, function (err, result) {
+  TransferModel.find({from_address: req.body.from_address, coin: req.body.coin}, function (err, result) {
     if (err) {
       // console.log(3)
       data.msg = 'errpr'
@@ -94,7 +94,7 @@ router.post('/receiveHistory', function (req, res) {
     msg: 'error',
     info: ''
   }
-  TransferModel.find({to_address: req.body.to_address}, function (err, result) {
+  TransferModel.find({to_address: req.body.to_address, coin: req.body.coin}, function (err, result) {
     if (err) {
       // console.log(3)
       data.msg = 'errpr'

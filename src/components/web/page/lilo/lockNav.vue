@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="contentHeader_box flex-bc">
-      <h1 class="contentHeader_title">Receive / Send</h1>
+      <h1 class="contentHeader_title">Lockin / Lockout</h1>
       <div class="biticonSelect_box">
         <div class="logo"><img src="../../../../assets/image/Fusion.svg"></div>
         <div class="arrow flex-c"><i class="i"></i></div>
@@ -13,8 +13,8 @@
 
     <div class="transferBtn_box">
       <div class="transferBtn_btn flex-sc">
-        <router-link to="/Transfer/tranReceive" class="tranBtn flex-c">Receive<i class="arrow"></i></router-link>
-        <router-link to="/Transfer/tranSend" class="tranBtn flex-c">Send<i class="arrow"></i></router-link>
+        <router-link to="/LILO/lockIn" class="tranBtn flex-c">Deposit<i class="arrow"></i></router-link>
+        <router-link to="/LILO/lockOut" class="tranBtn flex-c">Withdraw<i class="arrow"></i></router-link>
       </div>
     </div>
 
@@ -36,8 +36,8 @@ export default {
     return {
       // selectData: '',
       selectVal: '',
-      SetcoinAndUrl: this.$store.state.coinAndUrl,
-      coinDataPage: {},
+      SetcoinAndUrl: [],
+      coinDataPage: '',
       web3: '',
       newWeb3: ''
     }
@@ -45,42 +45,43 @@ export default {
   watch: {
     selectVal (cur, oold) {
       const that = this
-      console.log(cur)
       that.getCoinInfo(cur)
     }
   },
   mounted () {
-    let that = this
-    that.selectVal = that.$route.query.currency ? that.$route.query.currency : 'FSN'
+    const that = this
+    that.selectVal = that.$route.query.currency ? that.$route.query.currency : 'ETH'
+    for (let i = 0; i < that.$store.state.coinAndUrl.length; i++) {
+        if (that.$store.state.coinAndUrl[i].value !== 'FSN') {
+          that.SetcoinAndUrl.push(that.$store.state.coinAndUrl[i])
+          // break
+        }
+    }
+    // that.SetcoinAndUrl = that.$store.state.coinAndUrl
     that.getCoinInfo(that.selectVal)
+    // that.setWeb3()
   },
   methods: {
     getCoinInfo (coin) {
       const that = this
-      if (coin === 'FSN') {
-        that.coinDataPage = {
-          value: coin,
-          url: that.$$.baseUrl,
-          address: that.$store.state.addressInfo
-        }
-      } else {
-        for (let i = 0; i < that.SetcoinAndUrl.length; i++) {
-          if (coin === that.SetcoinAndUrl[i].value) {
-            that.setWeb3(that.SetcoinAndUrl[i].url)
-            that.newWeb3.lilo.dcrmGetAddr(that.$store.state.addressInfo, coin).then(function (val) {
-              // that.dcrmAddress = val
-              // console.log(val)
-              that.coinDataPage = {
-                value: coin,
-                url: that.SetcoinAndUrl[i].url,
-                address: val
-              }
-              console.log(that.coinDataPage)
-              that.$store.commit('storeDcrmAddress', val)
-            })
-          }
+      // console.log(that.SetcoinAndUrl)
+      for (let i = 0; i < that.SetcoinAndUrl.length; i++) {
+        if (coin === that.SetcoinAndUrl[i].value) {
+          that.setWeb3(that.SetcoinAndUrl[i].url)
+          that.newWeb3.lilo.dcrmGetAddr(that.$store.state.addressInfo, coin).then(function (val) {
+            // that.dcrmAddress = val
+            // console.log(val)
+            that.coinDataPage = {
+              value: coin,
+              url: that.SetcoinAndUrl[i].url,
+              address: val
+            }
+            // console.log(that.coinDataPage)
+            that.$store.commit('storeDcrmAddress', val)
+          })
         }
       }
+      // }
     },
     setWeb3 (url) {
       const that = this

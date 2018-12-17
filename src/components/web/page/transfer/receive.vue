@@ -4,11 +4,11 @@
       <div class="receiveAddress_box">
         <h3 v-html="addressTitle"></h3>
         <div class="receiveAddress_pwd">
-          <input type="text" class="input-text input" readonly v-model="walletAdress" id="walletAdressHide" />
+          <input type="text" class="input-text input" readonly v-model="coinAddress" id="walletAdressHide" />
           <!-- <input type="text" v-model="walletAdress" id="walletAdressHide" class="inputOpacity"/> -->
         </div>
         <div class="receiveAddress_btn flex-c" id="receiveAddressBtn">
-          <button class="btn blue flex-c" @click="qrcode(walletAdress)"><div class="icon"><img src="../../../../assets/image/QRcode.svg"></div>Show QR code</button>
+          <button class="btn blue flex-c" @click="qrcode(coinAddress)"><div class="icon"><img src="../../../../assets/image/QRcode.svg"></div>Show QR code</button>
           <button class="btn cyan flex-c" @click="copyAddress('walletAdressHide', 'receiveAddressBtn')" data-toggle="tooltip" data-placement="bottom" title="Copy clipboard">
             <div class="icon"><img src="../../../../assets/image/copy.svg"></div>
             Copy clipboard
@@ -78,47 +78,41 @@ export default {
   data () {
     return {
       addressTitle: '',
-      walletAdress: '',
-      privateKey: '',
-      publicKey: '',
       historyData: [],
-      refreshHistory: null
+      refreshHistory: null,
+      coinAddress: '',
+      web3: ''
     }
   },
   watch: {
     selectData (cur, old) {
-      let that = this
-      that.dataInit(cur)
+      const that = this
+      that.getInitData()
     }
   },
   mounted () {
     let that = this
-    that.privateKey = that.$store.state.privateKey
-    that.publicKey = that.$store.state.publicKey
-    that.walletAdress = that.$store.state.addressInfo
-    // that.historyData = [
-    //   {
-    //     status: 'failure',
-    //     coin: 'FSN',
-    //     amount: that.$$.thousandBit(500, 0),
-    //     date: '2018/10/22/15:46',
-    //     info: '0xfd02759fba7aa4ddb1a9e361d7ea6fa1e...'
-    //   }
-    // ]
-    that.getSendHistory()
     that.pageRefresh()
+    that.getInitData()
     $(function () {
       $("[data-toggle='tooltip']").tooltip()
     })
     that.refreshHistory = setInterval(() => {
       that.getSendHistory()
-    }, 20000)
+    }, 30000)
   },
   methods: {
+    getInitData () {
+      const that = this
+      that.titleChange(that.selectData.value)
+      that.getSendHistory()
+      that.coinAddress = that.selectData.address
+      that.setWeb3()
+    },
     pageRefresh () {
       let that = this
-      if (that.selectData) {
-        that.dataInit(that.selectData)
+      if (that.selectData.value) {
+        that.titleChange(that.selectData.value)
       }
       if (location.href.indexOf('tranSend') === -1) {
         $('.transferBtn_btn').find('a:eq(0)').addClass('router-link-active')
@@ -127,10 +121,6 @@ export default {
     titleChange (bitType) {
       let that = this
       that.addressTitle = bitType + ' Receiving Address'
-    },
-    peivateKeyChange () {
-      let that = this
-      that.privateKey = '0x6D0340908aB751a343BaF7D05F52508190364ecb'
     },
     qrcode (cont) {
       $('#qrcode').html('')
@@ -155,20 +145,15 @@ export default {
       }, 3000)
       this.$$.layerMsg('Copy Success')
     },
-    dataInit (data) {
-      let that = this
-      that.titleChange(data)
-      that.peivateKeyChange(data)
-    },
     setWeb3 () {
       const that = this
       let Web3 = require('web3')
       if (typeof web3 !== 'undefined') {
         Web3 = new Web3(Web3.currentProvider)
       } else {
-        Web3 = new Web3(new Web3.providers.HttpProvider(that.$$.baseUrl))
+        Web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
       }
-      that.web3Set = Web3
+      that.web3 = Web3
     },
     MoreContent (e) {
       const that = this
@@ -182,12 +167,13 @@ export default {
         datatype: 'json',
         type: 'post',
         data: {
-          to_address: that.walletAdress
+          to_address: that.coinAddress,
+          coin: that.selectData.value
         },
         success: function (res) {
           console.log(res)
+          that.historyData = []
           if (res.msg === 'success' && res.info.length > 0) {
-            that.historyData = []
             for (let i = 0; i < res.info.length; i++) {
               res.info[i].date = that.$$.timeChange({date: res.info[i].date, type:'yyyy-mm-dd hh:mm'})
               res.info[i].value = that.$$.thousandBit(res.info[i].value, 10)
@@ -197,8 +183,6 @@ export default {
               } else {
                 res.info[i].status = 'failure'
               }
-              // res.info[i].value = that.$$.thousandBit(res.info[i].value)
-              // that.getStatus(res.info[i])
             }
             that.historyData = res.info
           } else {
@@ -214,7 +198,7 @@ export default {
       const that = this
       that.setWeb3()
       if (txhax.txhax) {
-        that.web3Set.eth.getTransactionReceipt(txhax.txhax, function (err, res) {
+        that.web3.eth.getTransactionReceipt(txhax.txhax, function (err, res) {
           if (err) {
             console.log(err)
           } else {
@@ -231,9 +215,7 @@ export default {
       } else {
         that.historyData.push(txhax)
       }
-      console.log(that.historyData)
-      // console.log(statusData)
-    },
+    }
   },
   beforeDestroy () {
     const that = this

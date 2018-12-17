@@ -15,8 +15,10 @@ import tranReceive from '@/components/web/page/transfer/receive'
 import tranSend from '@/components/web/page/transfer/send'
 
 import lilo from '@/components/web/page/lilo/index'
+import coinList from '@/components/web/page/lilo/coinList'
 import lockIn from '@/components/web/page/lilo/lockIn'
 import lockOut from '@/components/web/page/lilo/lockOut'
+import lockNav from '@/components/web/page/lilo/lockNav'
 
 import dapp from '@/components/web/page/dapp/index'
 
@@ -64,7 +66,13 @@ const routers = new Router({
             }, {
               path: '/MyAssets',
               name: 'MyAssets',
-              component: myAssets
+              component: myAssets,
+              children: [
+                {
+                  path: '/pwdMyAssets',
+                  component: pwdSure
+                }
+              ]
             }, {
               path: '/Transfer',
               // name: 'Transfer',
@@ -83,7 +91,7 @@ const routers = new Router({
                   component: tranSend,
                   children: [
                     {
-                      path: '/',
+                      path: '/pwdSend',
                       component: pwdSure
                     }
                   ]
@@ -96,15 +104,43 @@ const routers = new Router({
               children: [
                 {
                   path: '/',
-                  component: lockIn
+                  component: coinList,
+                  children: [
+                    {
+                      path: '/pwdCoinList',
+                      component: pwdSure
+                    }
+                  ]
                 }, {
-                  path: '/LILO/lockIn',
-                  name: 'lockIn',
-                  component: lockIn
-                }, {
-                  path: '/LILO/lockOut',
-                  name: 'lockOut',
-                  component: lockOut
+                  path: '/lockNav',
+                  name: 'lockNav',
+                  component: lockNav,
+                  children: [
+                    {
+                      path: '/',
+                      component: lockIn
+                    }, {
+                      path: '/LILO/lockIn',
+                      name: 'lockIn',
+                      component: lockIn,
+                      children: [
+                        {
+                          path: '/pwdLockIn',
+                          component: pwdSure
+                        }
+                      ]
+                    }, {
+                      path: '/LILO/lockOut',
+                      name: 'lockOut',
+                      component: lockOut,
+                      children: [
+                        {
+                          path: '/pwdLockOut',
+                          component: pwdSure
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             }, {

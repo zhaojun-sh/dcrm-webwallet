@@ -10,7 +10,7 @@
         <h3 class="mt-20">Amount:</h3>
         <div class="receiveAddress_pwd">
           <input type="text" class="input-text amount" v-model="sendAmound" id="amountShow" />
-          <label v-html="selectData" class="currency"></label>
+          <label v-html="selectData.value" class="currency"></label>
         </div>
 
         <div class="receiveAddress_btn flex-c">
@@ -57,7 +57,7 @@
       </div>
     </div>
 
-    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" @click="modalClick">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -65,7 +65,7 @@
             <h4 class="modal-title" id="myModalLabel">Send Ether & Tokens</h4>
           </div>
           <div class="modal-body">
-            <router-view v-on:sendSignData='getSiignData' :sendDataPage='dataPage'></router-view>
+            <router-view v-on:sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
           </div>
           <!-- <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -91,7 +91,7 @@
                 </li>
                 <li>
                   <h3>From Address:</h3>
-                  <span>{{walletAdress}}</span>
+                  <span>{{coinAddress}}</span>
                 </li>
                 <li>
                   <h3>Amount to Send:</h3>
@@ -99,11 +99,11 @@
                 </li>
                 <li>
                   <h3>Account Balance:</h3>
-                  <span>{{Number(balanceNum)}} {{selectData}}</span>
+                  <span>{{Number(balanceNum)}} {{selectData.value}}</span>
                 </li>
                 <li>
                   <h3>Coin:</h3>
-                  <span>{{selectData}}</span>
+                  <span>{{selectData.value}}</span>
                 </li>
                 <li>
                   <h3>Network:</h3>
@@ -152,11 +152,11 @@ export default {
   data () {
     return {
       addressTitle: '',
-      walletAdress: '',
+      coinAddress: '',
       toAddress: '',
       historyData: [],
       sendAmound: '',
-      web3Set: '',
+      web3: '',
       gasPriceNum: '',
       gasLimitNum: '',
       balanceNum: '',
@@ -171,31 +171,38 @@ export default {
   watch: {
     selectData (cur, old) {
       const that = this
-      that.titleChange(cur)
+      that.getInitData()
     }
   },
   mounted () {
     const that = this
     that.pageRefresh()
-    that.walletAdress = that.$store.state.addressInfo
+    that.getInitData()
     that.sendAmound = that.$$.thousandBit('0', 2)
-    that.getSendHistory()
     that.refreshHistory = setInterval(() => {
       that.getSendHistory()
     }, 20000)
   },
   methods: {
-    // refreshHistory () {
-    //   const that = this
-    //   setInterval(() => {
-    //     that.getSendHistory()
-    //   }, 20000)
-    // },
+    getInitData () {
+      const that = this
+      that.coinAddress = that.selectData.address
+      that.titleChange(that.selectData.value)
+      that.getSendHistory()
+    },
+    modalClick () {
+      const that = this
+      $('#privateSure').on('hide.bs.modal', function () {
+        // alert('模态框关闭了');
+        // history.go(-1)
+        that.$router.push('/Transfer/tranSend')
+      })
+    },
     privateSure () {
       const that = this
       if (!that.toAddress) {
         that.$$.layerMsg({
-          tip: that.selectData + ' Receiving Address is not null.',
+          tip: that.selectData.value + ' Receiving Address is not null.',
           time: 2000,
           bgColor: '#ea4b40',
           icon: require('../../../../assets/image/Prompt.svg')
@@ -203,18 +210,19 @@ export default {
         return
       }
       that.setBaseSendData()
-      let to_value = that.web3Set.toWei(that.sendAmound, 'ether')
+      let to_value = that.web3.toWei(that.sendAmound, 'ether')
       that.dataPage = {
         nonce: that.nonceNum,
         gasPrice: Number(that.gasPriceNum),//Number类型 
         gasLimit: Number(that.gasLimitNum),
-        from: that.walletAdress,
+        from: that.coinAddress,
         to: that.toAddress,
         value: Number(to_value),//Number类型
       }
+      that.$router.push('/pwdSend')
       $('#privateSure').modal('show')
     },
-    getSiignData (data) {
+    getSignData (data) {
       const that = this
       if (data) {
         that.serializedTx = data
@@ -243,9 +251,6 @@ export default {
     },
     pageRefresh () {
       const that = this
-      if (that.selectData) {
-        that.titleChange(that.selectData)
-      }
       if (location.href.indexOf('tranSend') !== -1) {
         $('.transferBtn_btn').find('a:eq(0)').removeClass('router-link-active')
       }
@@ -260,44 +265,35 @@ export default {
       if (typeof web3 !== 'undefined') {
         Web3 = new Web3(Web3.currentProvider)
       } else {
-        Web3 = new Web3(new Web3.providers.HttpProvider(that.$$.baseUrl))
+        Web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
       }
-      that.web3Set = Web3
-      console.log(that.web3Set)
+      that.web3 = Web3
     },
     setBaseSendData () {
       const that = this
       that.setWeb3()
-      that.nonceNum = that.web3Set.eth.getTransactionCount(that.walletAdress, 'pending')
-      that.gasPriceNum = that.web3Set.eth.gasPrice.toString(10)
+      console.log(that.coinAddress)
+      that.nonceNum = that.web3.eth.getTransactionCount(that.coinAddress, 'pending')
+      that.gasPriceNum = that.web3.eth.gasPrice.toString(10)
       that.gasLimitNum = 21000
-      that.balanceNum = that.web3Set.fromWei(that.web3Set.eth.getBalance(that.walletAdress), 'ether')
-      that.maxFee = that.web3Set.fromWei(Number(that.gasLimitNum) * Number(that.gasPriceNum), 'ether')
-      that.netWorkInfo = that.web3Set.version.node
+      that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(that.coinAddress), 'ether')
+      that.maxFee = that.web3.fromWei(Number(that.gasLimitNum) * Number(that.gasPriceNum), 'ether')
+      that.netWorkInfo = that.web3.version.node
       // console.log(that.balanceNum)
     },
     sendAmoundInfo () {
       const that = this
-      // if (!that.toAddress) {
-      //   that.$$.layerMsg({
-      //     tip: that.selectData + ' Receiving Address is not null.',
-      //     time: 2000,
-      //     bgColor: '#ea4b40',
-      //     icon: require('../../../../assets/image/Prompt.svg')
-      //   })
-      //   return
-      // }
       that.setWeb3()
       let dataBase = {
         value: Number(that.$$.thousandToNum(that.sendAmound)),
-        coin: that.selectData,
+        coin: that.selectData.value,
         to_address: that.toAddress,
-        from_address: that.walletAdress,
+        from_address: that.coinAddress,
         date: new Date(),
         txhax: '',
         status: ''
       }
-      that.web3Set.eth.sendRawTransaction(that.serializedTx, function(err, hash) {
+      that.web3.eth.sendRawTransaction(that.serializedTx, function(err, hash) {
         if (!err) {
           dataBase.txhax = hash
           dataBase.status = 'success'
@@ -352,12 +348,13 @@ export default {
         datatype: 'json',
         type: 'post',
         data: {
-          from_address: that.walletAdress
+          from_address: that.coinAddress,
+          coin: that.selectData.value
         },
         success: function (res) {
           // console.log(res)
+          that.historyData = []
           if (res.msg === 'success' && res.info.length > 0) {
-            that.historyData = []
             for (let i = 0; i < res.info.length; i++) {
               res.info[i].date = that.$$.timeChange({date: res.info[i].date, type:'yyyy-mm-dd hh:mm'})
               res.info[i].value = that.$$.thousandBit(res.info[i].value, 10)
@@ -387,7 +384,7 @@ export default {
     // getStatus (txhax) {
     //   const that = this
     //   that.setWeb3()
-    //   that.web3Set.eth.getTransactionReceipt(txhax.txhax, function (err, res) {
+    //   that.web3.eth.getTransactionReceipt(txhax.txhax, function (err, res) {
     //     if (err) {
     //       // console.log(err)
     //       txhax.status = 'failure'

@@ -10,8 +10,9 @@ const liloSchema = new Schema({
   confirmations: {type: String},
   contractAddress: {type: String},
   cumulativeGasUsed: {type: String},
-  date: {type: String},
+  date: {type: Date},
   from: {type: String},
+  data: {type: String},
   gas: {type: String},
   gasPrice: {type: String},
   gasUsed: {type: String},
@@ -24,33 +25,38 @@ const liloSchema = new Schema({
   to: {type: String},
   transactionIndex: {type: String},
   txreceipt_status: {type: String},
-  value: {type: String}
+  value: {type: String},
+  statusFsn: {type: String},
+  coin: {type: String}
 })
 
 const LiloModel = mongoose.model('lilo', liloSchema)
 
 router.post('/create', function (req, res) {
   let send = new LiloModel({
-    blockHash: req.body.blockHash.toLowerCase(),
-    blockNumber: req.body.blockNumber.toLowerCase(),
-    confirmations: req.body.confirmations.toLowerCase(),
-    contractAddress: req.body.contractAddress.toLowerCase(),
-    cumulativeGasUsed: req.body.cumulativeGasUsed.toLowerCase(),
-    date: req.body.date.toLowerCase(),
-    from: req.body.from.toLowerCase(),
-    gas: req.body.gas.toLowerCase(),
-    gasPrice: req.body.gasPrice.toLowerCase(),
-    gasUsed: req.body.gasUsed.toLowerCase(),
-    hash: req.body.hash.toLowerCase(),
-    fsnhash: req.body.fsnhash.toLowerCase(),
-    input: req.body.input.toLowerCase(),
-    isError: req.body.isError.toLowerCase(),
-    nonce: req.body.nonce.toLowerCase(),
-    timeStamp: req.body.timeStamp.toLowerCase(),
-    to: req.body.to.toLowerCase(),
-    transactionIndex: req.body.transactionIndex.toLowerCase(),
-    txreceipt_status: req.body.txreceipt_status.toLowerCase(),
-    value: req.body.value.toLowerCase()
+    blockHash: req.body.blockHash ? req.body.blockHash : '',
+    blockNumber: req.body.blockNumber ? req.body.blockNumber : '',
+    confirmations: req.body.confirmations ? req.body.confirmations : '',
+    contractAddress: req.body.contractAddress ? req.body.contractAddress : '',
+    cumulativeGasUsed: req.body.cumulativeGasUsed ? req.body.cumulativeGasUsed : '',
+    date: new Date(),
+    data: req.body.data ? req.body.data : '',
+    from: req.body.from ? req.body.from.toLowerCase() : '',
+    gas: req.body.gas ? req.body.gas : '',
+    gasPrice: req.body.gasPrice ? req.body.gasPrice : '',
+    gasUsed: req.body.gasUsed ? req.body.gasUsed : '',
+    hash: req.body.hash ? req.body.hash.toLowerCase() : '',
+    fsnhash: req.body.fsnhash ? req.body.fsnhash.toLowerCase() : '',
+    input: req.body.input ? req.body.input : '',
+    isError: req.body.isError ? req.body.isError : '',
+    nonce: req.body.nonce ? req.body.nonce : '',
+    timeStamp: req.body.timeStamp ? req.body.timeStamp : '',
+    to: req.body.to ? req.body.to.toLowerCase() : '',
+    transactionIndex: req.body.transactionIndex ? req.body.transactionIndex : '',
+    txreceipt_status: req.body.txreceipt_status ? req.body.txreceipt_status : '',
+    value: req.body.value ? req.body.value : '',
+    statusFsn: req.body.statusFsn ? req.body.statusFsn : '',
+    coin: req.body.coin ? req.body.coin : ''
   })
   let data = {
     msg: 'error',
@@ -77,7 +83,8 @@ router.post('/lockInHistory', function (req, res) {
     msg: 'error',
     info: ''
   }
-  LiloModel.find({to: req.body.to.toLowerCase()}, function (err, result) {
+  let to_address = req.body.to ? req.body.to.toLowerCase() : ''
+  LiloModel.find({to: to_address}, function (err, result) {
     if (err) {
       data.msg = 'errpr'
       data.info = err
@@ -104,12 +111,37 @@ router.post('/lockInHistory', function (req, res) {
   })
 })
 
+router.post('/lockInChangeState', function (req, res) {
+  let data = {
+    msg: 'error',
+    info: ''
+  }
+  // let to_address = req.body.to ? req.body.to.toLowerCase() : ''
+  // console.log(req.body)
+  LiloModel.find({hash: req.body.hash}, function (err, result) {
+  // LiloModel.update({hash: req.body.hash}, {$set: {fsnhash: req.body.fsnhash}}, function (err, result) {
+    if (err) {
+      data.msg = 'errpr'
+      data.info = err
+    } else {
+      let updateData = result[0]
+      // console.log(updateData)
+      updateData.fsnhash = req.body.fsnhash
+      updateData.save()
+      data.msg = 'success'
+      data.info = result
+      res.json(data)
+    }
+  })
+})
+
 router.post('/lockOutHistory', function (req, res) {
   let data = {
     msg: 'error',
     info: ''
   }
-  LiloModel.find({from: req.body.from.toLowerCase()}, function (err, result) {
+  let from_address = req.body.from ? req.body.from.toLowerCase() : ''
+  LiloModel.find({from: from_address, coin: req.body.coin}, function (err, result) {
     if (err) {
       data.msg = 'errpr'
       data.info = err

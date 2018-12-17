@@ -1,6 +1,16 @@
-
+let Web3 = require('web3')
+// console.log(new Web3())
+// let newWeb3 = function (providers) {
 function newWeb3 (providers) {
+  Web3.call(this)
+  // if (typeof web3 !== 'undefined') {
+  //   Web3 = new Web3(Web3.currentProvider)
+  // } else {
+  //   Web3 = new Web3(new Web3.providers.HttpProvider(providers))
+  // }
   let idInit = 0
+  // this.returnWeb3 = Web3
+  // let that = this.returnWeb3
   let that = this
   this.lilo = {
     dcrmReqAddr: function (fromAddress, coin, pwd) {
@@ -22,10 +32,9 @@ function newWeb3 (providers) {
               if (data.result.indexOf('{') === 0) {
                 let $data = JSON.parse(data.result)
                 sessionStorage.setItem('dcrmFromAddress', $data.DcrmAddr)
-                resolve($data.DcrmAddr)
-                // that.lilo.dcrmConfimAddr($data.DcrmAddr, coin, pwd).then(function (val) {
-                //   resolve(val)
-                // })
+                that.lilo.dcrmConfimAddr($data.DcrmAddr, coin, pwd).then(function (val) {
+                  resolve(val)
+                })
               } else {
                 resolve(data)
               }
@@ -50,7 +59,7 @@ function newWeb3 (providers) {
         data: 'DCRMCONFIRMADDR:' + address + ':' + coin
       }
       callback = new Promise(function (resolve) {
-        new SendTransactionPub(web3, sendData).then(function (res) {
+        new SendTransactionPub(that, sendData).then(function (res) {
           resolve(res)
         })
       })
@@ -175,7 +184,7 @@ function newWeb3 (providers) {
       }
       return callback
     },
-    dcrmLockout: function (toAddress, value, coin, pwd, data) {
+    dcrmLockout: function (toAddress, value, coin, pwd) {
       let fromAddress = sessionStorage.getItem('dcrmFromAddress')
       let sendData = {
         from: fromAddress,
@@ -184,13 +193,12 @@ function newWeb3 (providers) {
         pwd: pwd,
         data: 'LOCKOUT:' + toAddress + ':' + value + ':' + coin
       }
-      console.log(sendData)
       let callback
       if (!fromAddress) {
         that.lilo.dcrmGetAddr(sessionStorage.getItem('localFromAddress'), coin).then(function (val) {
           sendData.from = val
           callback = new Promise(function (resolve) {
-            new SendTransactionPub(that, sendData, data).then(function (res) {
+            new SendTransactionPub(that, sendData).then(function (res) {
               resolve(res)
             })
           })
@@ -208,20 +216,19 @@ function newWeb3 (providers) {
   return this
   // return this.returnWeb3
 }
-// (function () {
-//   let Super = function () {}
-//   Super.prototype = Web3.prototype
-//   newWeb3.prototype = new Super()
-// })()
+(function () {
+  let Super = function () {}
+  Super.prototype = Web3.prototype
+  newWeb3.prototype = new Super()
+})()
 
 // newWeb3.prototype = new Web3()
 
-function SendTransactionPub (that, data, other) {
-  console.log(that)
+function SendTransactionPub (that, data) {
   let rawTx = {
-    nonce: data.nonce ? data.nonce : other.nonce,
-    gasPrice: data.gasPrice ? Number(data.gasPrice) : Number(other.gasPrice),
-    gasLimit: data.gasLimit ? Number(data.gasLimit) : Number(other.gasLimit),
+    nonce: data.nonce ? data.nonce : that.eth.getTransactionCount(data.from, 'pending'),
+    gasPrice: data.gasPrice ? Number(data.gasPrice) : Number(that.eth.gasPrice.toString(10)),
+    gasLimit: data.gasLimit ? Number(data.gasLimit) : Number(21000),
     from: data.from,
     to: data.to ? data.to : '0x00000000000000000000000000000000000000dc',
     value: data.value ? Number(data.value) : 0,

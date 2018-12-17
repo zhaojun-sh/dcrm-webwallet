@@ -77,6 +77,7 @@
 
 <script>
 import wallet from '../../../../assets/js/wallet'
+import Lilo from '../../../../assets/js/lilo'
 export default {
   name: 'createWallet',
   props: ['sendDataPage'],
@@ -89,6 +90,9 @@ export default {
       fileData: '',
       privateKey: '',
       checkAddress: '',
+      web3: '',
+      newWeb3: '',
+      dcrmAddress: ''
     }
   },
   mounted () {
@@ -113,8 +117,20 @@ export default {
       }
       reader.readAsText($(this)[0].files[0])
     })
+    // console.log(that.sendDataPage)
   },
   methods: {
+    setWeb3 () {
+      const that = this
+      let Web3 = require('web3')
+      if (typeof web3 !== 'undefined') {
+        Web3 = new Web3(Web3.currentProvider)
+      } else {
+        Web3 = new Web3(new Web3.providers.HttpProvider(that.sendDataPage.url))
+      }
+      that.web3 = Web3
+      that.newWeb3 = new Lilo(that.sendDataPage.url)
+    },
     inputFileBtn () {
       let that = this
       let walletData
@@ -122,7 +138,13 @@ export default {
         walletData = wallet.getWalletFromPrivKeyFile(that.fileData, that.password)
         that.privateKey = walletData.getPrivateKeyString()
         that.checkAddress = walletData.getChecksumAddressString()
-        that.signSendData()
+        if (that.sendDataPage.sendType === 'LOCKOUT') {
+          that.getDcrmAddress()
+        } else if (that.sendDataPage.sendType === 'MYWALLET') {
+          that.getDecrAddress(that.privateKey)
+        } else {
+          that.signSendData()
+        }
       } catch (e) {
         that.$$.layerMsg({
           tip: e,
@@ -132,16 +154,25 @@ export default {
         })
       }
     },
+    
     inputPwdBtn () {
       let that = this
+      console.log(that.sendDataPage)
       let walletData
       try {
-        console.log(1)
         walletData = new wallet(new Buffer(that.fixPkey(that.privateKey), 'hex'))
         that.privateKey = walletData.getPrivateKeyString()
         that.checkAddress = walletData.getChecksumAddressString()
-        that.signSendData()
+        if (that.sendDataPage.sendType === 'LOCKOUT' || that.sendDataPage.sendType === 'LOCKIN') {
+          // console.log('lock')
+          that.getDcrmAddress()
+        } else if (that.sendDataPage.sendType === 'MYWALLET') {
+          that.getDecrAddress(that.privateKey)
+        }else {
+          that.signSendData()
+        }
       } catch (e) {
+        console.log(e)
         that.$$.layerMsg({
           tip: e,
           time: 2000,
@@ -150,9 +181,71 @@ export default {
         })
       }
     },
+    getDcrmAddress () {
+      const that = this
+      that.setWeb3()
+      that.newWeb3.lilo.dcrmGetAddr(that.$store.state.addressInfo, that.sendDataPage.coin).then(function (val) {
+        that.dcrmAddress = val
+        that.signSendData()
+      })
+    },
+    getDecrAddress (pwd) {
+      const that = this
+      that.setWeb3()
+      that.newWeb3.lilo.dcrmReqAddr(that.sendDataPage.from, that.sendDataPage.coin, pwd).then(function (val) {
+        let rawTx = {
+          nonce: that.sendDataPage.nonce,
+          gasPrice: that.sendDataPage.gasPrice,
+          gasLimit: 21000 * 3,
+          from: that.sendDataPage.from,
+          to: '0x00000000000000000000000000000000000000dc',
+          value: 0,
+          data: 'DCRMCONFIRMADDR:' + val + ':' + that.sendDataPage.coin,
+        }
+        console.log(val)
+        console.log(rawTx)
+        let Tx = require('ethereumjs-tx')
+        pwd = pwd.indexOf('0x') === 0 ? pwd.substr(2) : pwd
+        let privateKey = new Buffer(pwd, 'hex')
+        let tx = new Tx(rawTx)
+        tx.sign(privateKey)
+        let serializedTx = tx.serialize()
+        let serializedTxString = serializedTx.toString('hex')
+        serializedTxString = serializedTxString.indexOf('0x') === 0 ? serializedTxString : ('0x' + serializedTxString)
+        console.log(serializedTxString)
+        that.web3.eth.sendRawTransaction(serializedTxString, function (err, hash) {
+          if (err) {
+            console.log(err)
+          } else {
+            console.log(hash)
+            that.sendSignData(that.sendDataPage.coin)
+            // resolve(hash)
+          }
+        })
+      })
+    },
     signSendData () {
       const that = this
-      if (that.checkAddress !== that.sendDataPage.from) {
+      if (that.checkAddress.toLowerCase() === that.sendDataPage.from.toLowerCase() || that.dcrmAddress.toLowerCase() === that.sendDataPage.from.toLowerCase()) {
+        let rawTx = {
+          nonce: that.sendDataPage.nonce,
+          gasPrice: Number(that.sendDataPage.gasPrice),//Number类型 
+          gasLimit: Number(that.sendDataPage.gasLimit),
+          from: that.sendDataPage.from,
+          to: that.sendDataPage.to,
+          value: Number(that.sendDataPage.value),//Number类型
+          data: that.sendDataPage.data
+        }
+        let Tx = require('ethereumjs-tx')
+        let privateKey = new Buffer(that.fixPkey(that.privateKey), 'hex')
+        let tx = new Tx(rawTx)
+        tx.sign(privateKey)
+        let serializedTx = tx.serialize()
+        let serializedTxString = serializedTx.toString('hex')
+        serializedTxString = serializedTxString.indexOf('0x') === 0 ? serializedTxString : ('0x' + serializedTxString)
+        that.sendSignData(serializedTxString)
+        // console.log(serializedTxString)
+      } else {    
         that.$$.layerMsg({
           tip: 'Account error!',
           time: 3000,
@@ -163,22 +256,6 @@ export default {
         $('#sendInfo').modal('hide')
         return
       }
-      let rawTx = {
-        nonce: that.sendDataPage.nonce,
-        gasPrice: Number(that.sendDataPage.gasPrice),//Number类型 
-        gasLimit: Number(that.sendDataPage.gasLimit),
-        from: that.sendDataPage.from,
-        to: that.sendDataPage.to,
-        value: Number(that.sendDataPage.value),//Number类型
-      }
-      let Tx = require('ethereumjs-tx')
-      let privateKey = new Buffer(that.fixPkey(that.privateKey), 'hex')
-      let tx = new Tx(rawTx)
-      tx.sign(privateKey)
-      let serializedTx = tx.serialize()
-      let serializedTxString = serializedTx.toString('hex')
-      serializedTxString = serializedTxString.indexOf('0x') === 0 ? serializedTxString : ('0x' + serializedTxString)
-      that.sendSignData(serializedTxString)
     },
     sendSignData (data) {
       let that = this

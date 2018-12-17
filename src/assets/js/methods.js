@@ -2,7 +2,8 @@ let $$ = {}
 // $$.baseUrl = 'https://mainnet.infura.io/'
 // $$.baseUrl = 'https://rinkeby.etherscan.io/api'
 // $$.baseUrl = 'http://47.92.168.85:40405/'
-$$.baseUrl = 'http://54.169.254.177:40415'// FSN
+// $$.baseUrl = 'http://54.169.254.177:40415'// FSN
+$$.baseUrl = 'http://47.92.255.230:8111'// FSN
 // $$.baseUrl = 'http://54.183.185.30:8018'// 以太坊
 // $$.baseUrl = 'http://47.92.255.230:40415/' //
 
@@ -14,7 +15,11 @@ $$.thousandBit = (num, dec = 2) => {
     num = 0
     num = num.toFixed(dec)
   } else {
-    num = num.toFixed(dec).replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toLocaleString()
+    if (isNaN(dec)) {
+      num = num.toLocaleString().replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toLocaleString()
+    } else {
+      num = num.toFixed(dec).replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toLocaleString()
+    }
   }
   return num
 }
@@ -25,7 +30,7 @@ $$.thousandChange = function (num, dec) {
 }
 
 $$.thousandToNum = (num) => {
-  return Number(num.replace(/,/, ''))
+  return num.replace(/,/, '')
 }
 
 $$.bigNumber = (num) => {

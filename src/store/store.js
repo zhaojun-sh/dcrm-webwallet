@@ -9,7 +9,14 @@ const store = new Vuex.Store({
     privateKey: '',
     publicKey: '',
     addressInfo: '',
-    downloadName: ''
+    downloadName: '',
+    coinAndUrl: [
+      {url: 'http://54.169.254.177:40415', value: 'FSN'},
+      {url: '', value: 'BTC'},
+      {url: 'http://47.92.255.230:8111', value: 'ETH'},
+      {url: '', value: 'BNB'}
+    ],
+    dcrmAddress: ''
   },
   mutations: {
     storeKeystoreURL (state, url) {
@@ -26,6 +33,9 @@ const store = new Vuex.Store({
     },
     storeDownload (state, address) {
       state.downloadName = address
+    },
+    storeDcrmAddress (state, address) {
+      state.dcrmAddress = address
     }
   }
 })
