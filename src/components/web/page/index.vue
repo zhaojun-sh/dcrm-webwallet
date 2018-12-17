@@ -41,6 +41,7 @@
 </style>
 
 <script>
+// import Web3 from '../../../assets/js/lilo'
 export default {
   name: 'index',
   data () {
@@ -54,18 +55,25 @@ export default {
     let that = this
     // that.topSetViewFlag = topSetViewFlag
     that.$$.showSearchTop()
-    if (!that.$store.state.storePrivateKey) {
+    if (!that.$store.state.addressInfo) {
       that.$router.push('/')
     }
     $(function () {
       $("[data-toggle='tooltip']").tooltip()
     })
-    // $('#copyAddress').click(function () {
-    //     console.log($('#addressCopy').val())
-    //     console.log(that.walletAdress)
-    //     $('#addressCopy').select()
-    //     document.execCommand('Copy')
+    // let setweb3 = new Web3(that.$$.baseUrl)
+    // let setweb3 = new Web3('http://47.92.255.230:8111')
+    // setweb3.setProvider(that.$$.baseUrl)
+    // console.log(setweb3)
+    // console.log(that.$$.thousandBit(setweb3.lilo.dcrmGetBalance('0xD562BB03A071f8928F885946Be4bd37b5beAeD6E', 'szabo')))
+    // console.log(setweb3.lilo.dcrmReqAddr('0xD562BB03A071f8928F885946Be4bd37b5beAeD6E', 'ETH'))
+    // setweb3.lilo.dcrmReqAddr('0xD562BB03A071f8928F885946Be4bd37b5beAeD6E', 'ETH', '0xe63d00f899b00b98b9f56d260d677af0b7ae5564feab9444afc808c914b19e3d').then(function(val){
+    //   console.log(val)
     // })
+    // setweb3.lilo.dcrmGetAddr('0xD562BB03A071f8928F885946Be4bd37b5beAeD6E', 'ETH').then(function(val){
+    //   console.log(val)
+    // })
+    // console.log(setweb3.lilo.dcrmGetAddr('0xD562BB03A071f8928F885946Be4bd37b5beAeD6E', 'ETH').then())
   },
   methods: {
     goBackupWallet () {
@@ -98,4 +106,5 @@ export default {
     }
   }
 }
+
 </script>

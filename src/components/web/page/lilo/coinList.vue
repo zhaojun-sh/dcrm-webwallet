@@ -1,18 +1,18 @@
 <template>
   <div>
     <div class="contentHeader_box flex-bc">
-      <h1 class="contentHeader_title">My Assets</h1>
-      <h2 class="contentHeader_title" v-html="myAssetsTotal"></h2>
+      <h1 class="contentHeader_title">LockIn/LockOut</h1>
+      <!-- <h2 class="contentHeader_title" v-html="myAssetsTotal"></h2> -->
     </div>
 
     <div class="myAssetsSear_box flex-ec">
       <div class="myAssetsSear_input">
-        <input type="text" placeholder="FSN" class="input-text" @keyup="searchInput" v-model="searchContent"/>
+        <input type="text" placeholder="ETH" class="input-text" @keyup="searchInput" v-model="searchContent"/>
         <div class="searchIcon"><div class="icon flex-c"><img src="../../../../assets/image/search.png"></div></div>
       </div>
     </div>
 
-    <div class="myAssetsTable_box">
+    <!-- <div class="myAssetsTable_box">
       <table>
         <thead>
           <tr>
@@ -39,14 +39,31 @@
             <td><span class="span" v-html="item.totalBalance"></span><p class="p" v-html="item.totalBalanceDoller"></p></td>
             <td>
               <div>
-                <router-link :to="{path:'/Transfer/tranReceive', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView">Receive</router-link>
-                <router-link :to="{path:'/Transfer/tranSend', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView">Send</router-link>
+                <router-link :to="{path:'/LILO/lockIn', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView">lockIn</router-link>
+                <router-link :to="{path:'/LILO/lockOut', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView">lockOut</router-link>
                 <a class="setBtn" v-if="!item.btnView" @click="privateSure(item.currency)">Request</a>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
+    </div> -->
+
+    <div class="contView_box">
+      <div class="supCoinView_list lockView_list">
+        <ul>
+          <li v-for="(item, index) in bitIconTypeSearch" :key="index">
+            <div class="iconImg"><img :src="item.logo"></div>
+            <h4 class="title" v-html="item.nameFull"></h4>
+            <div class="dappView_btn">
+              <router-link :to="{path:'/LILO/lockIn', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView">lockIn</router-link>
+              <router-link :to="{path:'/LILO/lockOut', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView">lockOut</router-link>
+              <a class="setBtn" v-if="!item.btnView" @click="privateSure(item.currency)">Request</a>
+            </div>
+            <div class="line"></div>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" @click="modalClick">
@@ -59,10 +76,6 @@
           <div class="modal-body">
             <router-view v-on:sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
           </div>
-          <!-- <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
-          </div> -->
         </div>
       </div>
     </div>
@@ -77,7 +90,6 @@ export default {
   name: 'myAssets',
   data () {
     return {
-      myAssetsTotal: '',
       bitIconTypeData: [],
       bitIconTypeSearch: [],
       walletAdress: '',
@@ -101,16 +113,8 @@ export default {
     modalClick () {
       const that = this
       $('#privateSure').on('hide.bs.modal', function () {
-        that.$router.push('/MyAssets')
+        that.$router.push('/LILO')
       })
-    },
-    myAssetsTotalBalance () {
-      const that = this
-      that.myAssetsTotal = 0
-      for (let i = 0; i < that.bitIconTypeData.length; i++) {
-        that.myAssetsTotal += that.$$.thousandToNum(that.bitIconTypeData[i].totalBalance)
-      }
-      that.myAssetsTotal = that.$$.thousandBit(that.myAssetsTotal)
     },
     searchInput () {
       const that = this
@@ -135,27 +139,25 @@ export default {
           if (searchObj.nameSimplicity.indexOf(searchTxt) !== -1 || searchObj.nameFull.indexOf(searchTxt) !== -1 || searchObj.availbleBalance.indexOf(searchTxt) !== -1 || searchObj.freeze.indexOf(searchTxt) !== -1 || searchObj.totalBalance.indexOf(searchTxt) !== -1 || searchObj.totalBalanceDoller.indexOf(searchTxt) !== -1) {
             that.bitIconTypeSearch.push(searchArr)
           }
-      }
-        // console.log(that.bitIconTypeData.toString())
+        }
       }
     },
     getInitData () {
       const that = this
       that.walletAdress = that.$store.state.addressInfo
-      that.bitIconTypeSearch = that.bitIconTypeData = [
-        {
-          logo: require('../../../../assets/image/Fusion.svg'),
-          nameSimplicity: 'FSN',
-          nameFull: 'Fusion',
-          availbleBalance: that.$$.thousandBit(0),
+      that.bitIconTypeSearch = that.bitIconTypeData = [{
+          logo: require('../../../../assets/image/btc.svg'),
+          nameSimplicity: 'Bitcoin',
+          nameFull: 'Bitcoin',
+          availbleBalance: that.$$.thousandBit(that.balanceCoin.ETH),
           freeze: that.$$.thousandBit(0),
-          totalBalance: that.$$.thousandBit(0),
-          totalBalanceDoller: '$' + that.$$.thousandBit(0),
-          currency: 'FSN',
+          totalBalance: that.$$.thousandBit(that.balanceCoin.ETH),
+          totalBalanceDoller: '$' + that.$$.thousandBit(that.balanceCoin.ETH),
+          currency: 'Bitcoin',
           receive: '',
           send: '',
-          btnView: true
-        },{
+          btnView: false
+        }, {
           logo: require('../../../../assets/image/eth.svg'),
           nameSimplicity: 'ETH',
           nameFull: 'Ethereum',
@@ -167,17 +169,80 @@ export default {
           receive: '',
           send: '',
           btnView: false
+        }, {
+          logo: require('../../../../assets/image/bnb.svg'),
+          nameSimplicity: 'Binance',
+          nameFull: 'Binance',
+          availbleBalance: that.$$.thousandBit(that.balanceCoin.ETH),
+          freeze: that.$$.thousandBit(0),
+          totalBalance: that.$$.thousandBit(that.balanceCoin.ETH),
+          totalBalanceDoller: '$' + that.$$.thousandBit(that.balanceCoin.ETH),
+          currency: 'Binance',
+          receive: '',
+          send: '',
+          btnView: false
+        }, {
+          logo: require('../../../../assets/image/mkr.svg'),
+          nameSimplicity: 'Maker(MKR)',
+          nameFull: 'Maker(MKR)',
+          availbleBalance: that.$$.thousandBit(that.balanceCoin.ETH),
+          freeze: that.$$.thousandBit(0),
+          totalBalance: that.$$.thousandBit(that.balanceCoin.ETH),
+          totalBalanceDoller: '$' + that.$$.thousandBit(that.balanceCoin.ETH),
+          currency: 'Maker(MKR)',
+          receive: '',
+          send: '',
+          btnView: false
+        }, {
+          logo: require('../../../../assets/image/gusd.svg'),
+          nameSimplicity: 'Gemini dollar GUSD',
+          nameFull: 'Gemini dollar GUSD',
+          availbleBalance: that.$$.thousandBit(that.balanceCoin.ETH),
+          freeze: that.$$.thousandBit(0),
+          totalBalance: that.$$.thousandBit(that.balanceCoin.ETH),
+          totalBalanceDoller: '$' + that.$$.thousandBit(that.balanceCoin.ETH),
+          currency: 'Gemini dollar GUSD',
+          receive: '',
+          send: '',
+          btnView: false
+        }, {
+          logo: require('../../../../assets/image/ht.svg'),
+          nameSimplicity: 'HuobiToken (HT)',
+          nameFull: 'HuobiToken (HT)',
+          availbleBalance: that.$$.thousandBit(that.balanceCoin.ETH),
+          freeze: that.$$.thousandBit(0),
+          totalBalance: that.$$.thousandBit(that.balanceCoin.ETH),
+          totalBalanceDoller: '$' + that.$$.thousandBit(that.balanceCoin.ETH),
+          currency: 'HuobiToken (HT)',
+          receive: '',
+          send: '',
+          btnView: false
+        }, {
+          logo: require('../../../../assets/image/bnt.svg'),
+          nameSimplicity: 'Bancor (BNT)',
+          nameFull: 'Bancor (BNT)',
+          availbleBalance: that.$$.thousandBit(that.balanceCoin.ETH),
+          freeze: that.$$.thousandBit(0),
+          totalBalance: that.$$.thousandBit(that.balanceCoin.ETH),
+          totalBalanceDoller: '$' + that.$$.thousandBit(that.balanceCoin.ETH),
+          currency: 'Bancor (BNT)',
+          receive: '',
+          send: '',
+          btnView: false
+        }, {
+          logo: require('../../../../assets/image/MORE.svg'),
+          nameSimplicity: 'MORE',
+          nameFull: 'MORE',
+          availbleBalance: that.$$.thousandBit(that.balanceCoin.ETH),
+          freeze: that.$$.thousandBit(0),
+          totalBalance: that.$$.thousandBit(that.balanceCoin.ETH),
+          totalBalanceDoller: '$' + that.$$.thousandBit(that.balanceCoin.ETH),
+          currency: 'MORE',
+          receive: '',
+          send: '',
+          btnView: false
         }
       ]
-      that.setWeb3()
-      that.balanceCoin.FSN = that.web3.fromWei(that.web3.eth.getBalance(sessionStorage.getItem('localFromAddress')), 'ether').toString()
-      for (let i = 0; i < that.bitIconTypeData.length; i++) {
-        if ('FSN' === that.bitIconTypeData[i].nameSimplicity) {
-          that.bitIconTypeData[i].availbleBalance = that.$$.thousandBit(that.balanceCoin.FSN)
-          that.bitIconTypeData[i].totalBalance = that.$$.thousandBit(that.balanceCoin.FSN)
-          that.bitIconTypeData[i].totalBalanceDoller = '$' + that.$$.thousandBit(that.balanceCoin.FSN)
-        }
-      }
       that.getBalanceData('ETH')
     },
     setWeb3 () {
@@ -206,10 +271,9 @@ export default {
       for (let i = 0; i < that.SetcoinAndUrl.length; i++) {
         if (that.SetcoinAndUrl[i].value === data) {
           that.dataPage.url = that.SetcoinAndUrl[i].url
-          console.log(that.dataPage.url)
         }
       }
-      that.$router.push('/pwdMyAssets')
+      that.$router.push('/pwdCoinList')
       $('#privateSure').modal('show')
     },
     getSignData (data) {
@@ -237,9 +301,6 @@ export default {
         })
       }
     },
-    getDcrmAddress (coin) {
-      const that = this
-    },
     getBalanceData (coin) {
       const that = this
       that.setWeb3()
@@ -256,7 +317,6 @@ export default {
             }
           }
         }
-        that.myAssetsTotalBalance()
       })
     }
   }

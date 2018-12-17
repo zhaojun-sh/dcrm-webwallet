@@ -9,7 +9,7 @@ import store from './store/store'
 
 import $ from 'jquery'
 import $$ from './assets/js/methods'
-
+import web3 from './assets/js/lilo'
 import './assets/css/bootstrap.min.css'
 import './assets/css/css.css'
 import './assets/css/style.css'
@@ -27,6 +27,7 @@ Vue.use(Vuex)
 new Vue({
   el: '#app',
   router,
+  web3,
   $,
   store,
   components: { App },

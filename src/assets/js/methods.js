@@ -2,7 +2,8 @@ let $$ = {}
 // $$.baseUrl = 'https://mainnet.infura.io/'
 // $$.baseUrl = 'https://rinkeby.etherscan.io/api'
 // $$.baseUrl = 'http://47.92.168.85:40405/'
-$$.baseUrl = 'http://54.169.254.177:40415'// FSN
+// $$.baseUrl = 'http://54.169.254.177:40415'// FSN
+$$.baseUrl = 'http://47.92.255.230:8111'// FSN
 // $$.baseUrl = 'http://54.183.185.30:8018'// 以太坊
 // $$.baseUrl = 'http://47.92.255.230:40415/' //
 
@@ -14,7 +15,11 @@ $$.thousandBit = (num, dec = 2) => {
     num = 0
     num = num.toFixed(dec)
   } else {
-    num = num.toFixed(dec).replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toLocaleString()
+    if (isNaN(dec)) {
+      num = num.toLocaleString().replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toLocaleString()
+    } else {
+      num = num.toFixed(dec).replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toLocaleString()
+    }
   }
   return num
 }
@@ -25,7 +30,7 @@ $$.thousandChange = function (num, dec) {
 }
 
 $$.thousandToNum = (num) => {
-  return Number(num.replace(/,/, ''))
+  return num.replace(/,/, '')
 }
 
 $$.bigNumber = (num) => {
@@ -38,10 +43,12 @@ $$.timeChange = (data) => {
   let formatType = data.format ? data.format : '/'
   let Y = time.getFullYear()
   let M = (time.getMonth() + 1) < 10 ? ('0' + (time.getMonth() + 1)) : (time.getMonth() + 1)
-  let D = time.getDay() < 10 ? ('0' + time.getDay()) : time.getDay()
+  let D = time.getDate() < 10 ? ('0' + time.getDate()) : time.getDate()
   let h = time.getHours()
   let m = time.getMinutes() < 10 ? ('0' + time.getMinutes()) : time.getMinutes()
   let s = time.getSeconds() < 10 ? ('0' + time.getSeconds()) : time.getSeconds()
+  // console.log(Date.parse(data.date))
+  // console.log(new Date(Date.parse(data.date)).getDate())
   if (data.type === 'yyyy-mm-dd') {
     time = Y + formatType + M + formatType + D
   } else if (data.type === 'yyyy-mm-dd hh:mm') {
@@ -66,7 +73,9 @@ $$.layerMsg = (layer) => {
     bgColor: layer.bgColor ? layer.bgColor : 'rgba(0,0,0,.8)',
     icon: layer.icon ? layer.icon : ''
   }
-  if ((typeof arguments).toLowerCase() !== 'object'.toLowerCase()) {
+  // console.log(layer)
+  // console.log((typeof layer).toLowerCase())
+  if ((typeof layer).toLowerCase() !== 'object'.toLowerCase()) {
     data = {
       tip: layer,
       time: 3000,
@@ -86,7 +95,7 @@ $$.layerMsg = (layer) => {
   _div.style.display = 'flex'
   _div.style.justifyContent = 'center'
   _div.style.alignItems = 'flex-end'
-  _div.style.zIndex = '998'
+  _div.style.zIndex = '99999'
 
   if (data.icon) {
     _span.innerHTML = '<img src="' + data.icon + '" width=16 height=16 style="margin-right:10px">' + data.tip
@@ -99,13 +108,14 @@ $$.layerMsg = (layer) => {
   _span.style.color = '#fff'
   // _span.style.maxWidth = '90%'
   _span.style.width = '100%'
-  _span.style.height = '55px'
-  _span.style.lineHeight = '55px'
+  // _span.style.height = '55px'
+  _span.style.lineHeight = '22px'
   _span.style.display = 'flex'
   _span.style.justifyContent = 'center'
   _span.style.alignItems = 'center'
   _span.style.position = 'relative'
-  _span.style.paddingRight = '144px'
+  // _span.style.paddingRight = '144px'
+  _span.style.padding = '18px 144px 18px 15px'
   _span.style.fontSize = '16px'
 
   _i.innerHTML = '<img src="' + require('../image/Close.svg') + '" width=15 height=15>'

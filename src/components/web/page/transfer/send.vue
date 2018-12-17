@@ -9,12 +9,13 @@
 
         <h3 class="mt-20">Amount:</h3>
         <div class="receiveAddress_pwd">
-          <input type="text" class="input-text amount" v-model="sendAmound" id="amountShow" @change="changeAmount" />
-          <label v-html="selectData" class="currency"></label>
+          <input type="text" class="input-text amount" v-model="sendAmound" id="amountShow" />
+          <label v-html="selectData.value" class="currency"></label>
         </div>
 
         <div class="receiveAddress_btn flex-c">
-          <button class="btn blue flex-c W240 mt-10" @click="sendAmoundInfo">Send</button>
+          <!-- <button class="btn blue flex-c W240 mt-10" @click="sendAmoundInfo">Send</button><br> -->
+          <button class="btn blue flex-c W240 mt-10" @click="privateSure">Send</button>
         </div>
       </div>
 
@@ -23,7 +24,7 @@
           <h3 class="title">History:</h3>
         </hgroup>
         <div class="tableHistory_table">
-          <table class="table table-bordered table-hover">
+          <table class="table table-bordered table-hover table-striped">
             <thead>
               <tr>
                 <th width='5%'>Status</th>
@@ -43,8 +44,8 @@
                   <div class="moreInfo_box" @click="MoreContent">
                     <span v-html="item.txhax" :title="item.info" class="ellipsis moreInfo_hax"></span>
                     <ul class="list">
-                      <li  v-html="item.txhax"></li>
-                      <li  v-html="item.to_address"></li>
+                      <li>TXid：{{item.txhax}}</li>
+                      <li>Adress：{{item.to_address}}</li>
                     </ul>
                     <i class="arrow"></i>
                   </div>
@@ -55,6 +56,90 @@
         </div>
       </div>
     </div>
+
+    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" @click="modalClick">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Send Ether & Tokens</h4>
+          </div>
+          <div class="modal-body">
+            <router-view v-on:sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
+          </div>
+          <!-- <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade bs-example-modal-lg" id="sendInfo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">You are about to send...</h4>
+          </div>
+          <div class="modal-body">
+            <div class="sendInfo_box">
+              <ul>
+                <li>
+                  <h3>To Address:</h3>
+                  <span>{{toAddress}}</span>
+                </li>
+                <li>
+                  <h3>From Address:</h3>
+                  <span>{{coinAddress}}</span>
+                </li>
+                <li>
+                  <h3>Amount to Send:</h3>
+                  <span>{{sendAmound}}</span>
+                </li>
+                <li>
+                  <h3>Account Balance:</h3>
+                  <span>{{Number(balanceNum)}} {{selectData.value}}</span>
+                </li>
+                <li>
+                  <h3>Coin:</h3>
+                  <span>{{selectData.value}}</span>
+                </li>
+                <li>
+                  <h3>Network:</h3>
+                  <span>{{netWorkInfo}}</span>
+                </li>
+                <li>
+                  <h3>Gas Limit:</h3>
+                  <span>{{gasLimitNum}}</span>
+                </li>
+                <li>
+                  <h3>Gas Price:</h3>
+                  <span>{{gasPriceNum}}</span>
+                </li>
+                <li>
+                  <h3>Max TX Fee:</h3>
+                  <span>{{maxFee}}</span>
+                </li>
+                <li>
+                  <h3>Nonce:</h3>
+                  <span>{{nonceNum}}</span>
+                </li>
+                <li>
+                  <h3>Data:</h3>
+                  <span>(none)</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">No, get me out of here!</button>
+            <button type="button" class="btn btn-primary" @click="sendAmoundInfo">Yes, I am sure! Make transaction.</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -67,67 +152,112 @@ export default {
   data () {
     return {
       addressTitle: '',
-      privateKey: '',
-      publicKey: '',
-      walletAdress: '',
+      coinAddress: '',
       toAddress: '',
       historyData: [],
       sendAmound: '',
-      web3Set: ''
+      web3: '',
+      gasPriceNum: '',
+      gasLimitNum: '',
+      balanceNum: '',
+      nonceNum: '',
+      dataPage: '',
+      serializedTx: '',
+      maxFee: '',
+      netWorkInfo: '',
+      refreshHistory: null
     }
   },
   watch: {
     selectData (cur, old) {
       const that = this
-      that.dataInit(cur)
+      that.getInitData()
     }
   },
   mounted () {
     const that = this
     that.pageRefresh()
-    that.privateKey = that.$store.state.privateKey
-    that.publicKey = that.$store.state.publicKey
-    that.walletAdress = that.$store.state.addressInfo
-    that.sendAmound = that.$$.thousandBit('0')
-    that.getSendHistory()
-    // $('body').on('click', '.moreInfo_hax', function () {
-    //   $(this).siblings('.list').toggle()
-      // if ($(this).siblings('.list').css('display') == 'none') {
-      //   console.log(1)
-      //   $(this).siblings('.list').css('display','block')
-      // } else {
-      //   console.log(2)
-      //   $(this).siblings('.list').css('display','none')
-      // }
-    // })
+    that.getInitData()
+    that.sendAmound = that.$$.thousandBit('0', 2)
+    that.refreshHistory = setInterval(() => {
+      that.getSendHistory()
+    }, 20000)
   },
   methods: {
+    getInitData () {
+      const that = this
+      that.coinAddress = that.selectData.address
+      that.titleChange(that.selectData.value)
+      that.getSendHistory()
+    },
+    modalClick () {
+      const that = this
+      $('#privateSure').on('hide.bs.modal', function () {
+        // alert('模态框关闭了');
+        // history.go(-1)
+        that.$router.push('/Transfer/tranSend')
+      })
+    },
+    privateSure () {
+      const that = this
+      if (!that.toAddress) {
+        that.$$.layerMsg({
+          tip: that.selectData.value + ' Receiving Address is not null.',
+          time: 2000,
+          bgColor: '#ea4b40',
+          icon: require('../../../../assets/image/Prompt.svg')
+        })
+        return
+      }
+      that.setBaseSendData()
+      let to_value = that.web3.toWei(that.sendAmound, 'ether')
+      that.dataPage = {
+        nonce: that.nonceNum,
+        gasPrice: Number(that.gasPriceNum),//Number类型 
+        gasLimit: Number(that.gasLimitNum),
+        from: that.coinAddress,
+        to: that.toAddress,
+        value: Number(to_value),//Number类型
+      }
+      that.$router.push('/pwdSend')
+      $('#privateSure').modal('show')
+    },
+    getSignData (data) {
+      const that = this
+      if (data) {
+        that.serializedTx = data
+        $('#privateSure').modal('hide')
+        $('#sendInfo').modal('show')
+      } else {
+        $('#privateSure').modal('hide')
+        $('#sendInfo').modal('hide')
+        that.$$.layerMsg({
+          tip: 'Sign error!',
+          time: 3000,
+          bgColor: '#ea4b40',
+          icon: require('../../../../assets/image/Prompt.svg')
+        })
+      }
+      // console.log(data)
+    },
     titleChange (bitType) {
       const that = this
       that.addressTitle = bitType + ' Receiving Address'
     },
     MoreContent (e) {
       const that = this
-      // $('.moreInfo_box').find('.list').hide()
       $(e.target.parentNode).parents('tr').siblings('tr').find('.list').hide()
       $(e.target.parentNode).find('.list').toggle()
     },
-    dataInit (data) {
-      const that = this
-      that.titleChange(data)
-    },
     pageRefresh () {
       const that = this
-      if (that.selectData) {
-        that.dataInit(that.selectData)
-      }
       if (location.href.indexOf('tranSend') !== -1) {
         $('.transferBtn_btn').find('a:eq(0)').removeClass('router-link-active')
       }
     },
     changeAmount () {
       const that = this
-      that.sendAmound = that.$$.thousandChange(that.sendAmound)
+      that.sendAmound = that.$$.thousandChange(that.sendAmound, 18)
     },
     setWeb3 () {
       const that = this
@@ -135,72 +265,55 @@ export default {
       if (typeof web3 !== 'undefined') {
         Web3 = new Web3(Web3.currentProvider)
       } else {
-        Web3 = new Web3(new Web3.providers.HttpProvider(that.$$.baseUrl))
+        Web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
       }
-      that.web3Set = Web3
+      that.web3 = Web3
+    },
+    setBaseSendData () {
+      const that = this
+      that.setWeb3()
+      console.log(that.coinAddress)
+      that.nonceNum = that.web3.eth.getTransactionCount(that.coinAddress, 'pending')
+      that.gasPriceNum = that.web3.eth.gasPrice.toString(10)
+      that.gasLimitNum = 21000
+      that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(that.coinAddress), 'ether')
+      that.maxFee = that.web3.fromWei(Number(that.gasLimitNum) * Number(that.gasPriceNum), 'ether')
+      that.netWorkInfo = that.web3.version.node
+      // console.log(that.balanceNum)
     },
     sendAmoundInfo () {
       const that = this
-      // let privKey = '0xd60d59ac00cc5fd92abb92b9f4ec7d19f45d11fd5b0a726a28cc6be0a443d684'
-      // let privKey = 'e63d00f899b00b98b9f56d260d677af0b7ae5564feab9444afc808c914b19e3d'
-      let privKey = that.privateKey.substr(2)
-      // console.log(that.privateKey)
-      // console.log(that.privateKey.substr(2))
-      // let from_address = '0xfeB89d8b6e4f775087c53aA8208Ca72A4E64A475'
-      // let from_address = '0xD562BB03A071f8928F885946Be4bd37b5beAeD6E'
-      let from_address = that.walletAdress
-      // let to_address = '0x0520e8e5e08169c4dbc1580dc9bf56638532773a'
-      // let to_address = '0x02b135e7e9d00410c518d9c420fde0ed0b21732c'
-      let to_address = that.toAddress
-      let to_value = that.sendAmound
       that.setWeb3()
-      // console.log(that.web3Set.isConnected())
-      let nonceNum = that.web3Set.eth.getTransactionCount(from_address, 'pending')
-      // let balanceNum = that.web3Set.eth.getBalance(from_address)
-      let getGasPriceNum = that.web3Set.eth.gasPrice.toString(10)
-      // let gasNum = that.web3Set.eth.estimateGas({to: to_address})
-      // that.getGasPrice()
-      // console.log(gasNum)
-      // console.log(nonceNum)
-      // console.log(that.toNum(balanceNum))
-      // console.log(that.toNum(that.web3Set.fromWei(balanceNum, 'ether')))
-      // console.log(that.web3Set.toWei('0.01', 'ether').length)
-      // console.log(getGasPriceNum)
-      let rawTx = {
-        nonce: nonceNum,
-        // gasPrice: Number(that.web3Set.toWei(0.0475, 'ether')), 
-        gasPrice: Number(getGasPriceNum),//Number类型 
-        gasLimit: '300',
-        from: from_address,
-        to: to_address,
-        value: Number(to_value),//Number类型
-        // value: that.web3Set.toWei(0.000000000001, 'ether'),
-        data: ""
-      }
-      let Tx = require('ethereumjs-tx')
-      let privateKey = new Buffer(privKey, 'hex')
-      let tx = new Tx(rawTx)
-      tx.sign(privateKey)
-      let serializedTx = tx.serialize()
-      let serializedTxString = serializedTx.toString('hex')
-      serializedTxString = serializedTxString.indexOf('0x') === 0 ? serializedTxString : ('0x' + serializedTxString)
       let dataBase = {
-        value: Number(that.$$.thousandToNum(to_value)),
-        coin: that.selectData,
-        to_address: to_address,
-        from_address: from_address,
+        value: Number(that.$$.thousandToNum(that.sendAmound)),
+        coin: that.selectData.value,
+        to_address: that.toAddress,
+        from_address: that.coinAddress,
         date: new Date(),
         txhax: '',
         status: ''
       }
-      that.web3Set.eth.sendRawTransaction(serializedTxString, function(err, hash) {
+      that.web3.eth.sendRawTransaction(that.serializedTx, function(err, hash) {
         if (!err) {
-          dataBase.txhax = hash.result
-          dataBase.status = 'pending'
+          dataBase.txhax = hash
+          dataBase.status = 'success'
+          $('#sendInfo').modal('hide')
+          that.$$.layerMsg({
+            tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + hash,
+            time: 5000,
+            bgColor: '#5dba5a',
+            icon: require('../../../../assets/image/Prompt.svg')
+          })
         } else {
           console.log(err)
           dataBase.txhax = ''
           dataBase.status = 'failure'
+          that.$$.layerMsg({
+            tip: err,
+            time: 4000,
+            bgColor: '#ea4b40',
+            icon: require('../../../../assets/image/Prompt.svg')
+          })
         }
         that.sendDatabase(dataBase)
       })
@@ -208,7 +321,7 @@ export default {
     sendDatabase (data) {
       const that = this
       $.ajax({
-        url: that.$$.serverURL + '/send/create',
+        url: that.$$.serverURL + '/transfer/create',
         datatype: 'json',
         type: 'post',
         data: {
@@ -231,22 +344,30 @@ export default {
     getSendHistory () {
       const that = this
       $.ajax({
-        url: that.$$.serverURL + '/send/history',
+        url: that.$$.serverURL + '/transfer/history',
         datatype: 'json',
         type: 'post',
         data: {
-          from_address: that.walletAdress
+          from_address: that.coinAddress,
+          coin: that.selectData.value
         },
         success: function (res) {
-          console.log(res)
+          // console.log(res)
+          that.historyData = []
           if (res.msg === 'success' && res.info.length > 0) {
             for (let i = 0; i < res.info.length; i++) {
               res.info[i].date = that.$$.timeChange({date: res.info[i].date, type:'yyyy-mm-dd hh:mm'})
-              res.info[i].value = that.$$.thousandBit(res.info[i].value)
-              // console.log(that.$$.thousandBit(res.info[i].value.toString()))
-              that.getStatus(res.info[i])
+              res.info[i].value = that.$$.thousandBit(res.info[i].value, 10)
+              // res.info[i].value = res.info[i].value
+              if (res.info[i].txhax) {
+                res.info[i].status = 'success'
+              } else {
+                res.info[i].status = 'failure'
+              }
+              // res.info[i].value = that.$$.thousandBit(res.info[i].value)
+              // that.getStatus(res.info[i])
             }
-            // that.historyData = res.info.reverse()
+            that.historyData = res.info
           } else {
 
           }
@@ -256,34 +377,34 @@ export default {
         }
       })
     },
-    getStatus (txhax) {
-      const that = this
-      that.setWeb3()
-      if (txhax.txhax) {
-        that.web3Set.eth.getTransactionReceipt(txhax.txhax, function (err, res) {
-          if (err) {
-            console.log(err)
-          } else {
-            // console.log(res)
-            if (res.status) {
-              txhax.status = 'success'
-              that.historyData.push(txhax)
-            } else {
-              txhax.status = 'pending'
-              that.historyData.push(txhax)
-            }
-          }
-        })
-      } else {
-        txhax.status = 'failure'
-        that.historyData.push(txhax)
-      }
-      // console.log(statusData)
-    },
-    toNum (num) {
-      let m = num.toExponential().match(/\d(?:\.(\d*))?e([+-]\d+)/)
-      return num.toFixed(Math.max(0, (m[1] || '').length - m[2]))
-    }
+    /**
+     * that.getStatus()方法暂不使用
+     * 后期会使用
+     */
+    // getStatus (txhax) {
+    //   const that = this
+    //   that.setWeb3()
+    //   that.web3.eth.getTransactionReceipt(txhax.txhax, function (err, res) {
+    //     if (err) {
+    //       // console.log(err)
+    //       txhax.status = 'failure'
+    //       that.historyData.push(txhax)
+    //     } else {
+    //       if (res && res.status) {
+    //         txhax.status = 'success'
+    //         that.historyData.push(txhax)
+    //       } else {
+    //         txhax.status = 'pending'
+    //         that.historyData.push(txhax)
+    //       }
+    //     }
+    //   })
+    // },
+  },
+  beforeDestroy () {
+    const that = this
+    clearInterval(that.refreshHistory)
+    that.refreshHistory = null
   }
 }
 </script>
