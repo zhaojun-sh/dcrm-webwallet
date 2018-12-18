@@ -5,7 +5,7 @@
       <div class="biticonSelect_box">
         <div class="logo"><img src="../../../../assets/image/Fusion.svg"></div>
         <div class="arrow flex-c"><i class="i"></i></div>
-        <select class="select" v-model="selectVal">
+        <select class="select" v-model="selectVal" id="selectValData">
           <option v-for="(item, index) in SetcoinAndUrl" :key="index" v-html="item.value" :value="item.value" :data-coinUrl="item.url"></option>
         </select>
       </div>
@@ -54,12 +54,9 @@ export default {
     for (let i = 0; i < that.$store.state.coinAndUrl.length; i++) {
         if (that.$store.state.coinAndUrl[i].value !== 'FSN') {
           that.SetcoinAndUrl.push(that.$store.state.coinAndUrl[i])
-          // break
         }
     }
-    // that.SetcoinAndUrl = that.$store.state.coinAndUrl
     that.getCoinInfo(that.selectVal)
-    // that.setWeb3()
   },
   methods: {
     getCoinInfo (coin) {
@@ -67,14 +64,17 @@ export default {
       // console.log(that.SetcoinAndUrl)
       for (let i = 0; i < that.SetcoinAndUrl.length; i++) {
         if (coin === that.SetcoinAndUrl[i].value) {
+          // console.log(coin)
           that.setWeb3(that.SetcoinAndUrl[i].url)
+            // console.log(123)
           that.newWeb3.lilo.dcrmGetAddr(that.$store.state.addressInfo, coin).then(function (val) {
-            // that.dcrmAddress = val
             // console.log(val)
             that.coinDataPage = {
               value: coin,
               url: that.SetcoinAndUrl[i].url,
-              address: val
+              address: val,
+              limit: that.SetcoinAndUrl[i].limit,
+              number: that.SetcoinAndUrl[i].number
             }
             // console.log(that.coinDataPage)
             that.$store.commit('storeDcrmAddress', val)

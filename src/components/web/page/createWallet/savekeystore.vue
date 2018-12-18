@@ -41,6 +41,14 @@ export default {
       keystoreName: ''
     }
   },
+  beforeCreate () {
+    const that = this
+    that.$$.loadingStart()
+  },
+  created () {
+    const that = this
+    that.$$.loadingEnd()
+  },
   mounted () {
     let that = this
     that.keystoreURL = that.$store.state.keystoreURL

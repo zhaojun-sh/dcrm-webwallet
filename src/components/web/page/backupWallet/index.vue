@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="contentHeader_box flex-bc">
-      <h1 class="contentHeader_title">MY Wallet</h1>
+      <h1 class="contentHeader_title">My Wallet</h1>
     </div>
 
     <div class="contView_box backupInfo_box">
@@ -17,13 +17,14 @@
           </div>
         </div>
 
-        <div class="backupCont_box">
+        <div class="backupCont_box" id="receiveAddressBtn">
           <h3 class="title">Private Key (unencrypted)</h3>
           <div class="backupCont_input">
             <input type="password" class="input-text input input1" readonly v-model="privateKey" id="privateKey" />
+            <input type="text" class="input-text input input1" v-model="privateKey" id="privateKeyInfo"  style="opacity: 0;"/>
             <div class="eyesBox showAndHideEyes" id="eyesView"><div class="eyes"><img src="../../../../assets/image/Visible.svg"></div></div>
           </div>
-          <button class="btn">Print Paper Wallet</button>
+          <button class="btn" @click="copyAddress('privateKeyInfo', 'receiveAddressBtn')" data-toggle="tooltip" data-placement="bottom" title="Copy clipboard">Copy clipboard</button>
         </div>
       </div>
 
@@ -68,6 +69,14 @@ export default {
       keystoreURL: '',
       keystoreHide: false
     }
+  },
+  beforeCreate () {
+    const that = this
+    that.$$.loadingStart()
+  },
+  created () {
+    const that = this
+    that.$$.loadingEnd()
   },
   mounted () {
     let that = this
@@ -124,7 +133,17 @@ export default {
       if (that.privateKey) {
         that.qrcode(that.privateKey, 'privateQrcode')
       }
-    }
+    },
+    copyAddress (id, textId) {
+      let copyText = $('#' + textId).find('.tooltip-inner').text()
+      document.getElementById(id).select()
+      document.execCommand('Copy')
+      $('#' + textId).find('.tooltip-inner').text('Copied')
+      setTimeout(function () {
+        $('#' + textId).find('.tooltip-inner').text(copyText)
+      }, 3000)
+      this.$$.layerMsg('Copy Success')
+    },
   },
   destroyed () {
     const that = this

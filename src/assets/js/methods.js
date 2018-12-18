@@ -7,7 +7,8 @@ $$.baseUrl = 'http://47.92.255.230:8111'// FSN
 // $$.baseUrl = 'http://54.183.185.30:8018'// 以太坊
 // $$.baseUrl = 'http://47.92.255.230:40415/' //
 
-$$.serverURL = 'http://localhost:8081'
+// $$.serverURL = 'http://localhost:8081'
+$$.serverURL = 'http://47.92.255.230:8081'
 
 $$.thousandBit = (num, dec = 2) => {
   num = Number(num)
@@ -44,7 +45,7 @@ $$.timeChange = (data) => {
   let Y = time.getFullYear()
   let M = (time.getMonth() + 1) < 10 ? ('0' + (time.getMonth() + 1)) : (time.getMonth() + 1)
   let D = time.getDate() < 10 ? ('0' + time.getDate()) : time.getDate()
-  let h = time.getHours()
+  let h = time.getHours() < 10 ? ('0' + time.getHours()) : time.getHours()
   let m = time.getMinutes() < 10 ? ('0' + time.getMinutes()) : time.getMinutes()
   let s = time.getSeconds() < 10 ? ('0' + time.getSeconds()) : time.getSeconds()
   // console.log(Date.parse(data.date))
@@ -200,5 +201,70 @@ $$.getBlob = (mime, str) => {
 // $('.moreInfo_box').on('click', '.moreInfo_hax', function () {
 //   console.log(123)
 // })
+
+$$.loadingStart = (data) => {
+  let initData = {
+    img: require('../image/load.gif'),
+    color: 'rgb(80, 109, 254)',
+    txt: data !== undefined ? data : 'Loading……'
+  }
+
+  if ((typeof data).toLowerCase() === 'object') {
+    initData = {
+      img: data.img ? data.img : require('../image/load.gif'),
+      color: data.color ? data.color : 'rgb(80, 109, 254)',
+      txt: data.img ? data.txt : 'Loading……'
+    }
+  }
+
+  let _div = document.createElement('div')
+  _div.id = 'OnLodaing'
+  _div.style.width = '100vw'
+  _div.style.height = '100vh'
+  _div.style.position = 'fixed'
+  _div.style.top = '0'
+  _div.style.left = '0'
+  _div.style.backgroundColor = 'rgba(255, 255, 255, 0.8)'
+  _div.style.zIndex = '99999'
+  _div.style.display = 'flex'
+  _div.style.justifyContent = 'center'
+  _div.style.alignItems = 'center'
+
+  let _Load = document.createElement('div')
+  _Load.innerHTML = '<img src="' + initData.img + '" /><p style="margin-top:15px;font-size:18px;font-weight:bold;color:' + initData.color + '">' + initData.txt + '</p>'
+  _Load.style.textAlign = 'center'
+  // let _img = ''
+
+  _div.appendChild(_Load)
+  document.body.appendChild(_div)
+}
+
+$$.loadingEnd = () => {
+  document.getElementById('OnLodaing').remove()
+}
+
+$$.limitCoin = function (num, limit, type) {
+  let callback = {
+    flag: true,
+    msg: ''
+  }
+  if (num < limit) {
+    callback = {
+      flag: true,
+      msg: 'The amount cannot be less than ' + limit
+    }
+  } else if (type && type === 'INT' && Number(num).toString().indexOf('.') !== -1) {
+    callback = {
+      flag: true,
+      msg: 'Please enter an integer'
+    }
+  } else {
+    callback = {
+      flag: false,
+      msg: ''
+    }
+  }
+  return callback
+}
 
 export default $$

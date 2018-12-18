@@ -90,21 +90,6 @@ router.post('/lockInHistory', function (req, res) {
       data.info = err
     } else {
       data.msg = 'success'
-      let compare = function compare (property) {
-        return function (a, b) {
-          let value1 = a[property]
-          let value2 = b[property]
-          if (Date.parse(value1) > Date.parse(value2)) {
-            return -1
-          } else if (value1 < value2) {
-            return 1
-          } else {
-            return 0
-          }
-          // return Date.parse(value1) - Date.parse(value2)
-        }
-      }
-      result.sort(compare('date'))
       data.info = result
       res.json(data)
     }
@@ -117,7 +102,7 @@ router.post('/lockInChangeState', function (req, res) {
     info: ''
   }
   // let to_address = req.body.to ? req.body.to.toLowerCase() : ''
-  // console.log(req.body)
+  console.log(req.body)
   LiloModel.find({hash: req.body.hash}, function (err, result) {
   // LiloModel.update({hash: req.body.hash}, {$set: {fsnhash: req.body.fsnhash}}, function (err, result) {
     if (err) {
@@ -125,7 +110,7 @@ router.post('/lockInChangeState', function (req, res) {
       data.info = err
     } else {
       let updateData = result[0]
-      // console.log(updateData)
+      console.log(updateData)
       updateData.fsnhash = req.body.fsnhash
       updateData.save()
       data.msg = 'success'

@@ -57,7 +57,7 @@
       </div>
     </div>
 
-    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" @click="modalClick">
+    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel" @click="modalClick">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -75,7 +75,7 @@
       </div>
     </div>
 
-    <div class="modal fade bs-example-modal-lg" id="sendInfo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade bs-example-modal-lg" id="sendInfo" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -91,7 +91,7 @@
                 </li>
                 <li>
                   <h3>From Address:</h3>
-                  <span>{{coinAddress}}</span>
+                  <span>{{walletAddress}}</span>
                 </li>
                 <li>
                   <h3>Amount to Send:</h3>
@@ -127,7 +127,7 @@
                 </li>
                 <li>
                   <h3>Data:</h3>
-                  <span>(none)</span>
+                  <span>{{dataPage.data || '(none)'}}</span>
                 </li>
               </ul>
             </div>
@@ -145,7 +145,7 @@
 
 <script>
 // let Web3 = require('web3')
-
+import Lilo from '../../../../assets/js/lilo'
 export default {
   name: 'receive',
   props: ['selectData'],
@@ -155,8 +155,10 @@ export default {
       coinAddress: '',
       toAddress: '',
       historyData: [],
+      walletAddress: '',
       sendAmound: '',
       web3: '',
+      newWeb3: '',
       gasPriceNum: '',
       gasLimitNum: '',
       balanceNum: '',
@@ -174,8 +176,17 @@ export default {
       that.getInitData()
     }
   },
+  beforeCreate () {
+    const that = this
+    that.$$.loadingStart()
+  },
+  created () {
+    const that = this
+    that.$$.loadingEnd()
+  },
   mounted () {
     const that = this
+    that.walletAddress = that.$store.state.addressInfo
     that.pageRefresh()
     that.getInitData()
     that.sendAmound = that.$$.thousandBit('0', 2)
@@ -209,16 +220,34 @@ export default {
         })
         return
       }
+      let getAmountTip = that.$$.limitCoin(that.sendAmound, that.selectData.limit, that.selectData.number)
+      if (getAmountTip.flag) {
+        that.$$.layerMsg({
+          tip: getAmountTip.msg,
+          time: 3000,
+          bgColor: '#ea4b40',
+          icon: require('../../../../assets/image/Prompt.svg')
+        })
+        return
+      }
       that.setBaseSendData()
       let to_value = that.web3.toWei(that.sendAmound, 'ether')
       that.dataPage = {
         nonce: that.nonceNum,
         gasPrice: Number(that.gasPriceNum),//Number类型 
         gasLimit: Number(that.gasLimitNum),
-        from: that.coinAddress,
+        from: that.walletAddress,
         to: that.toAddress,
-        value: Number(to_value),//Number类型
+        value: Number(to_value),//Number类型,
+        url: that.selectData.url,
+        coin: that.selectData.value
       }
+      if (that.selectData.value !== 'FSN') {
+        that.dataPage.data = 'TRANSACTION:' + that.toAddress + ':' + to_value + ':' + that.selectData.value
+        that.dataPage.sendType = 'SENDDCRM'
+        that.dataPage.to = '0x00000000000000000000000000000000000000dc'
+      }
+      console.log(that.dataPage)
       that.$router.push('/pwdSend')
       $('#privateSure').modal('show')
     },
@@ -262,21 +291,29 @@ export default {
     setWeb3 () {
       const that = this
       let Web3 = require('web3')
+      // console.log(that.selectData.url)
       if (typeof web3 !== 'undefined') {
         Web3 = new Web3(Web3.currentProvider)
       } else {
         Web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
       }
       that.web3 = Web3
+      that.newWeb3 = new Lilo(that.selectData.url)
     },
     setBaseSendData () {
       const that = this
       that.setWeb3()
-      console.log(that.coinAddress)
-      that.nonceNum = that.web3.eth.getTransactionCount(that.coinAddress, 'pending')
-      that.gasPriceNum = that.web3.eth.gasPrice.toString(10)
-      that.gasLimitNum = 21000
-      that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(that.coinAddress), 'ether')
+      // console.log(that.coinAddress)
+      that.nonceNum = that.web3.eth.getTransactionCount(that.walletAddress, 'pending')
+      that.gasPriceNum = that.web3.eth.gasPrice.toString(10) * 3
+      that.gasLimitNum = 21000 * 3
+      if (that.selectData.value === 'FSN') {
+        that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(that.coinAddress), 'ether')
+      } else {
+        that.newWeb3.lilo.dcrmGetBalance(sessionStorage.getItem('localFromAddress'), that.selectData.value).then(function(res){
+          that.balanceNum = that.web3.fromWei(res, 'ether')
+        })
+      }
       that.maxFee = that.web3.fromWei(Number(that.gasLimitNum) * Number(that.gasPriceNum), 'ether')
       that.netWorkInfo = that.web3.version.node
       // console.log(that.balanceNum)
@@ -357,7 +394,7 @@ export default {
           if (res.msg === 'success' && res.info.length > 0) {
             for (let i = 0; i < res.info.length; i++) {
               res.info[i].date = that.$$.timeChange({date: res.info[i].date, type:'yyyy-mm-dd hh:mm'})
-              res.info[i].value = that.$$.thousandBit(res.info[i].value, 10)
+              res.info[i].value = that.$$.thousandBit(res.info[i].value, 'no')
               // res.info[i].value = res.info[i].value
               if (res.info[i].txhax) {
                 res.info[i].status = 'success'

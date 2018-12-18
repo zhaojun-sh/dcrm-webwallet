@@ -28,6 +28,14 @@ export default {
       iconData: []
     }
   },
+  beforeCreate () {
+    const that = this
+    that.$$.loadingStart()
+  },
+  created () {
+    const that = this
+    that.$$.loadingEnd()
+  },
   mounted () {
     let that = this
     that.iconData = [

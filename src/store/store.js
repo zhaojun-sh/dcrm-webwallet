@@ -11,10 +11,14 @@ const store = new Vuex.Store({
     addressInfo: '',
     downloadName: '',
     coinAndUrl: [
-      {url: 'http://54.169.254.177:40415', value: 'FSN'},
-      {url: '', value: 'BTC'},
-      {url: 'http://47.92.255.230:8111', value: 'ETH'},
-      {url: '', value: 'BNB'}
+      {url: 'http://47.92.255.230:8111', value: 'FSN', limit: 0.001, number: 'FLOAT'},
+      {url: 'http://47.92.255.230:8111', value: 'BTC', limit: 0, number: 'FLOAT'},
+      {url: 'http://47.92.255.230:8111', value: 'ETH', limit: 0.001, number: 'FLOAT'},
+      {url: 'http://47.92.255.230:8111', value: 'BNB', limit: 0, number: 'FLOAT'},
+      {url: 'http://47.92.255.230:8111', value: 'MKR', limit: 0, number: 'FLOAT'},
+      {url: 'http://47.92.255.230:8111', value: 'GUSD', limit: 0, number: 'FLOAT'},
+      {url: 'http://47.92.255.230:8111', value: 'HT', limit: 0, number: 'FLOAT'},
+      {url: 'http://47.92.255.230:8111', value: 'BNT', limit: 0, number: 'FLOAT'}
     ],
     dcrmAddress: ''
   },

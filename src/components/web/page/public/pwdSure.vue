@@ -138,7 +138,7 @@ export default {
         walletData = wallet.getWalletFromPrivKeyFile(that.fileData, that.password)
         that.privateKey = walletData.getPrivateKeyString()
         that.checkAddress = walletData.getChecksumAddressString()
-        if (that.sendDataPage.sendType === 'LOCKOUT') {
+        if (that.sendDataPage.sendType === 'LOCKOUT' || that.sendDataPage.sendType === 'LOCKIN' || that.sendDataPage.sendType === 'SENDDCRM') {
           that.getDcrmAddress()
         } else if (that.sendDataPage.sendType === 'MYWALLET') {
           that.getDecrAddress(that.privateKey)
@@ -157,13 +157,13 @@ export default {
     
     inputPwdBtn () {
       let that = this
-      console.log(that.sendDataPage)
+      // console.log(that.sendDataPage)
       let walletData
       try {
         walletData = new wallet(new Buffer(that.fixPkey(that.privateKey), 'hex'))
         that.privateKey = walletData.getPrivateKeyString()
         that.checkAddress = walletData.getChecksumAddressString()
-        if (that.sendDataPage.sendType === 'LOCKOUT' || that.sendDataPage.sendType === 'LOCKIN') {
+        if (that.sendDataPage.sendType === 'LOCKOUT' || that.sendDataPage.sendType === 'LOCKIN' || that.sendDataPage.sendType === 'SENDDCRM') {
           // console.log('lock')
           that.getDcrmAddress()
         } else if (that.sendDataPage.sendType === 'MYWALLET') {
@@ -202,8 +202,8 @@ export default {
           value: 0,
           data: 'DCRMCONFIRMADDR:' + val + ':' + that.sendDataPage.coin,
         }
-        console.log(val)
-        console.log(rawTx)
+        // console.log(val)
+        // console.log(rawTx)
         let Tx = require('ethereumjs-tx')
         pwd = pwd.indexOf('0x') === 0 ? pwd.substr(2) : pwd
         let privateKey = new Buffer(pwd, 'hex')
@@ -212,7 +212,7 @@ export default {
         let serializedTx = tx.serialize()
         let serializedTxString = serializedTx.toString('hex')
         serializedTxString = serializedTxString.indexOf('0x') === 0 ? serializedTxString : ('0x' + serializedTxString)
-        console.log(serializedTxString)
+        // console.log(serializedTxString)
         that.web3.eth.sendRawTransaction(serializedTxString, function (err, hash) {
           if (err) {
             console.log(err)
@@ -226,6 +226,10 @@ export default {
     },
     signSendData () {
       const that = this
+      // console.log(that.checkAddress.toLowerCase())
+      // console.log(that.sendDataPage)
+      // console.log(that.dcrmAddress.toLowerCase())
+      // console.log(that.checkAddress.toLowerCase())
       if (that.checkAddress.toLowerCase() === that.sendDataPage.from.toLowerCase() || that.dcrmAddress.toLowerCase() === that.sendDataPage.from.toLowerCase()) {
         let rawTx = {
           nonce: that.sendDataPage.nonce,

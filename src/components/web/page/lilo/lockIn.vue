@@ -33,7 +33,7 @@
               <tr v-for="item in historyData" :key="item.index">
                 <td><span v-html="item.statusFsn" :class="item.statusFsn=='New'?'red':''"></span></td>
                 <td><span v-html="selectData.value"></span></td>
-                <td><span v-html="item.value"></span></td>
+                <td><span v-html="item.value2"></span></td>
                 <td><span v-html="item.date"></span></td>
                 <td>
                   <div class="moreInfo_box" @click="MoreContent">
@@ -69,12 +69,12 @@
 
     </div>
 
-    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" @click="modalClick">
+    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel" @click="modalClick">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Send Ether & Tokens</h4>
+            <h4 class="modal-title" id="myModalLabel">Unlock</h4>
           </div>
           <div class="modal-body">
             <router-view v-on:sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
@@ -177,6 +177,14 @@ export default {
       that.getInitData()
     }
   },
+  beforeCreate () {
+    const that = this
+    that.$$.loadingStart()
+  },
+  created () {
+    const that = this
+    that.$$.loadingEnd()
+  },
   mounted () {
     const that = this
     that.pageRefresh()
@@ -235,36 +243,19 @@ export default {
     sendAmoundInfo () {
       const that = this
       that.setWeb3()
-      // let dataBase = {
-      //   value: Number(that.$$.thousandToNum(that.sendAmound)),
-      //   coin: that.selectData,
-      //   to_address: that.toAddress,
-      //   from_address: that.walletAddress,
-      //   date: new Date(),
-      //   txhax: '',
-      //   status: ''
-      // }"0xbdc69db41f9852be2bc6fdcd8fa3a073cd67b246fbec0b9
-      that.updateDatabaseInfo({
-        // hash: that.dataPage.hash,
-        hash: '0xbdc69db41f9852be2bc6fdcd8fa3a073cd67b246fbec0b975873b86e846e6af6',
-        fsnhash: 123456789
-      })
       that.web3.eth.sendRawTransaction(that.serializedTx, function(err, hash) {
         if (!err) {
-          // dataBase.txhax = hash
-          // dataBase.status = 'success'
-          // $('#sendInfo').modal('hide')
           that.$$.layerMsg({
-            tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + hash,
+            tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + hash,
             time: 5000,
             bgColor: '#5dba5a',
             icon: require('../../../../assets/image/Prompt.svg')
           })
-          // that.sendDatabase(dataBase)
+          that.updateDatabaseInfo({
+            hash: that.dataPage.hash,
+            fsnhash: hash
+          })
         } else {
-          // console.log(err)
-          // dataBase.txhax = ''
-          // dataBase.status = 'failure'
           that.$$.layerMsg({
             tip: err,
             time: 4000,
@@ -330,10 +321,10 @@ export default {
     getDcrmAddress () {
       const that = this
       that.setWeb3()
-      console.log(that.newWeb3)
+      // console.log(that.newWeb3)
       that.newWeb3.lilo.dcrmGetAddr(that.$store.state.addressInfo, that.selectData.value).then(function (val) {
         that.dcrmAddress = val
-        console.log(val)
+        // console.log(val)
         that.getDatabaseInfo()
       })
     },
@@ -341,61 +332,73 @@ export default {
       const that = this
       $.ajax({
         url: 'http://api-rinkeby.etherscan.io/api?module=account&action=txlist&address=' + that.coinAddress,
+        // url: 'http://api-rinkeby.etherscan.io/api?module=account&action=tokentx&address=' + that.coinAddress,
         type: 'post',
         datatype: 'json',
         success: function (res) {
           console.log(res)
           that.setWeb3()
           that.historyData = []
-          if (res && res.result && res.result.length > 0) {
-            if (data.length > 0) {
-              for (let i = 0; i < data.length; i++) {
-                if (data[i].fsnhash) {
-                  data[i].statusFsn = 'Success'
-                  data[i].date = that.$$.timeChange({date: data[i].date, type:'yyyy-mm-dd hh:mm'})
-                  that.historyData.push(data[i])
-                } else {
-                  for (let j = 0; j < res.result.length; j++) {
-                    if (res.result[j].to.toLowerCase() === that.coinAddress.toLowerCase()) {
-                      if (res.result[j].hash.toLowerCase() === data[i].hash.toLowerCase()) {
-                        res.result[j].value = that.web3.fromWei(res.result[j].value, 'ether')
-                        res.result[j].value2 = res.result[j].value
-                        // res.result[j].date = that.$$.timeChange({date: res.result[j].date, type:'yyyy-mm-dd hh:mm'})
-                        res.result[i].date = that.$$.timeChange({date: Number(res.result[i].timeStamp) * 1000, type:'yyyy-mm-dd hh:mm'})
-                        res.result[j].statusFsn = 'New'
-                        that.historyData.push(res.result[j])
-                      } else {
-                        res.result[j].statusFsn = 'New'
-                        res.result[j].value = that.web3.fromWei(res.result[j].value, 'ether')
-                        res.result[j].value2 = res.result[j].value
-                        // res.result[j].date = that.$$.timeChange({date: res.result[j].date, type:'yyyy-mm-dd hh:mm'})
-                        res.result[i].date = that.$$.timeChange({date: Number(res.result[i].timeStamp) * 1000, type:'yyyy-mm-dd hh:mm'})
-                        res.result[j].coin = that.selectData.value
-                        that.createDatabaseInfo(res.result[j])
-                        that.historyData.push(res.result[j])
-                      }
-                    }
-                  }
-                }
-              }
-            } else {
-              // console.log(123)
-              for (let i = 0; i < res.result.length; i++) {
-                if (res.result[i].to.toLowerCase() === that.coinAddress.toLowerCase()) {
-                  // console.log(345)
-                  res.result[i].statusFsn = 'New'
-                  that.createDatabaseInfo(res.result[i])
-                  res.result[i].value = that.web3.fromWei(res.result[i].value, 'ether')
-                  res.result[i].value2 = res.result[i].value
-                  res.result[i].date = that.$$.timeChange({date: Number(res.result[i].timeStamp) * 1000, type:'yyyy-mm-dd hh:mm'})
-                  // res.result[i].date = that.$$.timeChange({date: res.result[i].date, type:'yyyy-mm-dd hh:mm'})
-                  that.historyData.push(res.result[i])
-                }
+          let arrObj = []
+          let newArr = []
+          let objArr = {}
+          if (data.length > 0) {
+            for (let i = 0; i < data.length; i++) {
+              arrObj.push(data[i])
+            }
+          }
+          // console.log(typeof res.result)
+          if (res.result && res.result.length > 0 && (typeof res.result).toLowerCase() === 'object') {
+            for (let i = 0; i < res.result.length; i++) {
+              // console.log(res.result[i])
+              if  (res.result[i].to.toLowerCase() === that.coinAddress.toLowerCase()) {
+                arrObj.push(res.result[i])
               }
             }
-          } else {
-            that.historyData = data
           }
+          console.log(arrObj)
+          for (let i = 0; i < arrObj.length; i++) {
+            if (!objArr[arrObj[i].hash]) {
+              newArr.push(arrObj[i])
+              objArr[arrObj[i].hash] = true
+            }
+          }
+          // console.log(newArr)
+          for (let i = 0; i < newArr.length; i++) {
+            if (newArr[i].fsnhash) {
+              newArr[i].statusFsn = 'Success'
+              newArr[i].date = that.$$.timeChange({date: newArr[i].date, type:'yyyy-mm-dd hh:mm'})
+            } else {
+              newArr[i].statusFsn = 'New'
+              newArr[i].date = that.$$.timeChange({date: Number(newArr[i].timeStamp) * 1000, type:'yyyy-mm-dd hh:mm'})
+            }
+            // console.log(123)
+            // console.log(objArr[newArr[i].hash])
+            if (newArr[i].dataType !== 'DATABASE') {
+              that.createDatabaseInfo(newArr[i])
+            }
+            if (!newArr[i].fsnhash && newArr[i].hash.indexOf('0xx') === 0) {
+              newArr[i].statusFsn = '<span style="color:red">failure</span>'
+            }
+            newArr[i].hash = newArr[i].hash.indexOf('0xx') === 0 ? newArr[i].fsnhash : newArr[i].hash
+            newArr[i].value2 = that.web3.fromWei(newArr[i].value, 'ether')
+            that.historyData.push(newArr[i])
+          }
+          let compare = function compare (property) {
+            return function (a, b) {
+              let value1 = a[property]
+              let value2 = b[property]
+              if (Date.parse(value1) > Date.parse(value2)) {
+                return -1
+              } else if (value1 < value2) {
+                return 1
+              } else {
+                return 0
+              }
+              // return Date.parse(value1) - Date.parse(value2)
+            }
+          }
+          that.historyData.sort(compare('date'))
         }
       })
     },
@@ -424,6 +427,12 @@ export default {
         data: {to: that.coinAddress},
         success: function (res) {
           console.log(res)
+          for (let i = 0; i < res.info.length; i++) {
+            if (res.info[i].hash === '' || res.info[i].hash === undefined) {
+              res.info[i].hash = '0xx' + i
+            }
+            res.info[i].dataType = 'DATABASE'
+          }
           that.getHistory(res.info)
         },
         error: function (res) {

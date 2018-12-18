@@ -71,17 +71,21 @@ function newWeb3 (providers) {
           dataType: 'json',
           contentType: 'application/json',
           success: function (data) {
+            // console.log(data)
             if (data && data.result) {
               let $data = data.result.indexOf('{') === 0 ? JSON.parse(data.result) : data.result
               sessionStorage.setItem('dcrmFromAddress', $data.DcrmAddr)
+              // console.log(1)
               resolve($data)
-            } else if (data && data.error) {
-              reject(data)
+            } else {
+              // console.log(2)
+              resolve(data.result)
             }
+            // console.log(3)
           },
           error: function (e) {
             console.log('error', e)
-            reject(e)
+            resolve(e)
           }
         })
       })
@@ -136,12 +140,12 @@ function newWeb3 (providers) {
               let $data = data.result.indexOf('{') === 0 ? JSON.parse(data.result) : data.result
               resolve($data)
             } else if (data && data.error) {
-              reject(data)
+              resolve(data)
             }
           },
           error: function (e) {
             console.log('error', e)
-            reject(e)
+            resolve(e)
           }
         })
       })

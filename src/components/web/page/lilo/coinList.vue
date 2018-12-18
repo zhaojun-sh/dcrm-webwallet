@@ -55,9 +55,9 @@
           <li v-for="(item, index) in bitIconTypeSearch" :key="index">
             <div class="iconImg"><img :src="item.logo"></div>
             <h4 class="title" v-html="item.nameFull"></h4>
-            <div class="dappView_btn">
-              <router-link :to="{path:'/LILO/lockIn', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView">lockIn</router-link>
-              <router-link :to="{path:'/LILO/lockOut', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView">lockOut</router-link>
+            <div class="dappView_btn" v-if="item.nameFull !== 'MORE'">
+              <a class="setBtn" v-if="item.btnView" @click="toUrlLock('/LILO/lockIn', item.currency)">Deposit</a>
+              <a class="setBtn" v-if="item.btnView" @click="toUrlLock('/LILO/lockOut', item.currency)" :style="!item.viewOpacity ? 'opacity:0.5' : ''">Withdraw</a>
               <a class="setBtn" v-if="!item.btnView" @click="privateSure(item.currency)">Request</a>
             </div>
             <div class="line"></div>
@@ -71,7 +71,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Send Ether & Tokens</h4>
+            <h4 class="modal-title" id="myModalLabel">Unlock</h4>
           </div>
           <div class="modal-body">
             <router-view v-on:sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
@@ -105,11 +105,25 @@ export default {
       searchContent: ''
     }
   },
+  beforeCreate () {
+    const that = this
+    that.$$.loadingStart()
+  },
+  created () {
+    const that = this
+    that.$$.loadingEnd()
+  },
   mounted () {
     let that = this
     that.getInitData()
   },
   methods: {
+    toUrlLock (url, coin) {
+      const that = this
+      if (coin === 'ETH' || url === '/LILO/lockIn') {
+        that.$router.push({ path: url, query: { currency: coin }})
+      }
+    },
     modalClick () {
       const that = this
       $('#privateSure').on('hide.bs.modal', function () {
@@ -147,20 +161,21 @@ export default {
       that.walletAdress = that.$store.state.addressInfo
       that.bitIconTypeSearch = that.bitIconTypeData = [{
           logo: require('../../../../assets/image/btc.svg'),
-          nameSimplicity: 'Bitcoin',
-          nameFull: 'Bitcoin',
+          nameSimplicity: 'BTC',
+          nameFull: 'Bitcoin (BTC)',
           availbleBalance: that.$$.thousandBit(that.balanceCoin.ETH),
           freeze: that.$$.thousandBit(0),
           totalBalance: that.$$.thousandBit(that.balanceCoin.ETH),
           totalBalanceDoller: '$' + that.$$.thousandBit(that.balanceCoin.ETH),
-          currency: 'Bitcoin',
+          currency: 'BTC',
           receive: '',
           send: '',
-          btnView: false
+          btnView: false,
+          viewOpacity: false
         }, {
           logo: require('../../../../assets/image/eth.svg'),
           nameSimplicity: 'ETH',
-          nameFull: 'Ethereum',
+          nameFull: 'Ethereum (ETH)',
           availbleBalance: that.$$.thousandBit(that.balanceCoin.ETH),
           freeze: that.$$.thousandBit(0),
           totalBalance: that.$$.thousandBit(that.balanceCoin.ETH),
@@ -168,67 +183,73 @@ export default {
           currency: 'ETH',
           receive: '',
           send: '',
-          btnView: false
+          btnView: false,
+          viewOpacity: true
         }, {
           logo: require('../../../../assets/image/bnb.svg'),
-          nameSimplicity: 'Binance',
-          nameFull: 'Binance',
+          nameSimplicity: 'BNB',
+          nameFull: 'Binance (BNB)',
           availbleBalance: that.$$.thousandBit(that.balanceCoin.ETH),
           freeze: that.$$.thousandBit(0),
           totalBalance: that.$$.thousandBit(that.balanceCoin.ETH),
           totalBalanceDoller: '$' + that.$$.thousandBit(that.balanceCoin.ETH),
-          currency: 'Binance',
+          currency: 'BNB',
           receive: '',
           send: '',
-          btnView: false
+          btnView: false,
+          viewOpacity: false
         }, {
           logo: require('../../../../assets/image/mkr.svg'),
-          nameSimplicity: 'Maker(MKR)',
-          nameFull: 'Maker(MKR)',
+          nameSimplicity: 'MKR',
+          nameFull: 'Maker (MKR)',
           availbleBalance: that.$$.thousandBit(that.balanceCoin.ETH),
           freeze: that.$$.thousandBit(0),
           totalBalance: that.$$.thousandBit(that.balanceCoin.ETH),
           totalBalanceDoller: '$' + that.$$.thousandBit(that.balanceCoin.ETH),
-          currency: 'Maker(MKR)',
+          currency: 'MKR',
           receive: '',
           send: '',
-          btnView: false
+          btnView: false,
+          viewOpacity: false
         }, {
           logo: require('../../../../assets/image/gusd.svg'),
-          nameSimplicity: 'Gemini dollar GUSD',
-          nameFull: 'Gemini dollar GUSD',
+          nameSimplicity: 'GUSD',
+          nameFull: 'Gemini Dollar (GUSD)',
           availbleBalance: that.$$.thousandBit(that.balanceCoin.ETH),
           freeze: that.$$.thousandBit(0),
           totalBalance: that.$$.thousandBit(that.balanceCoin.ETH),
           totalBalanceDoller: '$' + that.$$.thousandBit(that.balanceCoin.ETH),
-          currency: 'Gemini dollar GUSD',
+          currency: 'GUSD',
           receive: '',
           send: '',
-          btnView: false
+          btnView: false,
+          viewOpacity: false
         }, {
           logo: require('../../../../assets/image/ht.svg'),
-          nameSimplicity: 'HuobiToken (HT)',
+          nameSimplicity: 'HT',
           nameFull: 'HuobiToken (HT)',
           availbleBalance: that.$$.thousandBit(that.balanceCoin.ETH),
           freeze: that.$$.thousandBit(0),
           totalBalance: that.$$.thousandBit(that.balanceCoin.ETH),
           totalBalanceDoller: '$' + that.$$.thousandBit(that.balanceCoin.ETH),
-          currency: 'HuobiToken (HT)',
+          currency: 'HT',
           receive: '',
           send: '',
-          btnView: false
+          btnView: false,
+          viewOpacity: false
         }, {
           logo: require('../../../../assets/image/bnt.svg'),
-          nameSimplicity: 'Bancor (BNT)',
+          nameSimplicity: 'BNT',
           nameFull: 'Bancor (BNT)',
           availbleBalance: that.$$.thousandBit(that.balanceCoin.ETH),
           freeze: that.$$.thousandBit(0),
           totalBalance: that.$$.thousandBit(that.balanceCoin.ETH),
           totalBalanceDoller: '$' + that.$$.thousandBit(that.balanceCoin.ETH),
-          currency: 'Bancor (BNT)',
+          currency: 'BNT',
           receive: '',
           send: '',
-          btnView: false
+          btnView: false,
+          viewOpacity: false
         }, {
           logo: require('../../../../assets/image/MORE.svg'),
           nameSimplicity: 'MORE',
@@ -240,10 +261,13 @@ export default {
           currency: 'MORE',
           receive: '',
           send: '',
-          btnView: false
+          btnView: false,
+          viewOpacity: false
         }
       ]
-      that.getBalanceData('ETH')
+      // for (let i = 0; i < that.bitIconTypeData.length; i++) {
+        that.getBalanceData()
+      // }
     },
     setWeb3 () {
       const that = this
@@ -304,20 +328,13 @@ export default {
     getBalanceData (coin) {
       const that = this
       that.setWeb3()
-      that.newWeb3.lilo.dcrmGetBalance(sessionStorage.getItem('localFromAddress'), coin).then(function(res){
-        console.log(res)
-        if (!isNaN(res)) {
-          that.balanceCoin[coin] = that.web3.fromWei(res, 'ether')
-          for (let i = 0; i < that.bitIconTypeData.length; i++) {
-            if (coin === that.bitIconTypeData[i].currency) {
-              that.bitIconTypeData[i].availbleBalance = that.$$.thousandBit(that.balanceCoin[coin])
-              that.bitIconTypeData[i].totalBalance = that.$$.thousandBit(that.balanceCoin[coin])
-              that.bitIconTypeData[i].totalBalanceDoller = '$' + that.$$.thousandBit(that.balanceCoin[coin])
-              that.bitIconTypeData[i].btnView = true
-            }
+      for (let i = 0; i < that.bitIconTypeData.length; i++) {
+        that.newWeb3.lilo.dcrmGetAddr(sessionStorage.getItem('localFromAddress'), that.bitIconTypeData[i].currency).then(function(res){
+          if (res && (res.indexOf('0x') === 0 || res.indexOf('coin') === -1)) {
+            that.bitIconTypeData[i].btnView = true
           }
-        }
-      })
+        })
+      }
     }
   }
 }

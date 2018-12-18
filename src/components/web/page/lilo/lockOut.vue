@@ -42,9 +42,9 @@
                 <td><span v-html="item.date"></span></td>
                 <td>
                   <div class="moreInfo_box" @click="MoreContent">
-                    <span v-html="item.hash" :title="item.info" class="ellipsis moreInfo_hax"></span>
+                    <span v-html="item.fsnhash" :title="item.fsnhash" class="ellipsis moreInfo_hax"></span>
                     <ul class="list">
-                      <li>TXid：{{item.hash}}</li>
+                      <li>TXid：{{item.fsnhash}}</li>
                       <li>Adress：{{item.from}}</li>
                     </ul>
                     <i class="arrow"></i>
@@ -60,7 +60,7 @@
       </div>
     </div>
 
-    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" @click="modalClick">
+    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel" @click="modalClick">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -78,7 +78,7 @@
       </div>
     </div>
 
-    <div class="modal fade bs-example-modal-lg" id="sendInfo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade bs-example-modal-lg" id="sendInfo" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -176,6 +176,14 @@ export default {
       that.getInitData()
     }
   },
+  beforeCreate () {
+    const that = this
+    that.$$.loadingStart()
+  },
+  created () {
+    const that = this
+    that.$$.loadingEnd()
+  },
   mounted () {
     let that = this
     that.pageRefresh()
@@ -218,7 +226,14 @@ export default {
       that.nonceNum = that.web3.eth.getTransactionCount(that.walletAddress, 'pending')
       that.gasPriceNum = that.web3.eth.gasPrice.toString(10)
       that.gasLimitNum = 21000
-      that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(that.walletAddress), 'ether')
+      if (that.selectData.value === 'FSN') {
+        that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(sessionStorage.getItem('localFromAddress')), 'ether')
+      } else {
+        that.newWeb3.lilo.dcrmGetBalance(sessionStorage.getItem('localFromAddress'), that.selectData.value).then(function(res){
+          that.balanceNum = res
+        })
+      }
+      // that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(that.walletAddress), 'ether')
       that.maxFee = that.web3.fromWei(Number(that.gasLimitNum) * Number(that.gasPriceNum), 'ether')
       that.netWorkInfo = that.web3.version.node
     },
@@ -246,6 +261,16 @@ export default {
         that.$$.layerMsg({
           tip: that.selectData.value + ' Receiving Address is not null.',
           time: 2000,
+          bgColor: '#ea4b40',
+          icon: require('../../../../assets/image/Prompt.svg')
+        })
+        return
+      }
+      let getAmountTip = that.$$.limitCoin(that.sendAmound, that.selectData.limit, that.selectData.number)
+      if (getAmountTip.flag) {
+        that.$$.layerMsg({
+          tip: getAmountTip.msg,
+          time: 3000,
           bgColor: '#ea4b40',
           icon: require('../../../../assets/image/Prompt.svg')
         })

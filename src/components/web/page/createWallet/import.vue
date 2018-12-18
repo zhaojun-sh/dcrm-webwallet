@@ -94,6 +94,14 @@ export default {
       downloadName: ''
     }
   },
+  beforeCreate () {
+    const that = this
+    that.$$.loadingStart()
+  },
+  created () {
+    const that = this
+    that.$$.loadingEnd()
+  },
   mounted () {
     let that = this
     $('.selectType_type').on('click', 'label', function () {

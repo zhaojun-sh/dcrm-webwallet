@@ -57,25 +57,27 @@ export default {
   methods: {
     getCoinInfo (coin) {
       const that = this
-      if (coin === 'FSN') {
-        that.coinDataPage = {
-          value: coin,
-          url: that.$$.baseUrl,
-          address: that.$store.state.addressInfo
-        }
-      } else {
-        for (let i = 0; i < that.SetcoinAndUrl.length; i++) {
+      for (let i = 0; i < that.SetcoinAndUrl.length; i++) {
+        if (that.SetcoinAndUrl[i].value === 'FSN') {
+          that.coinDataPage = {
+            value: coin,
+            url: that.SetcoinAndUrl[i].url,
+            address: that.$store.state.addressInfo,
+            limit: that.SetcoinAndUrl[i].limit,
+            number: that.SetcoinAndUrl[i].number
+          }
+        } else {
           if (coin === that.SetcoinAndUrl[i].value) {
             that.setWeb3(that.SetcoinAndUrl[i].url)
             that.newWeb3.lilo.dcrmGetAddr(that.$store.state.addressInfo, coin).then(function (val) {
-              // that.dcrmAddress = val
-              // console.log(val)
               that.coinDataPage = {
                 value: coin,
                 url: that.SetcoinAndUrl[i].url,
-                address: val
+                address: val,
+                limit: that.SetcoinAndUrl[i].limit,
+                number: that.SetcoinAndUrl[i].number
               }
-              console.log(that.coinDataPage)
+              // console.log(that.coinDataPage)
               that.$store.commit('storeDcrmAddress', val)
             })
           }

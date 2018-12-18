@@ -4,7 +4,7 @@
       <div class="receiveAddress_box">
         <h3 v-html="addressTitle"></h3>
         <div class="receiveAddress_pwd">
-          <input type="text" class="input-text input" readonly v-model="coinAddress" id="walletAdressHide" />
+          <input type="text" class="input-text input" readonly v-model="walletAddress" id="walletAdressHide" />
           <!-- <input type="text" v-model="walletAdress" id="walletAdressHide" class="inputOpacity"/> -->
         </div>
         <div class="receiveAddress_btn flex-c" id="receiveAddressBtn">
@@ -78,6 +78,7 @@ export default {
   data () {
     return {
       addressTitle: '',
+      walletAddress: '',
       historyData: [],
       refreshHistory: null,
       coinAddress: '',
@@ -90,8 +91,17 @@ export default {
       that.getInitData()
     }
   },
+  beforeCreate () {
+    const that = this
+    that.$$.loadingStart()
+  },
+  created () {
+    const that = this
+    that.$$.loadingEnd()
+  },
   mounted () {
     let that = this
+    that.walletAddress = that.$store.state.addressInfo
     that.pageRefresh()
     that.getInitData()
     $(function () {
@@ -120,7 +130,8 @@ export default {
     },
     titleChange (bitType) {
       let that = this
-      that.addressTitle = bitType + ' Receiving Address'
+      // that.addressTitle = bitType + ' Receiving Address'
+      that.addressTitle = 'FSN Receiving Address'
     },
     qrcode (cont) {
       $('#qrcode').html('')
@@ -176,7 +187,7 @@ export default {
           if (res.msg === 'success' && res.info.length > 0) {
             for (let i = 0; i < res.info.length; i++) {
               res.info[i].date = that.$$.timeChange({date: res.info[i].date, type:'yyyy-mm-dd hh:mm'})
-              res.info[i].value = that.$$.thousandBit(res.info[i].value, 10)
+              res.info[i].value = that.$$.thousandBit(res.info[i].value, 'no')
               // res.info[i].value = res.info[i].value
               if (res.info[i].txhax) {
                 res.info[i].status = 'success'
