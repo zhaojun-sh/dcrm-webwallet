@@ -146,6 +146,7 @@
 <script>
 // let Web3 = require('web3')
 import Lilo from '../../../../assets/js/lilo'
+import { throws } from 'assert';
 export default {
   name: 'receive',
   props: ['selectData'],
@@ -312,11 +313,23 @@ export default {
       // console.log(that.coinAddress)
 
       let to_value = that.web3.toWei(that.sendAmound, 'ether')
-      let getGasLimit = that.web3.eth.estimateGas({to: that.toAddress})
+      let getGasLimit
+      try {
+        getGasLimit = that.web3.eth.estimateGas({to: that.toAddress})
+      } catch (error) {
+        getGasLimit = error
+        // throw error
+      }
       // console.log(getGasLimit)
-      // .then(function (val) {
-      //   console.log(val)
-      // })
+      if (getGasLimit.toString().indexOf('Error') !== -1) {
+        that.$$.layerMsg({
+          tip: getGasLimit,
+          time: 4000,
+          bgColor: '#ea4b40',
+          icon: require('../../../../assets/image/Prompt.svg')
+        })
+        throw getGasLimit
+      }
 
       that.nonceNum = that.web3.eth.getTransactionCount(that.walletAddress, 'pending')
       that.gasPriceNum = that.web3.eth.gasPrice.toString(10)

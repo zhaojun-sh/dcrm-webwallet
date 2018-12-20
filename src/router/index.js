@@ -113,7 +113,7 @@ const routers = new Router({
                   ]
                 }, {
                   path: '/lockNav',
-                  name: 'lockNav',
+                  // name: 'lockNav',
                   component: lockNav,
                   children: [
                     {

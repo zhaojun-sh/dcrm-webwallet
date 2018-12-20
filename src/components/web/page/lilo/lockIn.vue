@@ -74,7 +74,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Unlock</h4>
+            <h4 class="modal-title" id="myModalLabel">LockIn</h4>
           </div>
           <div class="modal-body">
             <router-view v-on:sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
@@ -353,8 +353,12 @@ export default {
           if (res.result && res.result.length > 0 && (typeof res.result).toLowerCase() === 'object') {
             for (let i = 0; i < res.result.length; i++) {
               // console.log(res.result[i])
-              if  (res.result[i].to.toLowerCase() === that.coinAddress.toLowerCase() && res.result[i].tokenSymbol === that.selectData.value) {
-                arrObj.push(res.result[i])
+              if (that.selectData.value === 'ETH') {
+                 arrObj.push(res.result[i])
+              } else {
+                if  (res.result[i].to.toLowerCase() === that.coinAddress.toLowerCase() && res.result[i].tokenSymbol === that.selectData.value) {
+                  arrObj.push(res.result[i])
+                }
               }
             }
           }

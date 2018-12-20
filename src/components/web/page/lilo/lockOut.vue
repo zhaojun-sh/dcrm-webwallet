@@ -65,7 +65,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Send Ether & Tokens</h4>
+            <h4 class="modal-title" id="myModalLabel">LochOut</h4>
           </div>
           <div class="modal-body">
             <router-view v-on:sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
@@ -83,7 +83,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">You are about to send...</h4>
+            <h4 class="modal-title" id="myModalLabel">LochOut</h4>
           </div>
           <div class="modal-body">
             <div class="sendInfo_box">
@@ -230,7 +230,24 @@ export default {
       const that = this
       that.nonceNum = that.web3.eth.getTransactionCount(that.walletAddress, 'pending')
       that.gasPriceNum = that.web3.eth.gasPrice.toString(10)
-      let getGasLimit = that.web3.eth.estimateGas({to: that.toAddress})
+      // let getGasLimit = that.web3.eth.estimateGas({to: that.toAddress})
+      let getGasLimit
+      try {
+        getGasLimit = that.web3.eth.estimateGas({to: that.toAddress})
+      } catch (error) {
+        getGasLimit = error
+        // throw error
+      }
+      // console.log(getGasLimit)
+      if (getGasLimit.toString().indexOf('Error') !== -1) {
+        that.$$.layerMsg({
+          tip: getGasLimit,
+          time: 4000,
+          bgColor: '#ea4b40',
+          icon: require('../../../../assets/image/Prompt.svg')
+        })
+        throw getGasLimit
+      }
       that.gasLimitNum = getGasLimit * 6
       if (that.selectData.value === 'FSN') {
         that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(sessionStorage.getItem('localFromAddress')), 'ether')
@@ -247,7 +264,7 @@ export default {
       const that = this
       if (data) {
         that.serializedTx = data
-        console.log(that.serializedTx)
+        // console.log(that.serializedTx)
         $('#privateSure').modal('hide')
         $('#sendInfo').modal('show')
       } else {
@@ -282,6 +299,7 @@ export default {
         })
         return
       }
+      that.$$.loadingStart()
       that.setWeb3()
       that.setBaseSendData()
       let to_value = that.web3.toWei(that.sendAmound, 'ether')
@@ -291,7 +309,7 @@ export default {
         that.dataPage = {
           nonce: that.nonceNum,
           gasPrice: Number(that.gasPriceNum),//Number类型 
-          gasLimit: Number(that.gasLimitNum) * 100,
+          gasLimit: Number(that.gasLimitNum),
           from: that.walletAddress,
           to: '0x00000000000000000000000000000000000000dc',
           value: Number(0),//Number类型
@@ -305,6 +323,7 @@ export default {
         }
         that.$router.push('/pwdLockOut')
         $('#privateSure').modal('show')
+        that.$$.loadingEnd()
       })
     },
     changeAmount (data) {
@@ -327,6 +346,7 @@ export default {
     },
     sendAmoundInfo () {
       const that = this
+      that.$$.loadingStart()
       that.setWeb3()
       let dataBase = {
         date: that.dataPage.data,
@@ -366,6 +386,7 @@ export default {
         }
         // console.log(12431234)
         that.createDatabaseInfo(dataBase)
+        that.$$.loadingEnd()
       })
     },
     createDatabaseInfo (data) {
