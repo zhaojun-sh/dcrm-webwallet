@@ -129,7 +129,7 @@ function newWeb3 (providers) {
     dcrmGetBalance: function (fromAddress, coin) {
       let inputdata = {
         params: [fromAddress, coin],
-        method: 'lilo_dcrmGetBalance',
+        method: 'lilo_dcrmGetBalance123',
         jsonrpc: '2.0',
         id: ++idInit
       }

@@ -32,7 +32,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in historyData" :key="item.index">
+              <tr v-for="(item, index) in historyData" :key="index">
                 <td><span v-html="item.status" :class="item.status !== 'success' ? 'red' : ''"></span></td>
                 <td><span v-html="item.coin"></span></td>
                 <td><span v-html="item.value"></span></td>
@@ -176,6 +176,9 @@ export default {
     },
     getSendHistory () {
       const that = this
+      if (!that.walletAddress || !that.selectData.value) {
+        return
+      }
       $.ajax({
         url: that.$$.serverURL + '/transfer/receiveHistory',
         datatype: 'json',
@@ -190,6 +193,7 @@ export default {
           if (res.msg === 'success' && res.info.length > 0) {
             for (let i = 0; i < res.info.length; i++) {
               if (res.info[i].coin === that.selectData.value && res.info[i].txhax) {
+                // console.log(12)
                 res.info[i].date = that.$$.timeChange({date: res.info[i].date, type:'yyyy-mm-dd hh:mm'})
                 res.info[i].value = that.$$.thousandBit(res.info[i].value, 'no')
                 // res.info[i].value = res.info[i].value
@@ -199,6 +203,7 @@ export default {
                   res.info[i].status = 'failure'
                 }
                 that.historyData.push(res.info[i])
+                // console.log(that.historyData)
               }
             }
           } else {

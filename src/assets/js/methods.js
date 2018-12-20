@@ -3,12 +3,12 @@ let $$ = {}
 // $$.baseUrl = 'https://rinkeby.etherscan.io/api'
 // $$.baseUrl = 'http://47.92.168.85:40405/'
 // $$.baseUrl = 'http://54.169.254.177:40415'// FSN
-$$.baseUrl = 'http://47.92.255.230:8111'// FSN
+$$.baseUrl = 'http://54.164.7.63:40415'// FSN
 // $$.baseUrl = 'http://54.183.185.30:8018'// 以太坊
 // $$.baseUrl = 'http://47.92.255.230:40415/' //
 
 // $$.serverURL = 'http://localhost:8081'
-$$.serverURL = 'http://47.92.255.230:8081'
+$$.serverURL = 'http://54.164.7.63:8081'
 
 $$.thousandBit = (num, dec = 2) => {
   num = Number(num)
