@@ -273,10 +273,11 @@ export default {
       that.dataPage = {
         nonce: that.web3.eth.getTransactionCount(that.walletAddress),
         gasPrice: Number(data.gasPrice),//Number类型 
-        gasLimit: Number(data.gas) * 100,
+        gasLimit: Number(data.gas) * 6,
         from: that.walletAddress,
         to: '0x00000000000000000000000000000000000000dc',
-        value: Number(that.web3.toWei(data.value, 'ether')),//Number类型
+        // value: Number(that.web3.toWei(data.value, 'ether')),//Number类型
+        value: Number(0),//Number类型
         data: 'LOCKIN:' + data.hash + ':' + that.web3.toWei(data.value, 'ether') + ':' + that.selectData.value,
         sendType: 'LOCKIN',
         coin: that.selectData.value,
@@ -331,8 +332,9 @@ export default {
     getHistory (data) {
       const that = this
       $.ajax({
-        url: 'http://api-rinkeby.etherscan.io/api?module=account&action=txlist&address=' + that.coinAddress,
+        // url: 'http://api-rinkeby.etherscan.io/api?module=account&action=txlist&address=' + that.coinAddress,
         // url: 'http://api-rinkeby.etherscan.io/api?module=account&action=tokentx&address=' + that.coinAddress,
+        url: 'http://api-rinkeby.etherscan.io/api?module=account&action=' + that.selectData.token + '&address=' + that.coinAddress,
         type: 'post',
         datatype: 'json',
         success: function (res) {
@@ -351,7 +353,7 @@ export default {
           if (res.result && res.result.length > 0 && (typeof res.result).toLowerCase() === 'object') {
             for (let i = 0; i < res.result.length; i++) {
               // console.log(res.result[i])
-              if  (res.result[i].to.toLowerCase() === that.coinAddress.toLowerCase()) {
+              if  (res.result[i].to.toLowerCase() === that.coinAddress.toLowerCase() && res.result[i].tokenSymbol === that.selectData.value) {
                 arrObj.push(res.result[i])
               }
             }

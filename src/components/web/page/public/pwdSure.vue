@@ -175,7 +175,7 @@ export default {
         console.log(e)
         that.$$.layerMsg({
           tip: e,
-          time: 2000,
+          time: 5000,
           bgColor: '#ea4b40',
           icon: require('../../../../assets/image/Prompt.svg')
         })
@@ -193,6 +193,16 @@ export default {
       const that = this
       that.setWeb3()
       that.newWeb3.lilo.dcrmReqAddr(that.sendDataPage.from, that.sendDataPage.coin, pwd).then(function (val) {
+        console.log(typeof val)
+        if ((typeof val).toLowerCase() === 'object') {
+          that.$$.layerMsg({
+            tip: val.result,
+            time: 5000,
+            bgColor: '#ea4b40',
+            icon: require('../../../../assets/image/Prompt.svg')
+          })
+          return
+        }
         let rawTx = {
           nonce: that.sendDataPage.nonce,
           gasPrice: that.sendDataPage.gasPrice,
@@ -216,6 +226,12 @@ export default {
         that.web3.eth.sendRawTransaction(serializedTxString, function (err, hash) {
           if (err) {
             console.log(err)
+            that.$$.layerMsg({
+              tip: err,
+              time: 5000,
+              bgColor: '#ea4b40',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
           } else {
             console.log(hash)
             that.sendSignData(that.sendDataPage.coin)
@@ -240,6 +256,7 @@ export default {
           value: Number(that.sendDataPage.value),//Number类型
           data: that.sendDataPage.data
         }
+        // console.log(rawTx)
         let Tx = require('ethereumjs-tx')
         let privateKey = new Buffer(that.fixPkey(that.privateKey), 'hex')
         let tx = new Tx(rawTx)
@@ -247,6 +264,7 @@ export default {
         let serializedTx = tx.serialize()
         let serializedTxString = serializedTx.toString('hex')
         serializedTxString = serializedTxString.indexOf('0x') === 0 ? serializedTxString : ('0x' + serializedTxString)
+        // console.log(serializedTxString)
         that.sendSignData(serializedTxString)
         // console.log(serializedTxString)
       } else {    
@@ -270,19 +288,25 @@ export default {
       that.checkAddress = ''
       that.showPwdBtn = false
     },
-    changePrv () {
+    changePrv (e) {
       let that = this
       if (that.privateKey.length < 6) {
         that.showPwdBtn = false
       } else {
         that.showPwdBtn = true
+        if (e.which === 13) {
+          that.inputPwdBtn()
+        }
       }
     },
-    changePwd () {
+    changePwd (e) {
       let that = this
       if (that.password.length < 6) {
         that.showPwdBtn = false
       } else {
+        if (e.which === 13) {
+          that.inputFileBtn()
+        }
         that.showPwdBtn = true
       }
     },

@@ -9,7 +9,7 @@
 
         <h3 class="mt-20">Amount:</h3>
         <div class="receiveAddress_pwd">
-          <input type="text" class="input-text amount" v-model="sendAmound" id="amountShow" />
+          <input type="text" class="input-text amount keyPressBtn" v-model="sendAmound" id="amountShow" />
           <label v-html="selectData.value" class="currency"></label>
         </div>
 
@@ -193,6 +193,11 @@ export default {
     that.refreshHistory = setInterval(() => {
       that.getSendHistory()
     }, 20000)
+    $('.keyPressBtn').keypress(function (e) {
+      if (e.which === 13) {
+        that.privateSure()
+      }
+    })
   },
   methods: {
     getInitData () {
@@ -246,6 +251,7 @@ export default {
         that.dataPage.data = 'TRANSACTION:' + that.toAddress + ':' + to_value + ':' + that.selectData.value
         that.dataPage.sendType = 'SENDDCRM'
         that.dataPage.to = '0x00000000000000000000000000000000000000dc'
+        that.dataPage.value = '0'
       }
       console.log(that.dataPage)
       that.$router.push('/pwdSend')
@@ -304,9 +310,17 @@ export default {
       const that = this
       that.setWeb3()
       // console.log(that.coinAddress)
+
+      let to_value = that.web3.toWei(that.sendAmound, 'ether')
+      let getGasLimit = that.web3.eth.estimateGas({to: that.toAddress})
+      // console.log(getGasLimit)
+      // .then(function (val) {
+      //   console.log(val)
+      // })
+
       that.nonceNum = that.web3.eth.getTransactionCount(that.walletAddress, 'pending')
-      that.gasPriceNum = that.web3.eth.gasPrice.toString(10) * 3
-      that.gasLimitNum = 21000 * 3
+      that.gasPriceNum = that.web3.eth.gasPrice.toString(10)
+      that.gasLimitNum = getGasLimit * 6
       if (that.selectData.value === 'FSN') {
         that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(that.coinAddress), 'ether')
       } else {
@@ -325,7 +339,7 @@ export default {
         value: Number(that.$$.thousandToNum(that.sendAmound)),
         coin: that.selectData.value,
         to_address: that.toAddress,
-        from_address: that.coinAddress,
+        from_address: that.walletAddress,
         date: new Date(),
         txhax: '',
         status: ''
@@ -385,7 +399,7 @@ export default {
         datatype: 'json',
         type: 'post',
         data: {
-          from_address: that.coinAddress,
+          from_address: that.walletAddress,
           coin: that.selectData.value
         },
         success: function (res) {

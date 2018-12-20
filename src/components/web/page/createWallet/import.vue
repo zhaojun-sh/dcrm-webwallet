@@ -190,20 +190,26 @@ export default {
       that.$store.commit('storeDownload', that.downloadName)
       sessionStorage.setItem('localFromAddress', that.checkAddress)
     },
-    changePrv () {
+    changePrv (e) {
       let that = this
       if (that.privateKey.length < 6) {
         that.showPwdBtn = false
       } else {
         that.showPwdBtn = true
+        if (e.which === 13) {
+          that.inputPwdBtn()
+        }
       }
     },
-    changePwd () {
+    changePwd (e) {
       let that = this
       if (that.password.length < 6) {
         that.showPwdBtn = false
       } else {
         that.showPwdBtn = true
+        if (e.which === 13) {
+          that.inputFileBtn()
+        }
       }
     },
     walletRequirePass (ethjson) {

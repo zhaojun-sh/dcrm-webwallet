@@ -41,8 +41,8 @@
                   <div class="moreInfo_box" @click="MoreContent">
                     <span v-html="item.txhax" :title="item.info" class="ellipsis moreInfo_hax"></span>
                     <ul class="list">
-                      <li  v-html="item.txhax"></li>
-                      <li  v-html="item.from_address"></li>
+                      <li>TXid：{{item.txhax}}</li>
+                      <li>Adress：{{item.from_address}}</li>
                     </ul>
                     <i class="arrow"></i>
                   </div>
@@ -89,6 +89,7 @@ export default {
     selectData (cur, old) {
       const that = this
       that.getInitData()
+      // console.log(that.selectData.address)
     }
   },
   beforeCreate () {
@@ -110,13 +111,15 @@ export default {
     that.refreshHistory = setInterval(() => {
       that.getSendHistory()
     }, 30000)
+    // console.log(that.selectData.address)
   },
   methods: {
     getInitData () {
       const that = this
       that.titleChange(that.selectData.value)
-      that.getSendHistory()
+      // console.log(that.selectData.address)
       that.coinAddress = that.selectData.address
+      that.getSendHistory()
       that.setWeb3()
     },
     pageRefresh () {
@@ -178,7 +181,7 @@ export default {
         datatype: 'json',
         type: 'post',
         data: {
-          to_address: that.coinAddress,
+          to_address: that.walletAddress,
           coin: that.selectData.value
         },
         success: function (res) {
@@ -186,16 +189,18 @@ export default {
           that.historyData = []
           if (res.msg === 'success' && res.info.length > 0) {
             for (let i = 0; i < res.info.length; i++) {
-              res.info[i].date = that.$$.timeChange({date: res.info[i].date, type:'yyyy-mm-dd hh:mm'})
-              res.info[i].value = that.$$.thousandBit(res.info[i].value, 'no')
-              // res.info[i].value = res.info[i].value
-              if (res.info[i].txhax) {
-                res.info[i].status = 'success'
-              } else {
-                res.info[i].status = 'failure'
+              if (res.info[i].coin === that.selectData.value && res.info[i].txhax) {
+                res.info[i].date = that.$$.timeChange({date: res.info[i].date, type:'yyyy-mm-dd hh:mm'})
+                res.info[i].value = that.$$.thousandBit(res.info[i].value, 'no')
+                // res.info[i].value = res.info[i].value
+                if (res.info[i].txhax) {
+                  res.info[i].status = 'success'
+                } else {
+                  res.info[i].status = 'failure'
+                }
+                that.historyData.push(res.info[i])
               }
             }
-            that.historyData = res.info
           } else {
 
           }

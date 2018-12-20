@@ -68,13 +68,14 @@ export default {
           that.setWeb3(that.SetcoinAndUrl[i].url)
             // console.log(123)
           that.newWeb3.lilo.dcrmGetAddr(that.$store.state.addressInfo, coin).then(function (val) {
-            // console.log(val)
+            console.log(val)
             that.coinDataPage = {
               value: coin,
               url: that.SetcoinAndUrl[i].url,
               address: val,
               limit: that.SetcoinAndUrl[i].limit,
-              number: that.SetcoinAndUrl[i].number
+              number: that.SetcoinAndUrl[i].number,
+              token: that.SetcoinAndUrl[i].token
             }
             // console.log(that.coinDataPage)
             that.$store.commit('storeDcrmAddress', val)

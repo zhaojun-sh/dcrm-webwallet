@@ -9,7 +9,7 @@
 
         <h3 class="mt-20">Amount:</h3>
         <div class="receiveAddress_pwd">
-          <input type="text" class="input-text amount" v-model="sendAmound" id="amountShow" @change="changeAmount" />
+          <input type="text" class="input-text amount keyPressBtn" v-model="sendAmound" id="amountShow" @change="changeAmount" />
           <label v-html="selectData.value" class="currency"></label>
         </div>
 
@@ -191,6 +191,11 @@ export default {
     that.walletAddress = that.$store.state.addressInfo
     that.getDatabaseInfo()
     that.sendAmound = that.$$.thousandBit('0')
+    $('.keyPressBtn').keypress(function (e) {
+      if (e.which === 13) {
+        that.privateSure()
+      }
+    })
   },
   methods: {
     getInitData () {
@@ -225,12 +230,13 @@ export default {
       const that = this
       that.nonceNum = that.web3.eth.getTransactionCount(that.walletAddress, 'pending')
       that.gasPriceNum = that.web3.eth.gasPrice.toString(10)
-      that.gasLimitNum = 21000
+      let getGasLimit = that.web3.eth.estimateGas({to: that.toAddress})
+      that.gasLimitNum = getGasLimit * 6
       if (that.selectData.value === 'FSN') {
         that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(sessionStorage.getItem('localFromAddress')), 'ether')
       } else {
         that.newWeb3.lilo.dcrmGetBalance(sessionStorage.getItem('localFromAddress'), that.selectData.value).then(function(res){
-          that.balanceNum = res
+          that.balanceNum = that.web3.fromWei(res, 'ether')
         })
       }
       // that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(that.walletAddress), 'ether')

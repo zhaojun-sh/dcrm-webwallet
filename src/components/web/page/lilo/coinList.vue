@@ -330,6 +330,7 @@ export default {
       that.setWeb3()
       for (let i = 0; i < that.bitIconTypeData.length; i++) {
         that.newWeb3.lilo.dcrmGetAddr(sessionStorage.getItem('localFromAddress'), that.bitIconTypeData[i].currency).then(function(res){
+          // console.log(that.bitIconTypeData[i].currency + ":" + res)
           if (res && (res.indexOf('0x') === 0 || res.indexOf('coin') === -1)) {
             that.bitIconTypeData[i].btnView = true
           }
