@@ -37,7 +37,7 @@
             <tbody>
               <tr v-for="item in historyData" :key="item.index">
                 <td><span v-html="item.statusFsn" :class="item.statusFsn=='failure'?'red':''"></span></td>
-                <td><span v-html="selectData.value"></span></td>
+                <td><span v-html="selectData.coin"></span></td>
                 <td><span v-html="item.value"></span></td>
                 <td><span v-html="item.date"></span></td>
                 <td>
@@ -173,7 +173,9 @@ export default {
   watch: {
     selectData (cur, old) {
       let that = this
-      that.getInitData()
+      if (cur.coin !== old.coin) {
+        that.getInitData()
+      }
     }
   },
   beforeCreate () {
@@ -187,9 +189,11 @@ export default {
   mounted () {
     let that = this
     that.pageRefresh()
-    that.getInitData()
+    if (that.selectData) {
+      that.getInitData()
+    }
     that.walletAddress = that.$store.state.addressInfo
-    that.getDatabaseInfo()
+    // that.getDatabaseInfo()
     that.sendAmound = that.$$.thousandBit('0')
     $('.keyPressBtn').keypress(function (e) {
       if (e.which === 13) {
@@ -200,7 +204,7 @@ export default {
   methods: {
     getInitData () {
       const that = this
-      that.titleChange(that.selectData.value)
+      that.titleChange(that.selectData.coin)
       that.coinAddress = that.selectData.address
       that.getDatabaseInfo()
       that.setWeb3()
@@ -217,27 +221,58 @@ export default {
     },
     setWeb3 () {
       const that = this
-      let Web3 = require('web3')
-      if (typeof web3 !== 'undefined') {
-        Web3 = new Web3(Web3.currentProvider)
-      } else {
-        Web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
-      }
-      that.web3 = Web3
-      that.newWeb3 = new Lilo(that.selectData.url)
+      that.$$.setWeb3(that)
+      // let Web3 = require('web3')
+      // let web3 = new Web3()
+      // // console.log(that.selectData.url)
+      // if (typeof web3 !== 'undefined') {
+      //   // Web3 = new Web3(Web3.currentProvider)
+      //   web3 = new Web3(new Web3.providers.HttpProvider(that.$$.baseUrl))
+      // } else {
+      //   Web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
+      // }
+      // that.web3 = Web3
+      that.newWeb3 = new Lilo(that.$$.baseUrl)
     },
     setBaseSendData () {
       const that = this
-      that.nonceNum = that.web3.eth.getTransactionCount(that.walletAddress, 'pending')
-      that.gasPriceNum = that.web3.eth.gasPrice.toString(10)
-      // let getGasLimit = that.web3.eth.estimateGas({to: that.toAddress})
+      try {
+        that.nonceNum = that.web3.eth.getTransactionCount(that.walletAddress, 'pending')
+      } catch (error) {
+        that.nonceNum = that.$$.getWeb3({
+          method: 'eth_getTransactionCount',
+          params: [that.walletAddress, 'pending']
+        }).result
+      }
+
+      try {
+        that.gasPriceNum = that.web3.eth.gasPrice.toString(10)
+      } catch (error) {
+        that.gasPriceNum = that.$$.getWeb3({
+          method: 'eth_gasPrice',
+          params: []
+        }).result.toString(10)
+      }
+
       let getGasLimit
       try {
         getGasLimit = that.web3.eth.estimateGas({to: that.toAddress})
       } catch (error) {
-        getGasLimit = error
-        // throw error
+        try {
+          getGasLimit = that.$$.getWeb3({
+            method: 'eth_estimateGas',
+            params: [{to: that.toAddress}]
+          })
+          if (getGasLimit.error) {
+            getGasLimit = 'Error'
+          } else {
+            getGasLimit = getGasLimit.result
+          }
+        } catch (error) {
+          getGasLimit = error
+        }
       }
+
       // console.log(getGasLimit)
       if (getGasLimit.toString().indexOf('Error') !== -1) {
         that.$$.layerMsg({
@@ -249,16 +284,32 @@ export default {
         throw getGasLimit
       }
       that.gasLimitNum = getGasLimit * 6
-      if (that.selectData.value === 'FSN') {
-        that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(sessionStorage.getItem('localFromAddress')), 'ether')
+      if (that.selectData.coin === 'FSN') {
+        try {
+          that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(sessionStorage.getItem('localFromAddress')), 'ether')
+        } catch (error) {
+          that.balanceNum = that.$$.getWeb3({
+            method: 'eth_getBalance',
+            params: [sessionStorage.getItem('localFromAddress'), 'latest']
+          }).result
+          that.balanceNum = that.web3.fromWei(that.balanceNum, 'ether')
+        }
       } else {
-        that.newWeb3.lilo.dcrmGetBalance(sessionStorage.getItem('localFromAddress'), that.selectData.value).then(function(res){
+        that.newWeb3.lilo.dcrmGetBalance(sessionStorage.getItem('localFromAddress'), that.selectData.coin).then(function(res){
           that.balanceNum = that.web3.fromWei(res, 'ether')
         })
       }
       // that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(that.walletAddress), 'ether')
       that.maxFee = that.web3.fromWei(Number(that.gasLimitNum) * Number(that.gasPriceNum), 'ether')
-      that.netWorkInfo = that.web3.version.node
+      // that.netWorkInfo = that.web3.version.node
+      try {
+        that.netWorkInfo = that.web3.version.node
+      } catch (error) {
+        that.netWorkInfo = that.$$.getWeb3({
+          method: 'web3_clientVersion',
+          params: []
+        }).result
+      }
     },
     getSignData (data) {
       const that = this
@@ -282,7 +333,7 @@ export default {
       const that = this
       if (!that.toAddress) {
         that.$$.layerMsg({
-          tip: that.selectData.value + ' Receiving Address is not null.',
+          tip: that.selectData.coin + ' Receiving Address is not null.',
           time: 2000,
           bgColor: '#ea4b40',
           icon: require('../../../../assets/image/Prompt.svg')
@@ -304,7 +355,7 @@ export default {
       that.setBaseSendData()
       let to_value = that.web3.toWei(that.sendAmound, 'ether')
       // console.log(that.newWeb3)
-      that.newWeb3.lilo.dcrmGetAddr(that.walletAddress, that.selectData.value).then(function (val) {
+      that.newWeb3.lilo.dcrmGetAddr(that.walletAddress, that.selectData.coin).then(function (val) {
         // console.log(val)
         that.dataPage = {
           nonce: that.nonceNum,
@@ -313,10 +364,10 @@ export default {
           from: that.walletAddress,
           to: '0x00000000000000000000000000000000000000dc',
           value: Number(0),//Number类型
-          data: 'LOCKOUT:' + that.toAddress + ':' + to_value + ':' + that.selectData.value,
+          data: 'LOCKOUT:' + that.toAddress + ':' + to_value + ':' + that.selectData.coin,
           sendType: 'LOCKOUT',
-          coin: that.selectData.value,
-          url: that.selectData.url,
+          coin: that.selectData.coin,
+          url: that.$$.baseUrl,
           to_value: to_value,
           to_address: that.toAddress,
           to_from: that.coinAddress
@@ -337,8 +388,9 @@ export default {
     },
     pageRefresh () {
       const that = this
+      // console.log(that.selectData)
       if (that.selectData) {
-        that.titleChange(that.selectData.value)
+        that.titleChange(that.selectData.coin)
       }
       if (location.href.indexOf('lockOut') !== -1) {
         $('.transferBtn_btn').find('a:eq(0)').removeClass('router-link-active')
@@ -360,34 +412,63 @@ export default {
         value: that.dataPage.to_value,
         statusFsn: '',
         coin: that.dataPage.coin,
-        data: that.dataPage.data
+        data: that.dataPage.data,
+        tokenSymbol: that.dataPage.coin
       }
-      that.web3.eth.sendRawTransaction(that.serializedTx, function(err, hash) {
-        if (!err) {
-          dataBase.fsnhash = hash
-          dataBase.statusFsn = 'success'
-          $('#sendInfo').modal('hide')
-          that.$$.layerMsg({
-            tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + hash,
-            time: 5000,
-            bgColor: '#5dba5a',
-            icon: require('../../../../assets/image/Prompt.svg')
-          })
-        } else {
-          console.log(err)
-          dataBase.fsnhash = ''
-          dataBase.statusFsn = 'failure'
-          that.$$.layerMsg({
-            tip: err,
-            time: 4000,
-            bgColor: '#ea4b40',
-            icon: require('../../../../assets/image/Prompt.svg')
-          })
-        }
-        // console.log(12431234)
-        that.createDatabaseInfo(dataBase)
-        that.$$.loadingEnd()
-      })
+      try {
+        that.web3.eth.sendRawTransaction(that.serializedTx, function(err, hash) {
+          if (!err) {
+            dataBase.fsnhash = hash
+            dataBase.statusFsn = 'success'
+            $('#sendInfo').modal('hide')
+            that.$$.layerMsg({
+              tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + hash,
+              time: 5000,
+              bgColor: '#5dba5a',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+          } else {
+            console.log(err)
+            dataBase.fsnhash = ''
+            dataBase.statusFsn = 'failure'
+            that.$$.layerMsg({
+              tip: err,
+              time: 4000,
+              bgColor: '#ea4b40',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+          }
+          // console.log(12431234)
+          that.createDatabaseInfo(dataBase)
+          that.$$.loadingEnd()
+        })
+      } catch (error) {
+        that.$$.web3({
+          method: 'eth_sendRawTransaction',
+          params: [that.serializedTx]
+        }).then(function (res) {
+          if (res.error) {
+            that.$$.layerMsg({
+              tip: res.error,
+              time: 4000,
+              bgColor: '#ea4b40',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+          } else {
+            dataBase.txhax = res.result
+            dataBase.status = 'success'
+            $('#sendInfo').modal('hide')
+            that.$$.layerMsg({
+              tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + res.result,
+              time: 5000,
+              bgColor: '#5dba5a',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+          }
+          that.createDatabaseInfo(dataBase)
+          that.$$.loadingEnd()
+        })
+      }
     },
     createDatabaseInfo (data) {
       const that = this
@@ -397,7 +478,7 @@ export default {
         datatype: 'json',
         data: data,
         success: function (res) {
-          console.log(res)
+          // console.log(res)
           that.getDatabaseInfo()
         }
       })
@@ -409,14 +490,17 @@ export default {
         url: that.$$.serverURL + '/lilo/lockOutHistory',
         type: 'post',
         datatype: 'json',
-        data: {from: that.coinAddress, coin: that.selectData.value},
+        data: {from: that.coinAddress, coin: that.selectData.coin},
         success: function (res) {
-          console.log(res)
+          // console.log(res)
           that.historyData = []
           if (res.msg === 'success') {
             for (let i = 0; i < res.info.length; i++) {
               res.info[i].date = that.$$.timeChange({date: res.info[i].date, type:'yyyy-mm-dd hh:mm'})
               res.info[i].value = that.web3.fromWei(res.info[i].value, 'ether')
+              if (!res.info[i].fsnhash) {
+                res.info[i].statusFsn = 'failure'
+              }
               that.historyData.push(res.info[i])
             }
           }

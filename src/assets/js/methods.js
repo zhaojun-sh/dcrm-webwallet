@@ -1,4 +1,6 @@
 let $$ = {}
+
+let idNum = 0
 // $$.baseUrl = 'https://mainnet.infura.io/'
 // $$.baseUrl = 'https://rinkeby.etherscan.io/api'
 // $$.baseUrl = 'http://47.92.168.85:40405/'
@@ -8,7 +10,7 @@ $$.baseUrl = 'http://54.164.7.63:40415'// FSN
 // $$.baseUrl = 'http://47.92.255.230:40415/' //
 
 // $$.serverURL = 'http://localhost:8081'
-$$.serverURL = 'http://54.164.7.63:8081'
+$$.serverURL = 'http://54.164.7.63:8087'
 
 $$.thousandBit = (num, dec = 2) => {
   num = Number(num)
@@ -172,7 +174,7 @@ $$.showSearchTop = () => {
 }
 
 $$.getBlob = (mime, str) => {
-  var _typeof = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol' ? function (obj) { 
+  var _typeof = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol' ? function (obj) {
     return typeof obj
   } : function (obj) {
     return obj && typeof Symbol === 'function' && obj.constructor === Symbol && obj !== Symbol.prototype ? 'symbol' : typeof obj
@@ -265,6 +267,83 @@ $$.limitCoin = function (num, limit, type) {
     }
   }
   return callback
+}
+
+$$.web3 = function (data) {
+  let that = this
+  // console.log(data)
+  let dataInit = {
+    id: ++idNum,
+    jsonrpc: '2.0',
+    method: data.method,
+    params: data.params
+  }
+  // console.log(dataInit)
+  let callback = new Promise(function (resolve) {
+    $.ajax({
+      url: that.baseUrl,
+      type: 'post',
+      datatype: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify(dataInit),
+      success: function (res) {
+        resolve(res)
+      },
+      error: function (res) {
+        resolve(res)
+      }
+    })
+  })
+  return callback
+  // console.log($('body'))
+}
+
+$$.getWeb3 = function (data) {
+  let that = this
+  // console.log(data)
+  let dataInit = {
+    id: ++idNum,
+    jsonrpc: '2.0',
+    method: data.method,
+    params: data.params
+  }
+  // console.log(dataInit)
+  let callback = function () {
+    let callbackData
+    $.ajax({
+      url: that.baseUrl,
+      type: 'post',
+      datatype: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify(dataInit),
+      async: false,
+      success: function (res) {
+        callbackData = res
+        // console.log(res)
+      },
+      error: function (res) {
+        callbackData = res
+      }
+    })
+    return callbackData
+  }
+  return callback()
+}
+
+// import Lilo from 'lilo'
+// let Lilo = require('Lilo')
+$$.setWeb3 = function (vueWeb3) {
+  let that = this
+  let Web3 = require('web3')
+  let web3
+  try {
+    web3 = new Web3(new Web3.providers.HttpProvider(that.baseUrl))
+  } catch (error) {
+    web3 = new Web3()
+    console.log(error)
+  }
+  vueWeb3.web3 = web3
+  // vueWeb3.newWeb3 = new Lilo(that.baseUrl)
 }
 
 export default $$

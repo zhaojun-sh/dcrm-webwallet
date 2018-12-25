@@ -32,7 +32,7 @@
             <tbody>
               <tr v-for="item in historyData" :key="item.index">
                 <td><span v-html="item.statusFsn" :class="item.statusFsn=='New'?'red':''"></span></td>
-                <td><span v-html="selectData.value"></span></td>
+                <td><span v-html="selectData.coin"></span></td>
                 <td><span v-html="item.value2"></span></td>
                 <td><span v-html="item.date"></span></td>
                 <td>
@@ -174,7 +174,9 @@ export default {
   watch: {
     selectData (cur, old) {
       const that = this
-      that.getInitData()
+      if (cur.coin !== old.coin) {
+        that.getInitData()
+      }
     }
   },
   beforeCreate () {
@@ -189,13 +191,20 @@ export default {
     const that = this
     that.pageRefresh()
     that.walletAddress = that.$store.state.addressInfo
-    // that.getDcrmAddress()
-    that.getInitData()
+    // $('#selectValData').change(function () {
+    //   that.getInitData()
+    // })
+    // $('#selectValData').change()
+    // that.getInitData()
+    if (that.selectData) {
+      that.getInitData()
+    }
   },
   methods: {
     getInitData () {
       const that = this
-      that.titleChange(that.selectData.value)
+      // console.log(that.selectData)
+      that.titleChange(that.selectData.coin)
       that.setWeb3()
       that.dcrmAddress = that.coinAddress = that.selectData.address
       that.getDatabaseInfo()
@@ -212,15 +221,19 @@ export default {
     },
     setWeb3 () {
       const that = this
-      let Web3 = require('web3')
-      // console.log(that.selectData.value)
-      if (typeof web3 !== 'undefined') {
-        Web3 = new Web3(Web3.currentProvider)
-      } else {
-        Web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
-      }
-      that.web3 = Web3
-      that.newWeb3 = new Lilo(that.selectData.url)
+      that.$$.setWeb3(that)
+      // let Web3 = require('web3')
+      // let web3 = new Web3()
+      // // console.log(that.selectData.url)
+      // if (typeof web3 !== 'undefined') {
+      //   // Web3 = new Web3(Web3.currentProvider)
+      //   web3 = new Web3(new Web3.providers.HttpProvider(that.$$.baseUrl))
+      // } else {
+      //   web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
+      // }
+      // that.web3 = web3
+      // console.log(that.$$.baseUrl)
+      that.newWeb3 = new Lilo(that.$$.baseUrl)
     },
     getSignData (data) {
       const that = this
@@ -243,27 +256,54 @@ export default {
     sendAmoundInfo () {
       const that = this
       that.setWeb3()
-      that.web3.eth.sendRawTransaction(that.serializedTx, function(err, hash) {
-        if (!err) {
-          that.$$.layerMsg({
-            tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + hash,
-            time: 5000,
-            bgColor: '#5dba5a',
-            icon: require('../../../../assets/image/Prompt.svg')
-          })
-          that.updateDatabaseInfo({
-            hash: that.dataPage.hash,
-            fsnhash: hash
-          })
-        } else {
-          that.$$.layerMsg({
-            tip: err,
-            time: 4000,
-            bgColor: '#ea4b40',
-            icon: require('../../../../assets/image/Prompt.svg')
-          })
-        }
-      })
+      try {
+        that.web3.eth.sendRawTransaction(that.serializedTx, function(err, hash) {
+          if (!err) {
+            that.$$.layerMsg({
+              tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + hash,
+              time: 5000,
+              bgColor: '#5dba5a',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+            that.updateDatabaseInfo({
+              hash: that.dataPage.hash,
+              fsnhash: hash
+            })
+          } else {
+            that.$$.layerMsg({
+              tip: err,
+              time: 4000,
+              bgColor: '#ea4b40',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+          }
+        })
+      } catch (error) {
+        that.$$.web3({
+          method: 'eth_sendRawTransaction',
+          params: [that.serializedTx]
+        }).then(function (res) {
+          if (res.error) {
+            that.$$.layerMsg({
+              tip: res.error,
+              time: 4000,
+              bgColor: '#ea4b40',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+          } else {
+            that.updateDatabaseInfo({
+              hash: that.dataPage.hash,
+              fsnhash: hash
+            })
+            that.$$.layerMsg({
+              tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + res.result,
+              time: 5000,
+              bgColor: '#5dba5a',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+          }
+        })
+      }
     },
     privateSure (data) {
       const that = this
@@ -278,10 +318,9 @@ export default {
         to: '0x00000000000000000000000000000000000000dc',
         // value: Number(that.web3.toWei(data.value, 'ether')),//Number类型
         value: Number(0),//Number类型
-        data: 'LOCKIN:' + data.hash + ':' + that.web3.toWei(data.value, 'ether') + ':' + that.selectData.value,
+        data: 'LOCKIN:' + data.hash + ':' + that.web3.toWei(data.value, 'ether') + ':' + that.selectData.coin,
         sendType: 'LOCKIN',
-        coin: that.selectData.value,
-        url: that.selectData.url,
+        coin: that.selectData.coin,
         hash: data.hash
       }
       console.log(that.dataPage)
@@ -313,21 +352,11 @@ export default {
     pageRefresh () {
       const that = this
       if (that.selectData) {
-        that.titleChange(that.selectData.value)
+        that.titleChange(that.selectData.coin)
       }
       if (location.href.indexOf('lockOut') === -1) {
         $('.transferBtn_btn').find('a:eq(0)').addClass('router-link-active')
       }
-    },
-    getDcrmAddress () {
-      const that = this
-      that.setWeb3()
-      // console.log(that.newWeb3)
-      that.newWeb3.lilo.dcrmGetAddr(that.$store.state.addressInfo, that.selectData.value).then(function (val) {
-        that.dcrmAddress = val
-        // console.log(val)
-        that.getDatabaseInfo()
-      })
     },
     getHistory (data) {
       const that = this
@@ -338,7 +367,7 @@ export default {
         type: 'post',
         datatype: 'json',
         success: function (res) {
-          console.log(res)
+          // console.log(res)
           that.setWeb3()
           that.historyData = []
           let arrObj = []
@@ -353,16 +382,16 @@ export default {
           if (res.result && res.result.length > 0 && (typeof res.result).toLowerCase() === 'object') {
             for (let i = 0; i < res.result.length; i++) {
               // console.log(res.result[i])
-              if (that.selectData.value === 'ETH') {
+              if (that.selectData.coin === 'ETH') {
                  arrObj.push(res.result[i])
               } else {
-                if  (res.result[i].to.toLowerCase() === that.coinAddress.toLowerCase() && res.result[i].tokenSymbol === that.selectData.value) {
+                if  (res.result[i].to.toLowerCase() === that.coinAddress.toLowerCase() && res.result[i].tokenSymbol === that.selectData.coin) {
                   arrObj.push(res.result[i])
                 }
               }
             }
           }
-          console.log(arrObj)
+          // console.log(arrObj)
           for (let i = 0; i < arrObj.length; i++) {
             if (!objArr[arrObj[i].hash]) {
               newArr.push(arrObj[i])
@@ -378,9 +407,11 @@ export default {
               newArr[i].statusFsn = 'New'
               newArr[i].date = that.$$.timeChange({date: Number(newArr[i].timeStamp) * 1000, type:'yyyy-mm-dd hh:mm'})
             }
+            newArr[i].date = that.$$.timeChange({date: Number(newArr[i].timeStamp) * 1000, type:'yyyy-mm-dd hh:mm'})
             // console.log(123)
             // console.log(objArr[newArr[i].hash])
             if (newArr[i].dataType !== 'DATABASE') {
+              newArr[i].coin = newArr[i].tokenSymbol ? newArr[i].tokenSymbol : that.selectData.coin
               that.createDatabaseInfo(newArr[i])
             }
             if (!newArr[i].fsnhash && newArr[i].hash.indexOf('0xx') === 0) {
@@ -416,13 +447,13 @@ export default {
         datatype: 'json',
         data: data,
         success: function (res) {
-          console.log(res)
+          // console.log(res)
         }
       })
     },
     getDatabaseInfo () {
       const that = this
-      console.log(that.coinAddress)
+      // console.log(that.coinAddress)
       if (!that.coinAddress) {
         return
       }
@@ -432,7 +463,7 @@ export default {
         datatype: 'json',
         data: {to: that.coinAddress},
         success: function (res) {
-          console.log(res)
+          // console.log(res)
           for (let i = 0; i < res.info.length; i++) {
             if (res.info[i].hash === '' || res.info[i].hash === undefined) {
               res.info[i].hash = '0xx' + i
@@ -455,7 +486,7 @@ export default {
         datatype: 'json',
         data: {hash: data.hash, fsnhash: data.fsnhash, statusFsn: 'Success'},
         success: function (res) {
-          console.log(res)
+          // console.log(res)
           that.getDatabaseInfo()
         },
         error: function (res) {

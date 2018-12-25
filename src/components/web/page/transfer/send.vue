@@ -146,7 +146,6 @@
 <script>
 // let Web3 = require('web3')
 import Lilo from '../../../../assets/js/lilo'
-import { throws } from 'assert';
 export default {
   name: 'receive',
   props: ['selectData'],
@@ -204,7 +203,7 @@ export default {
     getInitData () {
       const that = this
       that.coinAddress = that.selectData.address
-      that.titleChange(that.selectData.value)
+      that.titleChange(that.selectData.coin)
       that.getSendHistory()
     },
     modalClick () {
@@ -219,7 +218,7 @@ export default {
       const that = this
       if (!that.toAddress) {
         that.$$.layerMsg({
-          tip: that.selectData.value + ' Receiving Address is not null.',
+          tip: that.selectData.coin + ' Receiving Address is not null.',
           time: 2000,
           bgColor: '#ea4b40',
           icon: require('../../../../assets/image/Prompt.svg')
@@ -245,11 +244,11 @@ export default {
         from: that.walletAddress,
         to: that.toAddress,
         value: Number(to_value),//Number类型,
-        url: that.selectData.url,
-        coin: that.selectData.value
+        url: that.$$.baseUrl,
+        coin: that.selectData.coin
       }
-      if (that.selectData.value !== 'FSN') {
-        that.dataPage.data = 'TRANSACTION:' + that.toAddress + ':' + to_value + ':' + that.selectData.value
+      if (that.selectData.coin !== 'FSN') {
+        that.dataPage.data = 'TRANSACTION:' + that.toAddress + ':' + to_value + ':' + that.selectData.coin
         that.dataPage.sendType = 'SENDDCRM'
         that.dataPage.to = '0x00000000000000000000000000000000000000dc'
         that.dataPage.value = '0'
@@ -297,15 +296,24 @@ export default {
     },
     setWeb3 () {
       const that = this
-      let Web3 = require('web3')
+      that.$$.setWeb3(that)
+      // let Web3 = require('web3')
+      // let web3
+      // try {
+      //   web3 = new Web3(new Web3.providers.HttpProvider(that.$$.baseUrl))
+      // } catch (error) {
+      //   web3 = new Web3()
+      //   console.log(error)
+      // }
       // console.log(that.selectData.url)
-      if (typeof web3 !== 'undefined') {
-        Web3 = new Web3(Web3.currentProvider)
-      } else {
-        Web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
-      }
-      that.web3 = Web3
-      that.newWeb3 = new Lilo(that.selectData.url)
+      // if (typeof web3 !== 'undefined') {
+      //   // Web3 = new Web3(Web3.currentProvider)
+      //   web3 = new Web3(new Web3.providers.HttpProvider(that.$$.baseUrl))
+      // } else {
+      //   Web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
+      // }
+      // that.web3 = web3
+      that.newWeb3 = new Lilo(that.$$.baseUrl)
     },
     setBaseSendData () {
       const that = this
@@ -317,11 +325,23 @@ export default {
       try {
         getGasLimit = that.web3.eth.estimateGas({to: that.toAddress})
       } catch (error) {
-        getGasLimit = error
+        try {
+          getGasLimit = that.$$.getWeb3({
+            method: 'eth_estimateGas',
+            params: [{to: that.toAddress}]
+          })
+          if (getGasLimit.error) {
+            getGasLimit = 'Error'
+          } else {
+            getGasLimit = getGasLimit.result
+          }
+        } catch (error) {
+          getGasLimit = error
+        }
         // throw error
       }
       // console.log(getGasLimit)
-      if (getGasLimit.toString().indexOf('Error') !== -1) {
+      if (getGasLimit && getGasLimit.toString().indexOf('Error') !== -1) {
         that.$$.layerMsg({
           tip: getGasLimit,
           time: 4000,
@@ -331,18 +351,51 @@ export default {
         throw getGasLimit
       }
 
-      that.nonceNum = that.web3.eth.getTransactionCount(that.walletAddress, 'pending')
-      that.gasPriceNum = that.web3.eth.gasPrice.toString(10)
+      try {
+        that.nonceNum = that.web3.eth.getTransactionCount(that.walletAddress, 'pending')
+      } catch (error) {
+        that.nonceNum = that.$$.getWeb3({
+          method: 'eth_getTransactionCount',
+          params: [that.walletAddress, 'pending']
+        }).result
+      }
+
+      try {
+        that.gasPriceNum = that.web3.eth.gasPrice.toString(10)
+      } catch (error) {
+        that.gasPriceNum = that.$$.getWeb3({
+          method: 'eth_gasPrice',
+          params: []
+        }).result.toString(10)
+      }
+
       that.gasLimitNum = getGasLimit * 6
-      if (that.selectData.value === 'FSN') {
-        that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(that.coinAddress), 'ether')
+      if (that.selectData.coin === 'FSN') {
+        try {
+          that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(that.coinAddress), 'ether')
+          console.log(that.balanceNum)
+        } catch (error) {
+          that.balanceNum = that.$$.getWeb3({
+            method: 'eth_getBalance',
+            params: [that.coinAddress, 'latest']
+          }).result
+          that.balanceNum = that.web3.fromWei(that.balanceNum, 'ether')
+        }
       } else {
-        that.newWeb3.lilo.dcrmGetBalance(sessionStorage.getItem('localFromAddress'), that.selectData.value).then(function(res){
+        that.newWeb3.lilo.dcrmGetBalance(sessionStorage.getItem('localFromAddress'), that.selectData.coin).then(function(res){
           that.balanceNum = that.web3.fromWei(res, 'ether')
+          console.log(that.balanceNum)
         })
       }
       that.maxFee = that.web3.fromWei(Number(that.gasLimitNum) * Number(that.gasPriceNum), 'ether')
-      that.netWorkInfo = that.web3.version.node
+      try {
+        that.netWorkInfo = that.web3.version.node
+      } catch (error) {
+        that.netWorkInfo = that.$$.getWeb3({
+          method: 'web3_clientVersion',
+          params: []
+        }).result
+      }
       // console.log(that.balanceNum)
     },
     sendAmoundInfo () {
@@ -350,37 +403,64 @@ export default {
       that.setWeb3()
       let dataBase = {
         value: Number(that.$$.thousandToNum(that.sendAmound)),
-        coin: that.selectData.value,
+        coin: that.selectData.coin,
         to_address: that.toAddress,
         from_address: that.walletAddress,
         date: new Date(),
         txhax: '',
         status: ''
       }
-      that.web3.eth.sendRawTransaction(that.serializedTx, function(err, hash) {
-        if (!err) {
-          dataBase.txhax = hash
-          dataBase.status = 'success'
-          $('#sendInfo').modal('hide')
-          that.$$.layerMsg({
-            tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + hash,
-            time: 5000,
-            bgColor: '#5dba5a',
-            icon: require('../../../../assets/image/Prompt.svg')
-          })
-        } else {
-          console.log(err)
-          dataBase.txhax = ''
-          dataBase.status = 'failure'
-          that.$$.layerMsg({
-            tip: err,
-            time: 4000,
-            bgColor: '#ea4b40',
-            icon: require('../../../../assets/image/Prompt.svg')
-          })
-        }
-        that.sendDatabase(dataBase)
-      })
+      try {
+        that.web3.eth.sendRawTransaction(that.serializedTx, function(err, hash) {
+          if (!err) {
+            dataBase.txhax = hash
+            dataBase.status = 'success'
+            $('#sendInfo').modal('hide')
+            that.$$.layerMsg({
+              tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + hash,
+              time: 5000,
+              bgColor: '#5dba5a',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+          } else {
+            console.log(err)
+            dataBase.txhax = ''
+            dataBase.status = 'failure'
+            that.$$.layerMsg({
+              tip: err,
+              time: 4000,
+              bgColor: '#ea4b40',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+          }
+          that.sendDatabase(dataBase)
+        })
+      } catch (error) {
+        that.$$.web3({
+          method: 'eth_sendRawTransaction',
+          params: [that.serializedTx]
+        }).then(function (res) {
+          if (res.error) {
+            that.$$.layerMsg({
+              tip: res.error,
+              time: 4000,
+              bgColor: '#ea4b40',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+          } else {
+            dataBase.txhax = res.result
+            dataBase.status = 'success'
+            $('#sendInfo').modal('hide')
+            that.$$.layerMsg({
+              tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + res.result,
+              time: 5000,
+              bgColor: '#5dba5a',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+          }
+          that.sendDatabase(dataBase)
+        })
+      }
     },
     sendDatabase (data) {
       const that = this
@@ -407,13 +487,16 @@ export default {
     },
     getSendHistory () {
       const that = this
+      if (!that.walletAddress || !that.selectData.coin) {
+        return
+      }
       $.ajax({
         url: that.$$.serverURL + '/transfer/history',
         datatype: 'json',
         type: 'post',
         data: {
           from_address: that.walletAddress,
-          coin: that.selectData.value
+          coin: that.selectData.coin
         },
         success: function (res) {
           // console.log(res)

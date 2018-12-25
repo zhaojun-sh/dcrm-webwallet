@@ -20,6 +20,96 @@ const store = new Vuex.Store({
       {url: 'http://54.164.7.63:40415', value: 'HT', limit: 0, number: 'FLOAT', token: 'tokentx'},
       {url: 'http://54.164.7.63:40415', value: 'BNT', limit: 0, number: 'FLOAT', token: 'tokentx'}
     ],
+    coinInfo: [{
+      coin: 'FSN',
+      coinAll: 'Fusion',
+      balance: 0,
+      balanceDoller: 0,
+      freeze: 0,
+      flag: true,
+      logo: require('../assets/image/fsn.svg'),
+      limit: 0.001,
+      number: 'FLOAT',
+      token: ''
+    }, {
+      coin: 'BTC',
+      coinAll: 'Bitcoin',
+      balance: 0,
+      balanceDoller: 0,
+      freeze: 0,
+      flag: false,
+      logo: require('../assets/image/btc.svg'),
+      limit: 0,
+      number: 'FLOAT',
+      token: 'tokentx'
+    }, {
+      coin: 'ETH',
+      coinAll: 'Ethereum',
+      balance: 0,
+      balanceDoller: 0,
+      freeze: 0,
+      flag: false,
+      logo: require('../assets/image/eth.svg'),
+      limit: 0.001,
+      number: 'FLOAT',
+      token: 'txlist'
+    }, {
+      coin: 'BNB',
+      coinAll: 'Binance',
+      balance: 0,
+      balanceDoller: 0,
+      freeze: 0,
+      flag: false,
+      logo: require('../assets/image/bnb.svg'),
+      limit: 0,
+      number: 'FLOAT',
+      token: 'tokentx'
+    }, {
+      coin: 'MKR',
+      coinAll: 'Maker',
+      balance: 0,
+      balanceDoller: 0,
+      freeze: 0,
+      flag: false,
+      logo: require('../assets/image/mkr.svg'),
+      limit: 0,
+      number: 'FLOAT',
+      token: 'tokentx'
+    }, {
+      coin: 'GUSD',
+      coinAll: 'Gemini Dollar',
+      balance: 0,
+      balanceDoller: 0,
+      freeze: 0,
+      flag: false,
+      logo: require('../assets/image/gusd.svg'),
+      limit: 0,
+      number: 'FLOAT',
+      token: 'tokentx'
+    }, {
+      coin: 'HT',
+      coinAll: 'HuobiToken',
+      balance: 0,
+      balanceDoller: 0,
+      freeze: 0,
+      flag: false,
+      logo: require('../assets/image/ht.svg'),
+      limit: 0,
+      number: 'FLOAT',
+      token: 'tokentx'
+    }, {
+      coin: 'BNT',
+      coinAll: 'Bancor',
+      balance: 0,
+      balanceDoller: 0,
+      freeze: 0,
+      flag: false,
+      logo: require('../assets/image/bnt.svg'),
+      limit: 0,
+      number: 'FLOAT',
+      token: 'tokentx'
+    }],
+    walletLoadFlag: true,
     dcrmAddress: ''
   },
   mutations: {
@@ -40,6 +130,19 @@ const store = new Vuex.Store({
     },
     storeDcrmAddress (state, address) {
       state.dcrmAddress = address
+    },
+    storeCoinInfo (state, data) {
+      // console.log(data)
+      for (let i = 0; i < state.coinInfo.length; i++) {
+        if (data.coin === state.coinInfo[i].coin) {
+          state.coinInfo[i].balance = data.balance
+          state.coinInfo[i].balanceDoller = data.balanceDoller
+          state.coinInfo[i].flag = data.flag
+        }
+      }
+    },
+    storeWalletLoadFlag (state, data) {
+      state.walletLoadFlag = data
     }
   }
 })

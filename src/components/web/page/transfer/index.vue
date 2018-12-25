@@ -6,7 +6,7 @@
         <div class="logo"><img src="../../../../assets/image/Fusion.svg"></div>
         <div class="arrow flex-c"><i class="i"></i></div>
         <select class="select" v-model="selectVal">
-          <option v-for="(item, index) in SetcoinAndUrl" :key="index" v-html="item.value" :value="item.value" :data-coinUrl="item.url"></option>
+          <option v-for="(item, index) in SetcoinAndUrl" :key="index" v-html="item.coin" :value="item.coin"></option>
         </select>
       </div>
     </div>
@@ -36,7 +36,7 @@ export default {
     return {
       // selectData: '',
       selectVal: '',
-      SetcoinAndUrl: this.$store.state.coinAndUrl,
+      SetcoinAndUrl: this.$store.state.coinInfo,
       coinDataPage: {},
       web3: '',
       newWeb3: ''
@@ -45,7 +45,7 @@ export default {
   watch: {
     selectVal (cur, oold) {
       const that = this
-      console.log(cur)
+      // console.log(cur)
       that.getCoinInfo(cur)
     }
   },
@@ -58,21 +58,19 @@ export default {
     getCoinInfo (coin) {
       const that = this
       for (let i = 0; i < that.SetcoinAndUrl.length; i++) {
-        if (that.SetcoinAndUrl[i].value === 'FSN') {
+        if (that.SetcoinAndUrl[i].coin === 'FSN') {
           that.coinDataPage = {
-            value: coin,
-            url: that.SetcoinAndUrl[i].url,
+            coin: coin,
             address: that.$store.state.addressInfo,
             limit: that.SetcoinAndUrl[i].limit,
             number: that.SetcoinAndUrl[i].number
           }
         } else {
-          if (coin === that.SetcoinAndUrl[i].value) {
-            that.setWeb3(that.SetcoinAndUrl[i].url)
+          if (coin === that.SetcoinAndUrl[i].coin) {
+            that.setWeb3()
             that.newWeb3.lilo.dcrmGetAddr(that.$store.state.addressInfo, coin).then(function (val) {
               that.coinDataPage = {
-                value: coin,
-                url: that.SetcoinAndUrl[i].url,
+                coin: coin,
                 address: val,
                 limit: that.SetcoinAndUrl[i].limit,
                 number: that.SetcoinAndUrl[i].number
@@ -84,17 +82,10 @@ export default {
         }
       }
     },
-    setWeb3 (url) {
+    setWeb3 () {
       const that = this
-      let Web3 = require('web3')
-      
-      if (typeof web3 !== 'undefined') {
-        Web3 = new Web3(Web3.currentProvider)
-      } else {
-        Web3 = new Web3(new Web3.providers.HttpProvider(url))
-      }
-      that.web3 = Web3
-      that.newWeb3 = new Lilo(url)
+      that.$$.setWeb3(that)
+      that.newWeb3 = new Lilo(that.$$.baseUrl)
     }
   }
 }

@@ -120,8 +120,8 @@ export default {
     })
     $('#fileUpload').change(function () {
       let reader = new FileReader()
-      let _this = this
       that.password = ''
+      let _this = this
       reader.onload = function (onLoadEvent) {
         that.fileData = onLoadEvent.currentTarget.result
         // that.downloadName = $(_this)[0].files[0].name
@@ -130,14 +130,13 @@ export default {
       }
       reader.readAsText($(this)[0].files[0])
     })
-    that.$store.commit('storeWalletLoadFlag', true)
   },
   methods: {
     goBackupWallet () {
       let that = this
       that.setStore()
       that.sendInfoToParent()
-      that.$router.push('/MyAssets')
+      that.$router.push('/backupWallet')
     },
     inputFileBtn () {
       let that = this

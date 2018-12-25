@@ -110,6 +110,7 @@ export default {
     })
     $('#fileUpload').change(function () {
       let reader = new FileReader()
+      that.password = ''
       let _this = this
       reader.onload = function (onLoadEvent) {
         that.fileData = onLoadEvent.currentTarget.result
@@ -122,14 +123,25 @@ export default {
   methods: {
     setWeb3 () {
       const that = this
-      let Web3 = require('web3')
-      if (typeof web3 !== 'undefined') {
-        Web3 = new Web3(Web3.currentProvider)
-      } else {
-        Web3 = new Web3(new Web3.providers.HttpProvider(that.sendDataPage.url))
-      }
-      that.web3 = Web3
-      that.newWeb3 = new Lilo(that.sendDataPage.url)
+      that.$$.setWeb3(that)
+      // let Web3 = require('web3')
+      // let web3
+      // try {
+      //   web3 = new Web3(new Web3.providers.HttpProvider(that.$$.baseUrl))
+      // } catch (error) {
+      //   web3 = new Web3()
+      //   console.log(error)
+      // }
+      // let web3 = new Web3()
+      // // console.log(that.selectData.url)
+      // if (typeof web3 !== 'undefined') {
+      //   // Web3 = new Web3(Web3.currentProvider)
+      //   web3 = new Web3(new Web3.providers.HttpProvider(that.$$.baseUrl))
+      // } else {
+      //   Web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
+      // }
+      // that.web3 = web3
+      that.newWeb3 = new Lilo(that.$$.baseUrl)
     },
     inputFileBtn () {
       let that = this
@@ -138,6 +150,19 @@ export default {
         walletData = wallet.getWalletFromPrivKeyFile(that.fileData, that.password)
         that.privateKey = walletData.getPrivateKeyString()
         that.checkAddress = walletData.getChecksumAddressString()
+        // console.log(that.checkAddress.toLowerCase())
+        // console.log(that.sendDataPage.from.toLowerCase())
+        if (that.checkAddress.toLowerCase() !== that.sendDataPage.from.toLowerCase()) {
+          that.$$.layerMsg({
+            tip: 'Account error!',
+            time: 3000,
+            bgColor: '#ea4b40',
+            icon: require('../../../../assets/image/Prompt.svg')
+          })
+          // $('#privateSure').modal('hide')
+          $('#sendInfo').modal('hide')
+          return
+        }
         if (that.sendDataPage.sendType === 'LOCKOUT' || that.sendDataPage.sendType === 'LOCKIN' || that.sendDataPage.sendType === 'SENDDCRM') {
           that.getDcrmAddress()
         } else if (that.sendDataPage.sendType === 'MYWALLET') {
@@ -163,6 +188,17 @@ export default {
         walletData = new wallet(new Buffer(that.fixPkey(that.privateKey), 'hex'))
         that.privateKey = walletData.getPrivateKeyString()
         that.checkAddress = walletData.getChecksumAddressString()
+        if (that.checkAddress.toLowerCase() !== that.sendDataPage.from.toLowerCase()) {
+          that.$$.layerMsg({
+            tip: 'Account error!',
+            time: 3000,
+            bgColor: '#ea4b40',
+            icon: require('../../../../assets/image/Prompt.svg')
+          })
+          // $('#privateSure').modal('hide')
+          $('#sendInfo').modal('hide')
+          return
+        }
         if (that.sendDataPage.sendType === 'LOCKOUT' || that.sendDataPage.sendType === 'LOCKIN' || that.sendDataPage.sendType === 'SENDDCRM') {
           // console.log('lock')
           that.getDcrmAddress()
@@ -193,7 +229,7 @@ export default {
       const that = this
       that.setWeb3()
       that.newWeb3.lilo.dcrmReqAddr(that.sendDataPage.from, that.sendDataPage.coin, pwd).then(function (val) {
-        console.log(typeof val)
+        // console.log(typeof val)
         if ((typeof val).toLowerCase() === 'object') {
           that.$$.layerMsg({
             tip: val.result,
@@ -203,10 +239,19 @@ export default {
           })
           return
         }
+        let gasPriceNum
+        try {
+          gasPriceNum = that.web3.eth.gasPrice.toString(10)
+        } catch (error) {
+          gasPriceNum = that.$$.getWeb3({
+            method: 'eth_gasPrice',
+            params: []
+          }).result.toString(10)
+        }
         let rawTx = {
           nonce: that.sendDataPage.nonce,
           gasPrice: that.sendDataPage.gasPrice,
-          gasLimit: 21000 * 3,
+          gasLimit: gasPriceNum * 3,
           from: that.sendDataPage.from,
           to: '0x00000000000000000000000000000000000000dc',
           value: 0,
@@ -222,22 +267,52 @@ export default {
         let serializedTx = tx.serialize()
         let serializedTxString = serializedTx.toString('hex')
         serializedTxString = serializedTxString.indexOf('0x') === 0 ? serializedTxString : ('0x' + serializedTxString)
+        // if () {
+
+        // }
         // console.log(serializedTxString)
-        that.web3.eth.sendRawTransaction(serializedTxString, function (err, hash) {
-          if (err) {
-            console.log(err)
+        try {
+          that.web3.eth.sendRawTransaction(serializedTxString, function (err, hash) {
+            if (err) {
+              console.log(err)
+              that.$$.layerMsg({
+                tip: err,
+                time: 5000,
+                bgColor: '#ea4b40',
+                icon: require('../../../../assets/image/Prompt.svg')
+              })
+            } else {
+              console.log(hash)
+              that.sendSignData(that.sendDataPage.coin)
+              // resolve(hash)
+            }
+          })
+        } catch (error) {
+          that.$$.web3({
+          method: 'eth_sendRawTransaction',
+          params: [that.serializedTx]
+        }).then(function (res) {
+          if (res.error) {
             that.$$.layerMsg({
-              tip: err,
-              time: 5000,
+              tip: res.error,
+              time: 4000,
               bgColor: '#ea4b40',
               icon: require('../../../../assets/image/Prompt.svg')
             })
           } else {
-            console.log(hash)
-            that.sendSignData(that.sendDataPage.coin)
-            // resolve(hash)
+            dataBase.txhax = res.result
+            dataBase.status = 'success'
+            $('#sendInfo').modal('hide')
+            that.$$.layerMsg({
+              tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + res.result,
+              time: 5000,
+              bgColor: '#5dba5a',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
           }
+          that.sendDatabase(dataBase)
         })
+        }
       })
     },
     signSendData () {
@@ -246,7 +321,7 @@ export default {
       // console.log(that.sendDataPage)
       // console.log(that.dcrmAddress.toLowerCase())
       // console.log(that.checkAddress.toLowerCase())
-      if (that.checkAddress.toLowerCase() === that.sendDataPage.from.toLowerCase() || that.dcrmAddress.toLowerCase() === that.sendDataPage.from.toLowerCase()) {
+      if (that.checkAddress.toLowerCase() === that.sendDataPage.from.toLowerCase()) {
         let rawTx = {
           nonce: that.sendDataPage.nonce,
           gasPrice: Number(that.sendDataPage.gasPrice),//Number类型 
@@ -311,25 +386,25 @@ export default {
       }
     },
     walletRequirePass (ethjson) {
-        let jsonArr
-        try {
-            jsonArr = JSON.parse(ethjson)
-        } catch (err) {
-            throw 'This is not a valid wallet file. '
-        }
-        if (jsonArr.encseed != null) {
-          return true
-        } else if (jsonArr.Crypto != null || jsonArr.crypto != null) {
-          return true
-        } else if (jsonArr.hash != null && jsonArr.locked) {
-          return true
-        } else if (jsonArr.hash != null && !jsonArr.locked) {
-          return false
-        } else if (jsonArr.publisher == "MyEtherWallet" && !jsonArr.encrypted) {
-          return false
-        } else {
-          throw 'Sorry! We don\'t recognize this type of wallet file. '
-        }
+      let jsonArr
+      try {
+          jsonArr = JSON.parse(ethjson)
+      } catch (err) {
+          throw 'This is not a valid wallet file. '
+      }
+      if (jsonArr.encseed != null) {
+        return true
+      } else if (jsonArr.Crypto != null || jsonArr.crypto != null) {
+        return true
+      } else if (jsonArr.hash != null && jsonArr.locked) {
+        return true
+      } else if (jsonArr.hash != null && !jsonArr.locked) {
+        return false
+      } else if (jsonArr.publisher == "MyEtherWallet" && !jsonArr.encrypted) {
+        return false
+      } else {
+        throw 'Sorry! We don\'t recognize this type of wallet file. '
+      }
     },
     fixPkey (key) {
       if (key.indexOf("0x") === 0) {

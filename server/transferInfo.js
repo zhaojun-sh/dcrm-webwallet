@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-mongoose.connect('mongodb://localhost:27017/fsn')
+mongoose.connect('mongodb://localhost:27017/fsn', { useNewUrlParser: true })
 
 const transferSchema = new Schema({
   // privateKey: {type: String},

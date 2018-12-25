@@ -50,6 +50,7 @@ export default {
   mounted () {
     let that = this
     that.$$.showSearchTop()
+    that.$store.commit('storeWalletLoadFlag', true)
   },
   methods: {
     goSaveKeystore () {
@@ -78,12 +79,15 @@ export default {
         that.goSaveKeystore()
       }
     },
-    validPwd () {
+    validPwd (e) {
       let that = this
       if (that.password.length < 9) {
         $('.createInfo_input').find('.input').css('border','2px solid #ea4b40')
       } else {
         $('.createInfo_input').find('.input').css('border','2px solid #2f7cd7')
+        if (e.which === 13) {
+          that.changePwd()
+        }
       }
     }
   }

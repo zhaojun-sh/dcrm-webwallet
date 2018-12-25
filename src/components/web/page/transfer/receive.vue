@@ -116,7 +116,7 @@ export default {
   methods: {
     getInitData () {
       const that = this
-      that.titleChange(that.selectData.value)
+      that.titleChange(that.selectData.coin)
       // console.log(that.selectData.address)
       that.coinAddress = that.selectData.address
       that.getSendHistory()
@@ -124,8 +124,8 @@ export default {
     },
     pageRefresh () {
       let that = this
-      if (that.selectData.value) {
-        that.titleChange(that.selectData.value)
+      if (that.selectData.coin) {
+        that.titleChange(that.selectData.coin)
       }
       if (location.href.indexOf('tranSend') === -1) {
         $('.transferBtn_btn').find('a:eq(0)').addClass('router-link-active')
@@ -161,13 +161,24 @@ export default {
     },
     setWeb3 () {
       const that = this
-      let Web3 = require('web3')
-      if (typeof web3 !== 'undefined') {
-        Web3 = new Web3(Web3.currentProvider)
-      } else {
-        Web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
-      }
-      that.web3 = Web3
+      that.$$.setWeb3(that)
+      // let Web3 = require('web3')
+      // let web3
+      // try {
+      //   web3 = new Web3(new Web3.providers.HttpProvider(that.$$.baseUrl))
+      // } catch (error) {
+      //   web3 = new Web3()
+      //   console.log(error)
+      // }
+      // let web3 = new Web3()
+      // // console.log(that.selectData.url)
+      // if (typeof web3 !== 'undefined') {
+      //   // Web3 = new Web3(Web3.currentProvider)
+      //   web3 = new Web3(new Web3.providers.HttpProvider(that.$$.baseUrl))
+      // } else {
+      //   Web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
+      // }
+      // that.web3 = web3
     },
     MoreContent (e) {
       const that = this
@@ -176,7 +187,7 @@ export default {
     },
     getSendHistory () {
       const that = this
-      if (!that.walletAddress || !that.selectData.value) {
+      if (!that.walletAddress || !that.selectData.coin) {
         return
       }
       $.ajax({
@@ -185,14 +196,14 @@ export default {
         type: 'post',
         data: {
           to_address: that.walletAddress,
-          coin: that.selectData.value
+          coin: that.selectData.coin
         },
         success: function (res) {
           console.log(res)
           that.historyData = []
           if (res.msg === 'success' && res.info.length > 0) {
             for (let i = 0; i < res.info.length; i++) {
-              if (res.info[i].coin === that.selectData.value && res.info[i].txhax) {
+              if (res.info[i].coin === that.selectData.coin && res.info[i].txhax) {
                 // console.log(12)
                 res.info[i].date = that.$$.timeChange({date: res.info[i].date, type:'yyyy-mm-dd hh:mm'})
                 res.info[i].value = that.$$.thousandBit(res.info[i].value, 'no')

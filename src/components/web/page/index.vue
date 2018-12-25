@@ -16,7 +16,7 @@
               <div class="addreess">{{walletAdressTop}}</div><img src="../../../assets/image/copy2.svg">
             </a>
           </li>
-          <li><router-link class="setBtn flex-c" to="/backupWallet"><img src="../../../assets/image/Setting2.svg"></router-link></li>
+          <li><router-link class="setBtn flex-c" to="/backupSure"><img src="../../../assets/image/Setting2.svg"></router-link></li>
           <li><router-link class="setBtn flex-c" to="/"><img src="../../../assets/image/Help.svg"></router-link></li>
           <li><div class="setBtn flex-c cursorP" @click="refreshPage"><img src="../../../assets/image/Refresh.svg"></div></li>
           <li><router-link class="setBtn flex-c" to="/"><img src="../../../assets/image/Quit.svg"></router-link></li>
@@ -72,6 +72,18 @@ export default {
     $(function () {
       $("[data-toggle='tooltip']").tooltip()
     })
+    // that.$$.web3({
+    //   method: 'eth_getBalance',
+    //   params: ['0x3A1b3B81Ed061581558a81F11d63E03129347437']
+    //   // params: ['0x3A1b3B81Ed061581558a81F11d63E03129347437', 'latest']
+    // }).then(function (res) {
+    //   console.log(res.toString().indexOf('error'))
+    // })
+    // let testData = that.$$.getWeb3({
+    //   method: 'eth_getBalance',
+    //   params: ['0x3A1b3B81Ed061581558a81F11d63E03129347437', 'latest']
+    // })
+    // console.log(testData)
   },
   methods: {
     goBackupWallet () {
@@ -89,7 +101,9 @@ export default {
       this.$$.layerMsg('Copy Success')
     },
     refreshPage () {
-      history.go(0)
+      let that = this
+      that.$router.push('/loading')
+      // history.go(0)
     //   top.location.hert = top.location.hert
     },
     cutOut (str) {

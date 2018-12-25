@@ -23,8 +23,10 @@ import lockNav from '@/components/web/page/lilo/lockNav'
 import dapp from '@/components/web/page/dapp/index'
 
 import pwdSure from '@/components/web/page/public/pwdSure'
+import loading from '@/components/web/page/public/loading'
 
 import backupWallet from '@/components/web/page/backupWallet/index'
+import backupSure from '@/components/web/page/backupWallet/backupSure'
 
 Vue.use(Router)
 
@@ -55,6 +57,10 @@ const routers = new Router({
           path: '/saveKeystore',
           name: 'saveKeystore',
           component: saveKeystore
+        }, {
+          path: '/backupSure',
+          name: 'backupSure',
+          component: backupSure
         }, {
           path: '/nav',
           // name: 'nav',
@@ -151,6 +157,10 @@ const routers = new Router({
               path: '/backupWallet',
               name: 'backupWallet',
               component: backupWallet
+            }, {
+              path: '/loading',
+              name: 'loading',
+              component: loading
             }
           ]
         }
