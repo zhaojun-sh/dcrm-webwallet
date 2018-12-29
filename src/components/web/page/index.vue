@@ -1,7 +1,7 @@
 <template>
   <div class="boxContent">
     <header class="headerTop_box flex-bc">
-      <div class="logo"><router-link to="/"><img src="../../../assets/image/logo.svg"></router-link></div>
+      <div class="logo flex-c"><router-link to="/" class="logoImg flex-c"><img src="../../../assets/image/logo.svg"></router-link></div>
       <div class="headerTop_serBox" id="topSearchView">
         <img src="../../../assets/image/wifi.png" class="wifi">
         <i class="arrow"></i>
@@ -24,15 +24,18 @@
       </div>
     </header>
     <input type="text" v-model="walletAdress" id="addressCopy" class="inputOpacity" style="opacity: 0;">
+    
     <section id="boxContent_box">
-      <router-view v-on:setAddress='getChildInfo'></router-view>
+      <transition name="fade">
+        <router-view v-on:setAddress='getChildInfo'></router-view>
+      </transition>
     </section>
     <footer class="footerBottom_box flex-c">
       <ul class="flex-c">
-        <li><img src="../../../assets/image/logo-white.svg" width="61" height="16"></li>
+        <li><a href="https://fusion.org" target="_blank"><img src="../../../assets/image/logo-white.svg" width="61" height="16"></a></li>
         <li class="center flex-c">
-          <a class="mr-10 flex-c"><img src="../../../assets/image/GIT.svg" width="16" height="16"></a>
-          <a class="flex-c"><img src="../../../assets/image/GIT2.svg" width="16" height="16"></a>
+          <a class="mr-10 flex-c" href="https://github.com/FUSIONFoundation/dcrm-go" target="_blank"><img src="../../../assets/image/GIT.svg" width="16" height="16"></a>
+          <a class="flex-c" href="https://gitter.im/FUSIONDC/" target="_blank"><img src="../../../assets/image/GIT2.svg" width="16" height="16"></a>
         </li>
         <li>{{copyRight}}</li>
       </ul>
@@ -54,14 +57,6 @@ export default {
       walletAdress: '',
       walletAdressTop: '',
     }
-  },
-  beforeCreate () {
-    const that = this
-    that.$$.loadingStart()
-  },
-  created () {
-    const that = this
-    that.$$.loadingEnd()
   },
   mounted () {
     let that = this

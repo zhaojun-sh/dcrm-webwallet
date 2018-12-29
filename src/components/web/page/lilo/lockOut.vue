@@ -22,7 +22,7 @@
         <hgroup class="tableHistory_title">
           <h3 class="title">History:</h3>
         </hgroup>
-        <div class="tableHistory_table">
+        <div class="tableHistory_table table-responsive">
           <table class="table table-bordered table-hover">
             <thead>
               <tr>
@@ -61,11 +61,11 @@
     </div>
 
     <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel" @click="modalClick">
-      <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title" id="myModalLabel">LochOut</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
           <div class="modal-body">
             <router-view v-on:sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
@@ -79,11 +79,11 @@
     </div>
 
     <div class="modal fade bs-example-modal-lg" id="sendInfo" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel">
-      <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title" id="myModalLabel">LochOut</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
           <div class="modal-body">
             <div class="sendInfo_box">
@@ -178,14 +178,6 @@ export default {
       }
     }
   },
-  beforeCreate () {
-    const that = this
-    that.$$.loadingStart()
-  },
-  created () {
-    const that = this
-    that.$$.loadingEnd()
-  },
   mounted () {
     let that = this
     that.pageRefresh()
@@ -217,7 +209,7 @@ export default {
     },
     titleChange (bitType) {
       let that = this
-      that.addressTitle = bitType + ' Receiving Address'
+      that.addressTitle = bitType + ' Withdraw Address'
     },
     setWeb3 () {
       const that = this
@@ -286,16 +278,16 @@ export default {
       that.gasLimitNum = getGasLimit * 6
       if (that.selectData.coin === 'FSN') {
         try {
-          that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(sessionStorage.getItem('localFromAddress')), 'ether')
+          that.balanceNum = that.web3.fromWei(that.web3.eth.getBalance(that.$store.state.addressInfo), 'ether')
         } catch (error) {
           that.balanceNum = that.$$.getWeb3({
             method: 'eth_getBalance',
-            params: [sessionStorage.getItem('localFromAddress'), 'latest']
+            params: [that.$store.state.addressInfo, 'latest']
           }).result
           that.balanceNum = that.web3.fromWei(that.balanceNum, 'ether')
         }
       } else {
-        that.newWeb3.lilo.dcrmGetBalance(sessionStorage.getItem('localFromAddress'), that.selectData.coin).then(function(res){
+        that.newWeb3.lilo.dcrmGetBalance(that.$store.state.addressInfo, that.selectData.coin).then(function(res){
           that.balanceNum = that.web3.fromWei(res, 'ether')
         })
       }
@@ -335,6 +327,24 @@ export default {
         that.$$.layerMsg({
           tip: that.selectData.coin + ' Receiving Address is not null.',
           time: 2000,
+          bgColor: '#ea4b40',
+          icon: require('../../../../assets/image/Prompt.svg')
+        })
+        return
+      }
+      if (that.toAddress.toLowerCase() === that.walletAddress.toLowerCase()) {
+        that.$$.layerMsg({
+          tip: 'You can`t transfer money to yourself.',
+          time: 5000,
+          bgColor: '#ea4b40',
+          icon: require('../../../../assets/image/Prompt.svg')
+        })
+        return
+      }
+      if (that.selectData.coin !== 'BTC' && that.toAddress.indexOf('0x') !== 0) {
+        that.$$.layerMsg({
+          tip: 'The address needs to start with 0x',
+          time: 5000,
           bgColor: '#ea4b40',
           icon: require('../../../../assets/image/Prompt.svg')
         })
@@ -427,6 +437,7 @@ export default {
               bgColor: '#5dba5a',
               icon: require('../../../../assets/image/Prompt.svg')
             })
+            that.$store.commit('storeWalletLoadFlag', true)
           } else {
             console.log(err)
             dataBase.fsnhash = ''
@@ -459,11 +470,12 @@ export default {
             dataBase.status = 'success'
             $('#sendInfo').modal('hide')
             that.$$.layerMsg({
-              tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + res.result,
+              tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + res.result,
               time: 5000,
               bgColor: '#5dba5a',
               icon: require('../../../../assets/image/Prompt.svg')
             })
+            that.$store.commit('storeWalletLoadFlag', true)
           }
           that.createDatabaseInfo(dataBase)
           that.$$.loadingEnd()

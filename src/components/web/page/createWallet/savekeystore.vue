@@ -41,14 +41,6 @@ export default {
       keystoreName: ''
     }
   },
-  beforeCreate () {
-    const that = this
-    that.$$.loadingStart()
-  },
-  created () {
-    const that = this
-    that.$$.loadingEnd()
-  },
   mounted () {
     let that = this
     that.keystoreURL = that.$store.state.keystoreURL
@@ -57,6 +49,7 @@ export default {
     if (!that.keystoreURL) {
       history.go(-1)
     }
+    that.$store.commit('storeAddress', '')
   },
   methods: {
     goBackupWallet () {

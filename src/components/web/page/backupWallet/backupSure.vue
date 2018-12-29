@@ -94,14 +94,6 @@ export default {
       downloadName: ''
     }
   },
-  beforeCreate () {
-    const that = this
-    that.$$.loadingStart()
-  },
-  created () {
-    const that = this
-    that.$$.loadingEnd()
-  },
   mounted () {
     let that = this
     $('.selectType_type').on('click', 'label', function () {
@@ -147,6 +139,15 @@ export default {
         that.privateKey = walletData.getPrivateKeyString()
         that.downloadName = walletData.getV3Filename()
         that.downloadURL = that.$$.getBlob('text/json;charset=UTF-8', that.fileData)
+        if (that.checkAddress.toLowerCase() !== that.$store.state.addressInfo.toLowerCase()) {
+          that.$$.layerMsg({
+            tip: 'Account error!',
+            time: 3000,
+            bgColor: '#ea4b40',
+            icon: require('../../../../assets/image/Prompt.svg')
+          })
+          return
+        }
         // console.log(that.checkAddress)
         that.goBackupWallet()
       } catch (e) {
@@ -167,6 +168,15 @@ export default {
         that.checkAddress = walletData.getChecksumAddressString()
         that.downloadURL = ''
         that.downloadName = ''
+        if (that.checkAddress.toLowerCase() !== that.$store.state.addressInfo.toLowerCase()) {
+          that.$$.layerMsg({
+            tip: 'Account error!',
+            time: 3000,
+            bgColor: '#ea4b40',
+            icon: require('../../../../assets/image/Prompt.svg')
+          })
+          return
+        }
         that.goBackupWallet()
       } catch (e) {
         that.$$.layerMsg({
@@ -189,29 +199,28 @@ export default {
       that.$store.commit('storeAddress', that.checkAddress)
       that.$store.commit('storeKeystoreURL', that.downloadURL)
       that.$store.commit('storeDownload', that.downloadName)
-      sessionStorage.setItem('localFromAddress', that.checkAddress)
     },
     changePrv (e) {
       let that = this
-      if (that.privateKey.length < 6) {
-        that.showPwdBtn = false
-      } else {
-        that.showPwdBtn = true
-        if (e.which === 13) {
-          that.inputPwdBtn()
-        }
+      // if (that.privateKey.length < 6) {
+      //   that.showPwdBtn = false
+      // } else {
+      that.showPwdBtn = true
+      if (e.which === 13) {
+        that.inputPwdBtn()
       }
+      // }
     },
     changePwd (e) {
       let that = this
-      if (that.password.length < 6) {
-        that.showPwdBtn = false
-      } else {
-        that.showPwdBtn = true
-        if (e.which === 13) {
-          that.inputFileBtn()
-        }
+      // if (that.password.length < 6) {
+      //   that.showPwdBtn = false
+      // } else {
+      that.showPwdBtn = true
+      if (e.which === 13) {
+        that.inputFileBtn()
       }
+      // }
     },
     walletRequirePass (ethjson) {
         let jsonArr

@@ -1,7 +1,8 @@
 <template>
   <div>
-    
-    <router-view></router-view>
+    <transition name="fade">
+      <router-view></router-view>
+    </transition>
     <!-- <div class="transferCont_absolute">
       <div class="transferCont_box">
         <transition name="fade">

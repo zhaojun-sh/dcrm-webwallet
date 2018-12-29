@@ -173,7 +173,7 @@ export default {
       } catch (e) {
         that.$$.layerMsg({
           tip: e,
-          time: 2000,
+          time: 5000,
           bgColor: '#ea4b40',
           icon: require('../../../../assets/image/Prompt.svg')
         })
@@ -228,99 +228,109 @@ export default {
     getDecrAddress (pwd) {
       const that = this
       that.setWeb3()
-      that.newWeb3.lilo.dcrmReqAddr(that.sendDataPage.from, that.sendDataPage.coin, pwd).then(function (val) {
-        // console.log(typeof val)
-        if ((typeof val).toLowerCase() === 'object') {
-          that.$$.layerMsg({
-            tip: val.result,
-            time: 5000,
-            bgColor: '#ea4b40',
-            icon: require('../../../../assets/image/Prompt.svg')
+      let gasPriceNum
+      try {
+        gasPriceNum = that.web3.eth.gasPrice.toString(10)
+      } catch (error) {
+        gasPriceNum = that.$$.getWeb3({
+          method: 'eth_gasPrice',
+          params: []
+        }).result.toString(10)
+      }
+
+      let getGasLimit
+      try {
+        getGasLimit = that.web3.eth.estimateGas({to: that.toAddress})
+      } catch (error) {
+        try {
+          getGasLimit = that.$$.getWeb3({
+            method: 'eth_estimateGas',
+            params: [{to: that.toAddress}]
           })
+          if (getGasLimit.error) {
+            getGasLimit = 'Error'
+          } else {
+            getGasLimit = getGasLimit.result
+          }
+        } catch (error) {
+          getGasLimit = error
+        }
+        // throw error
+      }
+      if (getGasLimit && getGasLimit.toString().indexOf('Error') !== -1) {
+        that.$$.layerMsg({
+          tip: getGasLimit,
+          time: 5000,
+          bgColor: '#ea4b40',
+          icon: require('../../../../assets/image/Prompt.svg')
+        })
+        throw getGasLimit
+      }
+      let rawTx = {
+        nonce: that.sendDataPage.nonce,
+        gasPrice: Number(gasPriceNum),
+        gasLimit: Number(getGasLimit),
+        // gasLimit: 21000,
+        from: that.sendDataPage.from,
+        to: '0x00000000000000000000000000000000000000dc',
+        value: 0,
+        data: ''
+      }
+      let sendBack = {
+        coin: that.sendDataPage.coin,
+        serializedTx: '',
+        nowFlag: false,
+        dcrmAddress: ''
+      }
+      let Tx = require('ethereumjs-tx')
+      pwd = pwd.indexOf('0x') === 0 ? pwd.substr(2) : pwd
+      let privateKey = new Buffer(pwd, 'hex')
+      that.newWeb3.lilo.dcrmReqAddr(that.sendDataPage.from, that.sendDataPage.coin, pwd).then(function (val) {
+        let dcrmAddressVal
+        // console.log(val)
+        // console.log(typeof val)
+        if ((typeof val).toLowerCase() === 'object' && val.result) {
+          // console.log(val.result)
+          // console.log(val.result.indexOf('the account has confirm dcrm address already.the dcrm address is'))
+          if (val.result.indexOf('the account has confirm dcrm address already.the dcrm address is') === 0) {
+            that.$$.layerMsg({
+              tip: 'The address has been requested. Please refresh later. DCRM:' + val.result.split(':')[1],
+              time: 8000,
+              bgColor: '#5dba5a',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+            $('#privateSure').modal('hide')
+          } else{
+            that.$$.layerMsg({
+              tip: val.result,
+              time: 8000,
+              bgColor: '#ea4b40',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+          }
           return
         }
-        let gasPriceNum
-        try {
-          gasPriceNum = that.web3.eth.gasPrice.toString(10)
-        } catch (error) {
-          gasPriceNum = that.$$.getWeb3({
-            method: 'eth_gasPrice',
-            params: []
-          }).result.toString(10)
+        if (val.error && val.error.message.indexOf('the account has request dcrm address already.the dcrm address is') === 0) {
+          dcrmAddressVal = val.error.message.split(':')[1]
+          sendBack.nowFlag = false
+        } else {
+          dcrmAddressVal = val
+          sendBack.nowFlag = true
         }
-        let rawTx = {
-          nonce: that.sendDataPage.nonce,
-          gasPrice: that.sendDataPage.gasPrice,
-          gasLimit: gasPriceNum * 3,
-          from: that.sendDataPage.from,
-          to: '0x00000000000000000000000000000000000000dc',
-          value: 0,
-          data: 'DCRMCONFIRMADDR:' + val + ':' + that.sendDataPage.coin,
-        }
-        // console.log(val)
+        sendBack.dcrmAddress = dcrmAddressVal
+        rawTx.data = 'DCRMCONFIRMADDR:' + dcrmAddressVal + ':' + that.sendDataPage.coin
         // console.log(rawTx)
-        let Tx = require('ethereumjs-tx')
-        pwd = pwd.indexOf('0x') === 0 ? pwd.substr(2) : pwd
-        let privateKey = new Buffer(pwd, 'hex')
         let tx = new Tx(rawTx)
         tx.sign(privateKey)
         let serializedTx = tx.serialize()
         let serializedTxString = serializedTx.toString('hex')
         serializedTxString = serializedTxString.indexOf('0x') === 0 ? serializedTxString : ('0x' + serializedTxString)
-        // if () {
-
-        // }
-        // console.log(serializedTxString)
-        try {
-          that.web3.eth.sendRawTransaction(serializedTxString, function (err, hash) {
-            if (err) {
-              console.log(err)
-              that.$$.layerMsg({
-                tip: err,
-                time: 5000,
-                bgColor: '#ea4b40',
-                icon: require('../../../../assets/image/Prompt.svg')
-              })
-            } else {
-              console.log(hash)
-              that.sendSignData(that.sendDataPage.coin)
-              // resolve(hash)
-            }
-          })
-        } catch (error) {
-          that.$$.web3({
-          method: 'eth_sendRawTransaction',
-          params: [that.serializedTx]
-        }).then(function (res) {
-          if (res.error) {
-            that.$$.layerMsg({
-              tip: res.error,
-              time: 4000,
-              bgColor: '#ea4b40',
-              icon: require('../../../../assets/image/Prompt.svg')
-            })
-          } else {
-            dataBase.txhax = res.result
-            dataBase.status = 'success'
-            $('#sendInfo').modal('hide')
-            that.$$.layerMsg({
-              tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + res.result,
-              time: 5000,
-              bgColor: '#5dba5a',
-              icon: require('../../../../assets/image/Prompt.svg')
-            })
-          }
-          that.sendDatabase(dataBase)
-        })
-        }
+        sendBack.serializedTx = serializedTxString
+        that.sendSignData(sendBack)
       })
     },
     signSendData () {
       const that = this
-      // console.log(that.checkAddress.toLowerCase())
-      // console.log(that.sendDataPage)
-      // console.log(that.dcrmAddress.toLowerCase())
-      // console.log(that.checkAddress.toLowerCase())
       if (that.checkAddress.toLowerCase() === that.sendDataPage.from.toLowerCase()) {
         let rawTx = {
           nonce: that.sendDataPage.nonce,
@@ -365,25 +375,25 @@ export default {
     },
     changePrv (e) {
       let that = this
-      if (that.privateKey.length < 6) {
-        that.showPwdBtn = false
-      } else {
-        that.showPwdBtn = true
-        if (e.which === 13) {
-          that.inputPwdBtn()
-        }
+      // if (that.privateKey.length < 6) {
+      //   that.showPwdBtn = false
+      // } else {
+      that.showPwdBtn = true
+      if (e.which === 13) {
+        that.inputPwdBtn()
       }
+      // }
     },
     changePwd (e) {
       let that = this
-      if (that.password.length < 6) {
-        that.showPwdBtn = false
-      } else {
-        if (e.which === 13) {
-          that.inputFileBtn()
-        }
-        that.showPwdBtn = true
+      // if (that.password.length < 6) {
+      //   that.showPwdBtn = false
+      // } else {
+      if (e.which === 13) {
+        that.inputFileBtn()
       }
+      that.showPwdBtn = true
+      // }
     },
     walletRequirePass (ethjson) {
       let jsonArr

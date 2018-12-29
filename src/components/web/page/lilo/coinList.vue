@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="contentHeader_box flex-bc">
-      <h1 class="contentHeader_title">LockIn/LockOut</h1>
+      <h1 class="contentHeader_title">LockIn / LockOut</h1>
       <!-- <h2 class="contentHeader_title" v-html="myAssetsTotal"></h2> -->
     </div>
 
@@ -52,14 +52,15 @@
     <div class="contView_box">
       <div class="supCoinView_list lockView_list">
         <ul>
-          <li v-for="(item, index) in bitIconTypeSearch" :key="index">
+          <li v-for="(item, index) in bitIconTypeSearch" :key="index" class="col col-md-3">
             <div class="iconImg"><img :src="item.logo"></div>
             <h4 class="title" v-html="item.nameFull"></h4>
             <div class="dappView_btn" v-if="item.nameFull !== 'MORE'">
               <a class="setBtn" v-if="item.btnView" @click="toUrlLock('/LILO/lockIn', item.currency)">Deposit</a>
-              <a class="setBtn" v-if="item.btnView" @click="toUrlLock('/LILO/lockOut', item.currency)" :style="!item.viewOpacity ? 'opacity:0.5' : ''">Withdraw</a>
+              <a class="setBtn" v-if="item.btnView" @click="toUrlLock('/LILO/lockOut', item.currency)" :style="item.currency === 'ETH' ? '' : 'opacity:0.5'">Withdraw</a>
               <a class="setBtn" v-if="!item.btnView" @click="privateSure(item.currency)">Request</a>
             </div>
+            <div class="dappView_btn" v-if="item.nameFull === 'MORE'"></div>
             <div class="line"></div>
           </li>
         </ul>
@@ -67,14 +68,34 @@
     </div>
 
     <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" @click="modalClick">
-      <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title" id="myModalLabel">Unlock</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
           <div class="modal-body">
             <router-view v-on:sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal fade bs-example-modal-lg" id="confirmDcrm" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Request address confirmation</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <div class="modal-body">
+            <div class="">
+              Do you requeest?
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">No, get me out of here!</button>
+            <button type="button" class="btn btn-primary" @click="sendRawTransion(confirmData)">Yes, I am sure!</button>
           </div>
         </div>
       </div>
@@ -84,7 +105,6 @@
 </template>
 
 <script>
-import wallet from '../../../../assets/js/wallet'
 import Lilo from '../../../../assets/js/lilo'
 export default {
   name: 'myAssets',
@@ -101,16 +121,9 @@ export default {
       },
       dataPage: {},
       selectOption: [],
-      searchContent: ''
+      searchContent: '',
+      confirmData: ''
     }
-  },
-  beforeCreate () {
-    const that = this
-    that.$$.loadingStart()
-  },
-  created () {
-    const that = this
-    that.$$.loadingEnd()
   },
   mounted () {
     let that = this
@@ -125,6 +138,13 @@ export default {
       const that = this
       if (coin === 'ETH' || url === '/LILO/lockIn') {
         that.$router.push({ path: url, query: { currency: coin }})
+      } else {
+        that.$$.layerMsg({
+          tip: 'Functional development!',
+          time: 3000,
+          bgColor: '#f15a4a',
+          icon: require('../../../../assets/image/Prompt.svg')
+        })
       }
     },
     modalClick () {
@@ -200,16 +220,6 @@ export default {
     setWeb3 () {
       const that = this
       that.$$.setWeb3(that)
-      // let Web3 = require('web3')
-      // let web3 = new Web3()
-      // // console.log(that.selectData.url)
-      // if (typeof web3 !== 'undefined') {
-      //   // Web3 = new Web3(Web3.currentProvider)
-      //   web3 = new Web3(new Web3.providers.HttpProvider(that.$$.baseUrl))
-      // } else {
-      //   Web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
-      // }
-      // that.web3 = Web3
       that.newWeb3 = new Lilo(that.$$.baseUrl)
     },
     privateSure (data) {
@@ -221,7 +231,6 @@ export default {
         sendType: 'MYWALLET',
         from: that.walletAddress,
         nonce: '',
-        gasPrice: ''
       }
 
       try {
@@ -232,48 +241,96 @@ export default {
           params: [that.walletAddress, 'pending']
         }).result
       }
-      try {
-        that.dataPage.gasPrice = that.web3.eth.gasPrice.toString(10)
-      } catch (error) {
-        that.dataPage.gasPrice = that.$$.getWeb3({
-          method: 'eth_gasPrice',
-          params: []
-        }).result.toString(10)
-      }
-
       that.$router.push('/pwdCoinList')
       $('#privateSure').modal('show')
     },
     getSignData (data) {
       const that = this
       if (data) {
-        for (let i = 0; i < that.bitIconTypeData.length; i++) {
-          if (data === that.bitIconTypeData[i].currency) {
-            that.bitIconTypeData[i].btnView = true
-          }
+        if (data.nowFlag) {
+          that.sendRawTransion(data)
+        } else {
+          that.confirmData = data
+          $('#confirmDcrm').modal('show')
         }
         $('#privateSure').modal('hide')
-        that.$$.layerMsg({
-          tip: 'Request success',
-          time: 3000,
-          bgColor: '#5dba5a',
-          icon: require('../../../../assets/image/Prompt.svg')
-        })
-        // that.getBalanceData()
-        let storeData = {
-          balance: 0,
-          balanceDoller: 0,
-          flag: true,
-          coin: data
-        }
-        that.$store.commit('storeCoinInfo', storeData)
       } else {
         $('#privateSure').modal('hide')
         that.$$.layerMsg({
           tip: 'Sign error!',
-          time: 3000,
+          time: 5000,
           bgColor: '#ea4b40',
           icon: require('../../../../assets/image/Prompt.svg')
+        })
+      }
+    },
+    sendRawTransion (data) {
+      const that = this
+      try {
+        that.web3.eth.sendRawTransaction(data.serializedTx, function (err, hash) {
+          if (err) {
+            console.log(err)
+            that.$$.layerMsg({
+              tip: err,
+              time: 5000,
+              bgColor: '#ea4b40',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+          } else {
+            for (let i = 0; i < that.bitIconTypeData.length; i++) {
+              if (data.coin === that.bitIconTypeData[i].currency) {
+                that.bitIconTypeData[i].btnView = true
+              }
+            }
+            let storeData = {
+              balance: 0,
+              balanceDoller: 0,
+              flag: true,
+              coin: data.coin
+            }
+            that.$store.commit('storeCoinInfo', storeData)
+            $('#confirmDcrm').modal('hide')
+            that.$$.layerMsg({
+              tip: 'Request success',
+              time: 3000,
+              bgColor: '#5dba5a',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+            // resolve(hash)
+          }
+        })
+      } catch (error) {
+        that.$$.web3({
+          method: 'eth_sendRawTransaction',
+          params: [data.serializedTx]
+        }).then(function (res) {
+          if (res.error) {
+            that.$$.layerMsg({
+              tip: res.error,
+              time: 5000,
+              bgColor: '#ea4b40',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+          } else {
+            for (let i = 0; i < that.bitIconTypeData.length; i++) {
+              if (data.coin === that.bitIconTypeData[i].currency) {
+                that.bitIconTypeData[i].btnView = true
+              }
+            }
+            that.$$.layerMsg({
+              tip: 'Request success',
+              time: 3000,
+              bgColor: '#5dba5a',
+              icon: require('../../../../assets/image/Prompt.svg')
+            })
+            let storeData = {
+              balance: 0,
+              balanceDoller: 0,
+              flag: true,
+              coin: data.coin
+            }
+            that.$store.commit('storeCoinInfo', storeData)
+          }
         })
       }
     },
@@ -291,7 +348,10 @@ export default {
             flag: '',
             coin: that.bitIconTypeData[i].currency
           }
+          // console.log(that.bitIconTypeData[i].currency)
+          // console.log(res)
           if (!isNaN(res)) {
+            // console.log(that.bitIconTypeData[i].currency + ':' + i + 1)
             let balanceChange = that.web3.fromWei(res, 'ether')
             balanceChange = balanceChange === 0 ? '0.00' : that.$$.thousandBit(balanceChange, 'no')
             storeData = {
@@ -300,9 +360,10 @@ export default {
               flag: true,
               coin: that.bitIconTypeData[i].currency
             }
-            that.bitIconTypeData[j].btnView = true
+            that.bitIconTypeData[i].btnView = true
             that.$store.commit('storeCoinInfo', storeData)
           } else {
+            // console.log(that.bitIconTypeData[i].currency + ':' + i + 2)
             let balanceChange = that.web3.fromWei(0, 'ether')
             balanceChange = balanceChange === 0 ? '0.00' : that.$$.thousandBit(balanceChange, 'no')
             storeData = {
@@ -311,7 +372,7 @@ export default {
               flag: false,
               coin: that.bitIconTypeData[i].currency
             }
-            that.bitIconTypeData[j].btnView = false
+            that.bitIconTypeData[i].btnView = false
             that.$store.commit('storeCoinInfo', storeData)
           }
         })

@@ -94,14 +94,6 @@ export default {
       downloadName: ''
     }
   },
-  beforeCreate () {
-    const that = this
-    that.$$.loadingStart()
-  },
-  created () {
-    const that = this
-    that.$$.loadingEnd()
-  },
   mounted () {
     let that = this
     $('.selectType_type').on('click', 'label', function () {
@@ -136,6 +128,7 @@ export default {
     goBackupWallet () {
       let that = this
       that.setStore()
+      // console.log(that.$store.state.addressInfo)
       that.sendInfoToParent()
       that.$router.push('/MyAssets')
     },
@@ -190,29 +183,29 @@ export default {
       that.$store.commit('storeAddress', that.checkAddress)
       that.$store.commit('storeKeystoreURL', that.downloadURL)
       that.$store.commit('storeDownload', that.downloadName)
-      sessionStorage.setItem('localFromAddress', that.checkAddress)
+      // sessionStorage.setItem('localFromAddress', that.checkAddress)
     },
     changePrv (e) {
       let that = this
-      if (that.privateKey.length < 6) {
-        that.showPwdBtn = false
-      } else {
-        that.showPwdBtn = true
-        if (e.which === 13) {
-          that.inputPwdBtn()
-        }
+      // if (that.privateKey.length < 6) {
+      //   that.showPwdBtn = false
+      // } else {
+      that.showPwdBtn = true
+      if (e.which === 13) {
+        that.inputPwdBtn()
       }
+      // }
     },
     changePwd (e) {
       let that = this
-      if (that.password.length < 6) {
-        that.showPwdBtn = false
-      } else {
-        that.showPwdBtn = true
-        if (e.which === 13) {
-          that.inputFileBtn()
-        }
+      // if (that.password.length < 6) {
+      //   that.showPwdBtn = false
+      // } else {
+      that.showPwdBtn = true
+      if (e.which === 13) {
+        that.inputFileBtn()
       }
+      // }
     },
     walletRequirePass (ethjson) {
         let jsonArr

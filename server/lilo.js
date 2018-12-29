@@ -1,9 +1,12 @@
 const express = require('express')
 const router = express.Router()
-const mongoose = require('mongoose')
+const pub = require('./public')
+const mongoose = pub.mongoose
+// const mongoose = require('mongoose')
 const Schema = mongoose.Schema
+// console.log(pub)
 // mongoose.connect('mongodb://localhost:27017/fsn')
-mongoose.connect('mongodb://localhost:27017/fsn', { useNewUrlParser: true })
+// mongoose.connect('mongodb://localhost:27017/fsn', { useNewUrlParser: true })
 const liloSchema = new Schema({
   blockHash: {type: String},
   blockNumber: {type: String},

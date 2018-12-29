@@ -20,7 +20,7 @@
         <hgroup class="tableHistory_title">
           <h3 class="title">History:</h3>
         </hgroup>
-        <div class="tableHistory_table">
+        <div class="tableHistory_table table-responsive">
           <table class="table table-bordered table-hover table-striped">
             <thead>
               <tr>
@@ -54,7 +54,7 @@
       </div>
 
       <div class="modal fade bs-example-modal-md" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="qrcodeBox">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog modal-md modal-dialog-centered" role="document">
           <div class="modal-content">
             <div class="qrcodeCont_box">
               <div id="qrcode" class="flex-c"></div>
@@ -92,14 +92,6 @@ export default {
       // console.log(that.selectData.address)
     }
   },
-  beforeCreate () {
-    const that = this
-    that.$$.loadingStart()
-  },
-  created () {
-    const that = this
-    that.$$.loadingEnd()
-  },
   mounted () {
     let that = this
     that.walletAddress = that.$store.state.addressInfo
@@ -133,8 +125,8 @@ export default {
     },
     titleChange (bitType) {
       let that = this
-      // that.addressTitle = bitType + ' Receiving Address'
-      that.addressTitle = 'FSN Receiving Address'
+      that.addressTitle = bitType + ' Receiving Address'
+      // that.addressTitle = 'FSN Receiving Address'
     },
     qrcode (cont) {
       $('#qrcode').html('')

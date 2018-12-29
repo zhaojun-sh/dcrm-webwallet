@@ -1,6 +1,17 @@
-let express = require('express')
-let app = express()
-let bodyParser = require('body-parser')
+const http = require('http')
+const https = require('https')
+const express = require('express')
+const app = express()
+const fs = require('fs')
+const net = require('net')
+const bodyParser = require('body-parser')
+
+const httpsPort =  8086
+const httpPort =  8087
+
+const privateKey = fs.readFileSync('./server/keys/privkey.pem', 'utf-8')
+const cretificats = fs.readFileSync('./server/keys/cert.pem', 'utf-8')
+const credentials = {key: privateKey, cert: cretificats}
 
 app.use(express.static(require('path').join(__dirname,'public')))
 
@@ -22,6 +33,26 @@ let lilo = require('./server/lilo')
 app.use('/transfer', transferInfo)
 app.use('/lilo', lilo)
 
-let server = app.listen(8087, function () {
-  console.log('success')
-})
+const httpsServer = https.createServer(credentials, app)
+httpsServer.listen(httpsPort)
+
+const httpserver = http.createServer(app).listen(httpPort)
+
+net.createServer(function (socket) {
+  socket.once('data', function (buf) {
+    // console.log(buf[0])
+    var address = buf[0] === 22 ? httpsPort : httpPort
+    var proxy = net.createConnection(address, function() {
+    proxy.write(buf)
+    socket.pipe(proxy).pipe(socket); })
+    proxy.on('error', function(err) {
+      console.log(err)
+    })
+  })
+  socket.on('error', function(err) {
+    console.log(err)
+  })
+  // console.log('success')
+}, app).listen(8085)
+
+// console.log(credentials)

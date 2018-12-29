@@ -14,7 +14,7 @@ export default {
   },
   beforeCreate () {
     const that = this
-    that.$$.loadingStart()
+    // that.$$.loadingStart()
   },
   mounted () {
     let that = this
@@ -25,13 +25,13 @@ export default {
     goBack () {
       history.go(-1)
     }
-  },
-  destroyed () {
-    let that = this
-    setTimeout(function () {
-      that.$$.loadingEnd()
-    }, 600)
   }
+  // destroyed () {
+  //   let that = this
+  //   setTimeout(function () {
+  //     that.$$.loadingEnd()
+  //   }, 600)
+  // }
 }
 </script>
 

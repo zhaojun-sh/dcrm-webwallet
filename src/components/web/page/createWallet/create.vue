@@ -39,18 +39,11 @@ export default {
       walletInit: ''
     }
   },
-  beforeCreate () {
-    const that = this
-    that.$$.loadingStart()
-  },
-  created () {
-    const that = this
-    that.$$.loadingEnd()
-  },
   mounted () {
     let that = this
     that.$$.showSearchTop()
     that.$store.commit('storeWalletLoadFlag', true)
+    that.$store.commit('storeAddress', '')
   },
   methods: {
     goSaveKeystore () {

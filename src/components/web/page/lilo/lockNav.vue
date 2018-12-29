@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="background:#fff">
     <div class="contentHeader_box flex-bc">
       <h1 class="contentHeader_title">Lockin / Lockout</h1>
       <div class="biticonSelect_box">

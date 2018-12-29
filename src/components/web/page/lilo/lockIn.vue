@@ -17,7 +17,7 @@
         <hgroup class="tableHistory_title">
           <h3 class="title">History:</h3>
         </hgroup>
-        <div class="tableHistory_table">
+        <div class="tableHistory_table table-responsive">
           <table class="table table-bordered table-hover">
             <thead>
               <tr>
@@ -55,7 +55,7 @@
       </div>
 
       <div class="modal fade bs-example-modal-md" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="qrcodeBox">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog modal-md modal-dialog-centered" role="document">
           <div class="modal-content">
             <div class="qrcodeCont_box">
               <div id="qrcode" class="flex-c"></div>
@@ -70,11 +70,11 @@
     </div>
 
     <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel" @click="modalClick">
-      <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title" id="myModalLabel">LockIn</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
           <div class="modal-body">
             <router-view v-on:sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
@@ -87,8 +87,8 @@
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title" id="myModalLabel">You are about to send...</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
           <div class="modal-body">
             <div class="sendInfo_box">
@@ -179,14 +179,6 @@ export default {
       }
     }
   },
-  beforeCreate () {
-    const that = this
-    that.$$.loadingStart()
-  },
-  created () {
-    const that = this
-    that.$$.loadingEnd()
-  },
   mounted () {
     const that = this
     that.pageRefresh()
@@ -217,7 +209,7 @@ export default {
     },
     titleChange (bitType) {
       const that = this
-      that.addressTitle = bitType + ' Receiving Address'
+      that.addressTitle = bitType + ' Deposit Address'
     },
     setWeb3 () {
       const that = this
@@ -269,6 +261,7 @@ export default {
               hash: that.dataPage.hash,
               fsnhash: hash
             })
+            that.$store.commit('storeWalletLoadFlag', true)
           } else {
             that.$$.layerMsg({
               tip: err,
@@ -296,11 +289,12 @@ export default {
               fsnhash: hash
             })
             that.$$.layerMsg({
-              tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + res.result,
+              tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + res.result,
               time: 5000,
               bgColor: '#5dba5a',
               icon: require('../../../../assets/image/Prompt.svg')
             })
+            that.$store.commit('storeWalletLoadFlag', true)
           }
         })
       }
@@ -363,7 +357,7 @@ export default {
       $.ajax({
         // url: 'http://api-rinkeby.etherscan.io/api?module=account&action=txlist&address=' + that.coinAddress,
         // url: 'http://api-rinkeby.etherscan.io/api?module=account&action=tokentx&address=' + that.coinAddress,
-        url: 'http://api-rinkeby.etherscan.io/api?module=account&action=' + that.selectData.token + '&address=' + that.coinAddress,
+        url: 'https://api-rinkeby.etherscan.io/api?module=account&action=' + that.selectData.token + '&address=' + that.coinAddress,
         type: 'post',
         datatype: 'json',
         success: function (res) {

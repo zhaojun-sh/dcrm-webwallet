@@ -7,7 +7,7 @@
     <div class="contView_box">
       <div class="dappView_list">
         <ul>
-          <li v-for="item in iconData" :key="item.index">
+          <li v-for="item in iconData" :key="item.index" @click="toUrl()">
             <div class="iconImg"><img :src="item.icon"></div>
             <h4 class="title" v-html="item.title"></h4>
             <div class="line"></div>
@@ -27,14 +27,6 @@ export default {
       // selectData: '',
       iconData: []
     }
-  },
-  beforeCreate () {
-    const that = this
-    that.$$.loadingStart()
-  },
-  created () {
-    const that = this
-    that.$$.loadingEnd()
   },
   mounted () {
     let that = this
@@ -57,6 +49,19 @@ export default {
     ]
   },
   methods: {
+    toUrl (url) {
+      const that = this
+      if (url === '/') {
+        that.$router.push({ path: url, query: { currency: '' }})
+      } else {
+        that.$$.layerMsg({
+          tip: 'Functional development!',
+          time: 3000,
+          bgColor: '#f15a4a',
+          icon: require('../../../../assets/image/Prompt.svg')
+        })
+      }
+    },
   }
 }
 </script>

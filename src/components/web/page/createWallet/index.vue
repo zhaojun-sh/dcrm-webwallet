@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="supCoinView_container">
     <div class="walletBtn_box">
       <ul>
         <li><router-link to="/createWallet" class="btnStyle btnBlue flex-c"><div class="icon"><img src="../../../../assets/image/pageWhite.svg"></div>Create wallet</router-link></li>
@@ -12,7 +12,7 @@
       </hgroup>
       <div class="supCoinView_list">
         <ul>
-          <li v-for="item in iconData" :key="item.index">
+          <li v-for="item in iconData" :key="item.index" class="col col-md-3">
             <div class="iconImg"><img :src="item.icon"></div>
             <h4 class="title" v-html="item.title"></h4>
             <div class="line"></div>
@@ -47,6 +47,13 @@ export default {
       {icon: require('../../../../assets/image/ht.svg'), title: 'HuobiToken (HT)'},
       {icon: require('../../../../assets/image/bnt.svg'), title: 'Bancor (BNT)'}
     ]
+    let toPath = location.href.toUpperCase()
+    if (toPath.lastIndexOf('/') === (toPath.length - 1)) {
+      that.$store.commit('storeAddress', '')
+    }
+    that.$$.loadingEndIndex()
+    // console.log($('.OnLodaingIndex'))
+    // sessionStorage.setItem('localFromAddress', '')
   }
 }
 </script>

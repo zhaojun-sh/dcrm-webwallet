@@ -1,16 +1,21 @@
 let $$ = {}
 
 let idNum = 0
-// $$.baseUrl = 'https://mainnet.infura.io/'
-// $$.baseUrl = 'https://rinkeby.etherscan.io/api'
-// $$.baseUrl = 'http://47.92.168.85:40405/'
-// $$.baseUrl = 'http://54.169.254.177:40415'// FSN
-$$.baseUrl = 'http://54.164.7.63:40415'// FSN
-// $$.baseUrl = 'http://54.183.185.30:8018'// 以太坊
-// $$.baseUrl = 'http://47.92.255.230:40415/' //
+// $$.baseUrl = 'http://54.169.254.177:40415'
+// $$.baseUrl = 'http://54.164.7.63:40415'
+// $$.baseUrl = window.location.protocol + '//54.164.7.63:40445'
+$$.baseUrl = window.location.protocol + '//api.dcrm.network'
+// $$.baseUrl = window.location.protocol + '//104.210.49.28:40445'
+// $$.baseUrl = 'http://10.192.32.92:40445'
+// $$.baseUrl = 'http://47.92.255.230:40415/'
 
-// $$.serverURL = 'http://localhost:8081'
-$$.serverURL = 'http://54.164.7.63:8087'
+// $$.serverURL = 'http://localhost:8087'
+// $$.serverURL = 'http://localhost:8085'
+// $$.serverURL = 'https://localhost:8085'
+// $$.serverURL = 'http://54.164.7.63:8087'
+// $$.serverURL = 'https://wallet.dcrm.network:8085'
+// $$.serverURL = window.location.protocol + '//wallet.dcrm.network:8087'
+$$.serverURL = window.location.protocol + '//wallet.dcrm.network:8085'
 
 $$.thousandBit = (num, dec = 2) => {
   num = Number(num)
@@ -19,7 +24,16 @@ $$.thousandBit = (num, dec = 2) => {
     num = num.toFixed(dec)
   } else {
     if (isNaN(dec)) {
-      num = num.toLocaleString().replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toLocaleString()
+      // console.log(num)
+      if (num.toString().indexOf('.') === -1) {
+        num = num.toLocaleString().replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toLocaleString()
+      } else {
+        let numSplit = num.toString().split('.')
+        numSplit[1] = numSplit[1].length > 9 ? numSplit[1].substr(0, 8) : numSplit[1]
+        // console.log(numSplit)
+        num = numSplit[0].toLocaleString().replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toLocaleString()
+        num = num + '.' + numSplit[1]
+      }
     } else {
       num = num.toFixed(dec).replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toLocaleString()
     }
@@ -33,7 +47,8 @@ $$.thousandChange = function (num, dec) {
 }
 
 $$.thousandToNum = (num) => {
-  return num.replace(/,/, '')
+  // console.log(num)
+  return num.toString().replace(/,/, '')
 }
 
 $$.bigNumber = (num) => {
@@ -206,34 +221,34 @@ $$.getBlob = (mime, str) => {
 
 $$.loadingStart = (data) => {
   let initData = {
-    img: require('../image/load.gif'),
-    color: 'rgb(80, 109, 254)',
+    img: require('../image/wait.svg'),
+    color: '#999',
     txt: data !== undefined ? data : 'Loading……'
   }
 
   if ((typeof data).toLowerCase() === 'object') {
     initData = {
-      img: data.img ? data.img : require('../image/load.gif'),
-      color: data.color ? data.color : 'rgb(80, 109, 254)',
+      img: data.img ? data.img : require('../image/wait.svg'),
+      color: data.color ? data.color : '#999',
       txt: data.img ? data.txt : 'Loading……'
     }
   }
 
   let _div = document.createElement('div')
-  _div.id = 'OnLodaing'
+  _div.className = 'OnLodaing'
   _div.style.width = '100vw'
   _div.style.height = '100vh'
   _div.style.position = 'fixed'
   _div.style.top = '0'
   _div.style.left = '0'
-  _div.style.backgroundColor = 'rgba(255, 255, 255, 0.8)'
+  _div.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'
   _div.style.zIndex = '99999'
   _div.style.display = 'flex'
   _div.style.justifyContent = 'center'
   _div.style.alignItems = 'center'
 
   let _Load = document.createElement('div')
-  _Load.innerHTML = '<img src="' + initData.img + '" /><p style="margin-top:15px;font-size:18px;font-weight:bold;color:' + initData.color + '">' + initData.txt + '</p>'
+  _Load.innerHTML = '<div class="rotateLoad"><img src="' + initData.img + '" /></div><p style="margin-top:15px;font-size:16px;font-weight:bold;color:#333;padding-left:12px;' + initData.color + '">' + initData.txt + '</p>'
   _Load.style.textAlign = 'center'
   // let _img = ''
 
@@ -242,7 +257,13 @@ $$.loadingStart = (data) => {
 }
 
 $$.loadingEnd = () => {
-  document.getElementById('OnLodaing').remove()
+  // document.getElementsByClassName('OnLodaing').remove()
+  $('.OnLodaing').remove()
+}
+$$.loadingEndIndex = () => {
+  // document.getElementsByClassName('OnLodaing').remove()
+  $('.OnLodaingIndex').remove()
+  // console.log($('.OnLodaingIndex'))
 }
 
 $$.limitCoin = function (num, limit, type) {
