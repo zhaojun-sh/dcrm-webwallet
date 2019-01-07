@@ -33,7 +33,7 @@ import store from "../store/store";
 Vue.use(Router);
 
 const routers = new Router({
-  // mode: 'history',
+  mode: "history",
   routes: [
     {
       path: "/",
