@@ -62,7 +62,7 @@
               <div class="selectType_contTnput">
                 <input
                   type="password"
-                  placeholder="Enter a password"
+                  placeholder="Enter a Private Key"
                   class="input-text input"
                   v-model="privateKey"
                   @keyup="changePrv"
