@@ -8,21 +8,6 @@
 
 <script>
 export default {
-  name: 'App'
-}
-</script>
-
-<style>
-
-</style>
-
-<script>
-export default {
-  name: 'App',
-  data () {
-    return {
-      //
-    }
-  }
-}
+  name: "App"
+};
 </script>
