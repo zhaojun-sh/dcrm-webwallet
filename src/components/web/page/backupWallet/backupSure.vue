@@ -95,6 +95,8 @@
 <script>
 import wallet from "@/assets/js/wallet";
 
+const PromptSvg = require("@/assets/image/Prompt.svg");
+
 export default {
   name: "createWallet",
   // props: ['wAdress'],
@@ -169,7 +171,7 @@ export default {
             tip: "Account error!",
             time: 3000,
             bgColor: "#ea4b40",
-            icon: require("@/assets/image/Prompt.svg")
+            icon: PromptSvg
           });
           return;
         }
@@ -179,7 +181,7 @@ export default {
           tip: e,
           time: 2000,
           bgColor: "#ea4b40",
-          icon: require("@/assets/image/Prompt.svg")
+          icon: PromptSvg
         });
       }
     },
@@ -200,7 +202,7 @@ export default {
             tip: "Account error!",
             time: 3000,
             bgColor: "#ea4b40",
-            icon: require("@/assets/image/Prompt.svg")
+            icon: PromptSvg
           });
           return;
         }
@@ -210,7 +212,7 @@ export default {
           tip: e,
           time: 2000,
           bgColor: "#ea4b40",
-          icon: require("@/assets/image/Prompt.svg")
+          icon: PromptSvg
         });
       }
     },

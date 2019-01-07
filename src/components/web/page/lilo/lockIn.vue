@@ -195,6 +195,9 @@
 <script>
 import QRCode from "qrcodejs2";
 import Lilo from "@/assets/js/lilo";
+
+const PromptSvg = require("@/assets/image/Prompt.svg");
+
 export default {
   name: "receive",
   props: ["selectData"],
@@ -274,7 +277,7 @@ export default {
           tip: "Sign error!",
           time: 3000,
           bgColor: "#ea4b40",
-          icon: require("@/assets/image/Prompt.svg")
+          icon: PromptSvg
         });
       }
     },
@@ -289,7 +292,7 @@ export default {
                 hash,
               time: 5000,
               bgColor: "#5dba5a",
-              icon: require("@/assets/image/Prompt.svg")
+              icon: PromptSvg
             });
             this.updateDatabaseInfo({
               hash: this.dataPage.hash,
@@ -301,7 +304,7 @@ export default {
               tip: err,
               time: 4000,
               bgColor: "#ea4b40",
-              icon: require("@/assets/image/Prompt.svg")
+              icon: PromptSvg
             });
           }
         });
@@ -315,7 +318,7 @@ export default {
               tip: res.error,
               time: 4000,
               bgColor: "#ea4b40",
-              icon: require("@/assets/image/Prompt.svg")
+              icon: PromptSvg
             });
           } else {
             this.updateDatabaseInfo({
@@ -328,7 +331,7 @@ export default {
                 res.result,
               time: 5000,
               bgColor: "#5dba5a",
-              icon: require("@/assets/image/Prompt.svg")
+              icon: PromptSvg
             });
             this.$store.commit("storeWalletLoadFlag", true);
           }

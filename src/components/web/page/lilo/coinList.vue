@@ -150,6 +150,9 @@
 
 <script>
 import Lilo from "@/assets/js/lilo";
+
+const PromptSvg = require("@/assets/image/Prompt.svg");
+
 export default {
   name: "myAssets",
   data() {
@@ -185,7 +188,7 @@ export default {
           tip: "Functional development!",
           time: 3000,
           bgColor: "#f15a4a",
-          icon: require("@/assets/image/Prompt.svg")
+          icon: PromptSvg
         });
       }
     },
@@ -306,7 +309,7 @@ export default {
           tip: "Sign error!",
           time: 5000,
           bgColor: "#ea4b40",
-          icon: require("@/assets/image/Prompt.svg")
+          icon: PromptSvg
         });
       }
     },
@@ -319,7 +322,7 @@ export default {
               tip: err,
               time: 5000,
               bgColor: "#ea4b40",
-              icon: require("@/assets/image/Prompt.svg")
+              icon: PromptSvg
             });
           } else {
             for (let i = 0; i < this.bitIconTypeData.length; i++) {
@@ -339,7 +342,7 @@ export default {
               tip: "Request success",
               time: 3000,
               bgColor: "#5dba5a",
-              icon: require("@/assets/image/Prompt.svg")
+              icon: PromptSvg
             });
             // resolve(hash)
           }
@@ -354,7 +357,7 @@ export default {
               tip: res.error,
               time: 5000,
               bgColor: "#ea4b40",
-              icon: require("@/assets/image/Prompt.svg")
+              icon: PromptSvg
             });
           } else {
             for (let i = 0; i < this.bitIconTypeData.length; i++) {
@@ -366,7 +369,7 @@ export default {
               tip: "Request success",
               time: 3000,
               bgColor: "#5dba5a",
-              icon: require("@/assets/image/Prompt.svg")
+              icon: PromptSvg
             });
             let storeData = {
               balance: 0,
