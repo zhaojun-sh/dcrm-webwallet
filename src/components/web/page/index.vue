@@ -59,7 +59,7 @@
 
     <section id="boxContent_box">
       <transition name="fade">
-        <router-view v-on:setAddress="getChildInfo"></router-view>
+        <router-view @setAddress="getChildInfo"></router-view>
       </transition>
     </section>
     <footer class="footerBottom_box flex-c">
