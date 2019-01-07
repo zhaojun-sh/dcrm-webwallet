@@ -7,8 +7,18 @@
 
     <div class="myAssetsSear_box flex-ec">
       <div class="myAssetsSear_input">
-        <input type="text" placeholder="FSN" class="input-text" @keyup="searchInput" v-model="searchContent"/>
-        <div class="searchIcon"><div class="icon flex-c"><img src="@/assets/image/search.png"></div></div>
+        <input
+          type="text"
+          placeholder="FSN"
+          class="input-text"
+          @keyup="searchInput"
+          v-model="searchContent"
+        >
+        <div class="searchIcon">
+          <div class="icon flex-c">
+            <img src="@/assets/image/search.png">
+          </div>
+        </div>
       </div>
     </div>
 
@@ -27,20 +37,37 @@
           <tr v-for="(item, index) in bitIconTypeSearch" :key="index">
             <td>
               <div class="flex-sc">
-                <div class="logo"><img :src="item.logo"></div>
+                <div class="logo">
+                  <img :src="item.logo">
+                </div>
                 <div class="title">
                   <h2 class="span" v-html="item.nameSimplicity"></h2>
                   <h3 class="p" v-html="item.nameFull"></h3>
                 </div>
               </div>
             </td>
-            <td><span class="span" v-html="item.availbleBalance"></span></td>
-            <td><span class="span" v-html="item.freeze"></span></td>
-            <td><span class="span" v-html="item.totalBalance"></span><p class="p">$ {{item.totalBalanceDoller}}</p></td>
+            <td>
+              <span class="span" v-html="item.availbleBalance"></span>
+            </td>
+            <td>
+              <span class="span" v-html="item.freeze"></span>
+            </td>
+            <td>
+              <span class="span" v-html="item.totalBalance"></span>
+              <p class="p">$ {{item.totalBalanceDoller}}</p>
+            </td>
             <td>
               <div style="text-align:left">
-                <router-link :to="{path:'/Transfer/tranReceive', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView">Receive</router-link>
-                <router-link :to="{path:'/Transfer/tranSend', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView">Send</router-link>
+                <router-link
+                  :to="{path:'/Transfer/tranReceive', query: {currency: item.currency}}"
+                  class="setBtn"
+                  v-if="item.btnView"
+                >Receive</router-link>
+                <router-link
+                  :to="{path:'/Transfer/tranSend', query: {currency: item.currency}}"
+                  class="setBtn"
+                  v-if="item.btnView"
+                >Send</router-link>
                 <a class="setBtn" v-if="!item.btnView" @click="privateSure(item.currency)">Request</a>
                 <!-- <a class="setBtn" @click="privateSure(item.currency)">Request</a> -->
               </div>
@@ -50,137 +77,160 @@
       </table>
     </div>
 
-    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" @click="modalClick">
+    <div
+      class="modal fade bs-example-modal-lg"
+      id="privateSure"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="myModalLabel"
+      @click="modalClick"
+    >
       <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title" id="myModalLabel">Unlock</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
           </div>
           <div class="modal-body">
-            <router-view @sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
+            <router-view @sendSignData="getSignData" :sendDataPage="dataPage"></router-view>
           </div>
           <!-- <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             <button type="button" class="btn btn-primary">Save changes</button>
-          </div> -->
+          </div>-->
         </div>
       </div>
     </div>
 
-    <div class="modal fade bs-example-modal-lg" id="confirmDcrm" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel">
+    <div
+      class="modal fade bs-example-modal-lg"
+      id="confirmDcrm"
+      tabindex="-1"
+      role="dialog"
+      data-backdrop="static"
+      data-keyboard="false"
+      aria-labelledby="myModalLabel"
+    >
       <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title" id="myModalLabel">Request address confirmation</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
           </div>
           <div class="modal-body">
-            <div class="">
-              Do you requeest?
-            </div>
+            <div class>Do you requeest?</div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">No, get me out of here!</button>
-            <button type="button" class="btn btn-primary" @click="sendRawTransion(confirmData)">Yes, I am sure!</button>
+            <button
+              type="button"
+              class="btn btn-default"
+              data-dismiss="modal"
+            >No, get me out of here!</button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              @click="sendRawTransion(confirmData)"
+            >Yes, I am sure!</button>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script>
-import Lilo from '@/assets/js/lilo'
+import Lilo from "@/assets/js/lilo";
 export default {
-  name: 'myAssets',
-  data () {
+  name: "myAssets",
+  data() {
     return {
-      myAssetsTotal: '',
+      myAssetsTotal: "",
       bitIconTypeData: [],
       bitIconTypeSearch: [],
-      walletAddress: '',
-      web3: '',
-      newWeb3: '',
+      walletAddress: "",
+      web3: "",
+      newWeb3: "",
       dataPage: {},
       selectOption: [],
-      searchContent: '',
-      refreshBalance: '',
-      confirmData: ''
-    }
+      searchContent: "",
+      refreshBalance: "",
+      confirmData: ""
+    };
   },
   watch: {
-    myAssetsTotal () {
-      const that = this
-      that.myAssetsTotal = that.$$.thousandBit(that.myAssetsTotal, 2)
+    myAssetsTotal() {
+      this.myAssetsTotal = this.$$.thousandBit(this.myAssetsTotal, 2);
     }
     // bitIconTypeData (cur, old) {
     //   console.log('bitIconTypeData')
     //   console.log(cur)
     //   console.log(old)
-    //   const that = this
-    //   that.myAssetsTotal = 0
-    //   // for (let i = 0; i < that.bitIconTypeData.length; i++) {
-    //   //   that.myAssetsTotal += Number(that.bitIconTypeData[i].balanceDoller)
+    //   const this = this
+    //   this.myAssetsTotal = 0
+    //   // for (let i = 0; i < this.bitIconTypeData.length; i++) {
+    //   //   this.myAssetsTotal += Number(this.bitIconTypeData[i].balanceDoller)
     //   // }
     //   for (let i = 0; i < cur.length; i++) {
-    //     that.myAssetsTotal += Number(cur[i].balanceDoller)
+    //     this.myAssetsTotal += Number(cur[i].balanceDoller)
     //   }
-    //   that.myAssetsTotal = that.$$.thousandBit(that.myAssetsTotal, 'no')
+    //   this.myAssetsTotal = this.$$.thousandBit(this.myAssetsTotal, 'no')
     // },
     // bitIconTypeSearch (cur) {
-    //   const that = this
-    //   that.myAssetsTotal = 0
+    //   const this = this
+    //   this.myAssetsTotal = 0
     //   for (let i = 0; i < cur.length; i++) {
-    //     that.myAssetsTotal += Number(that.$$.thousandToNum(cur[i].totalBalanceDoller))
+    //     this.myAssetsTotal += Number(this.$$.thousandToNum(cur[i].totalBalanceDoller))
     //   }
-    //   that.myAssetsTotal = that.$$.thousandBit(that.myAssetsTotal, 2)
+    //   this.myAssetsTotal = this.$$.thousandBit(this.myAssetsTotal, 2)
     // }
   },
-  mounted () {
-    let that = this
-    that.walletAddress = that.$store.state.addressInfo
-    that.getInitData()
-    that.setWeb3()
-    
-    if (that.$store.state.walletLoadFlag) {
-      that.getBalanceData()
-    }
-    that.refreshBalance = setInterval(() => {
-      that.getBalanceData()
-    }, 250000)
+  mounted() {
+    this.walletAddress = this.$store.state.addressInfo;
+    this.getInitData();
+    this.setWeb3();
 
-    // that.changeCoinDoller('FSN')
-    console.log(that.$$.baseUrl)
+    if (this.$store.state.walletLoadFlag) {
+      this.getBalanceData();
+    }
+    this.refreshBalance = setInterval(() => {
+      this.getBalanceData();
+    }, 250000);
+
+    // this.changeCoinDoller('FSN')
+    console.log(this.$$.baseUrl);
   },
   methods: {
-    modalClick () {
-      const that = this
-      $('#privateSure').on('hide.bs.modal', function () {
-        that.$router.push('/MyAssets')
-      })
+    modalClick() {
+      $("#privateSure").on("hide.bs.modal", () => {
+        this.$router.push("/MyAssets");
+      });
     },
-    myAssetsTotalBalance () {
-      const that = this
-      that.myAssetsTotal = 0
-      for (let i = 0; i < that.bitIconTypeData.length; i++) {
-        that.myAssetsTotal += that.$$.thousandToNum(that.bitIconTypeData[i].totalBalance)
+    myAssetsTotalBalance() {
+      this.myAssetsTotal = 0;
+      for (let i = 0; i < this.bitIconTypeData.length; i++) {
+        this.myAssetsTotal += this.$$.thousandToNum(
+          this.bitIconTypeData[i].totalBalance
+        );
       }
-      that.myAssetsTotal = that.$$.thousandBit(that.myAssetsTotal)
+      this.myAssetsTotal = this.$$.thousandBit(this.myAssetsTotal);
     },
-    searchInput () {
-      const that = this
-      that.bitIconTypeSearch = []
-      let searchTxt = that.searchContent ? that.searchContent : that.searchContent.toLowerCase()
-      if (searchTxt === '') {
-        that.bitIconTypeSearch = that.bitIconTypeData
+    searchInput() {
+      this.bitIconTypeSearch = [];
+      let searchTxt = this.searchContent
+        ? this.searchContent
+        : this.searchContent.toLowerCase();
+      if (searchTxt === "") {
+        this.bitIconTypeSearch = this.bitIconTypeData;
       } else {
-        if (!isNaN(that.searchContent)) {
-          searchTxt = that.$$.thousandBit(that.searchContent, 'no')
+        if (!isNaN(this.searchContent)) {
+          searchTxt = this.$$.thousandBit(this.searchContent, "no");
         }
-        for (let i = 0; i < that.bitIconTypeData.length; i++) {
-          let searchArr = that.bitIconTypeData[i]
+        for (let i = 0; i < this.bitIconTypeData.length; i++) {
+          let searchArr = this.bitIconTypeData[i];
           let searchObj = {
             nameSimplicity: searchArr.nameSimplicity,
             nameFull: searchArr.nameFull,
@@ -188,103 +238,119 @@ export default {
             freeze: searchArr.freeze,
             totalBalance: searchArr.totalBalance,
             totalBalanceDoller: searchArr.totalBalanceDoller
+          };
+          if (
+            searchObj.nameSimplicity.toLowerCase().indexOf(searchTxt) !== -1 ||
+            searchObj.nameFull.toLowerCase().indexOf(searchTxt) !== -1 ||
+            searchObj.availbleBalance.indexOf(searchTxt) !== -1 ||
+            searchObj.freeze.indexOf(searchTxt) !== -1 ||
+            searchObj.totalBalance.indexOf(searchTxt) !== -1 ||
+            searchObj.totalBalanceDoller.indexOf(searchTxt) !== -1
+          ) {
+            this.bitIconTypeSearch.push(searchArr);
           }
-          if (searchObj.nameSimplicity.toLowerCase().indexOf(searchTxt) !== -1 || searchObj.nameFull.toLowerCase().indexOf(searchTxt) !== -1 || searchObj.availbleBalance.indexOf(searchTxt) !== -1 || searchObj.freeze.indexOf(searchTxt) !== -1 || searchObj.totalBalance.indexOf(searchTxt) !== -1 || searchObj.totalBalanceDoller.indexOf(searchTxt) !== -1) {
-            that.bitIconTypeSearch.push(searchArr)
-          }
+        }
+        // console.log(this.bitIconTypeData.toString())
       }
-        // console.log(that.bitIconTypeData.toString())
+      this.myAssetsTotal = 0;
+      for (let i = 0; i < this.bitIconTypeSearch.length; i++) {
+        this.myAssetsTotal += Number(
+          this.$$.thousandToNum(this.bitIconTypeSearch[i].totalBalanceDoller)
+        );
       }
-      that.myAssetsTotal = 0
-      for (let i = 0; i < that.bitIconTypeSearch.length; i++) {
-        that.myAssetsTotal += Number(that.$$.thousandToNum(that.bitIconTypeSearch[i].totalBalanceDoller))
-      }
-      that.myAssetsTotal = that.$$.thousandBit(that.myAssetsTotal, 2)
+      this.myAssetsTotal = this.$$.thousandBit(this.myAssetsTotal, 2);
     },
-    getInitData () {
-      const that = this
-      let coinInfo = that.$store.state.coinInfo
-      let bitCoinInfo = []
-      for (let i = 0;i < coinInfo.length; i++) {
-        let balance = Number(coinInfo[i].balance) === 0 ? '0.00' : that.$$.thousandBit(coinInfo[i].balance, 'no')
-        let balanceDoller = Number(coinInfo[i].balanceDoller) === 0 ? '0.00' : that.$$.thousandBit(coinInfo[i].balanceDoller, 2)
+    getInitData() {
+      let coinInfo = this.$store.state.coinInfo;
+      let bitCoinInfo = [];
+      for (let i = 0; i < coinInfo.length; i++) {
+        let balance =
+          Number(coinInfo[i].balance) === 0
+            ? "0.00"
+            : this.$$.thousandBit(coinInfo[i].balance, "no");
+        let balanceDoller =
+          Number(coinInfo[i].balanceDoller) === 0
+            ? "0.00"
+            : this.$$.thousandBit(coinInfo[i].balanceDoller, 2);
         // console.log(balance)
         bitCoinInfo.push({
           logo: coinInfo[i].logo,
           nameSimplicity: coinInfo[i].coin,
           nameFull: coinInfo[i].coinAll,
           availbleBalance: balance,
-          freeze: Number(coinInfo[i].freeze) === 0 ? '0.00' : that.$$.thousandBit(coinInfo[i].freeze, 'no'),
+          freeze:
+            Number(coinInfo[i].freeze) === 0
+              ? "0.00"
+              : this.$$.thousandBit(coinInfo[i].freeze, "no"),
           totalBalance: balance,
           totalBalanceDoller: balanceDoller,
           currency: coinInfo[i].coin,
-          receive: '',
-          send: '',
+          receive: "",
+          send: "",
           btnView: coinInfo[i].flag
-        })
+        });
       }
-      that.bitIconTypeSearch = that.bitIconTypeData = bitCoinInfo
+      this.bitIconTypeSearch = this.bitIconTypeData = bitCoinInfo;
     },
-    setWeb3 () {
-      const that = this
-      that.$$.setWeb3(that)
-      that.newWeb3 = new Lilo(that.$$.baseUrl)
+    setWeb3() {
+      this.$$.setWeb3(this);
+      this.newWeb3 = new Lilo(this.$$.baseUrl);
     },
-    privateSure (data) {
-      const that = this
-      that.dataPage = {
+    privateSure(data) {
+      this.dataPage = {
         coin: data,
-        sendType: 'MYWALLET',
-        from: that.walletAddress,
-        nonce: '',
-      }
+        sendType: "MYWALLET",
+        from: this.walletAddress,
+        nonce: ""
+      };
       try {
-        that.dataPage.nonce = that.web3.eth.getTransactionCount(that.walletAddress, 'pending')
+        this.dataPage.nonce = this.web3.eth.getTransactionCount(
+          this.walletAddress,
+          "pending"
+        );
       } catch (error) {
-        that.nonceNum = that.$$.getWeb3({
-          method: 'eth_getTransactionCount',
-          params: [that.walletAddress, 'pending']
-        }).result
+        this.nonceNum = this.$$.getWeb3({
+          method: "eth_getTransactionCount",
+          params: [this.walletAddress, "pending"]
+        }).result;
       }
-      that.$router.push('/pwdMyAssets')
-      $('#privateSure').modal('show')
+      this.$router.push("/pwdMyAssets");
+      $("#privateSure").modal("show");
     },
-    getSignData (data) {
-      const that = this
+    getSignData(data) {
       if (data) {
         if (data.nowFlag) {
-          that.sendRawTransion(data)
+          this.sendRawTransion(data);
         } else {
-          that.confirmData = data
-          $('#confirmDcrm').modal('show')
+          this.confirmData = data;
+          $("#confirmDcrm").modal("show");
         }
-        $('#privateSure').modal('hide')
+        $("#privateSure").modal("hide");
       } else {
-        $('#privateSure').modal('hide')
-        that.$$.layerMsg({
-          tip: 'Sign error!',
+        $("#privateSure").modal("hide");
+        this.$$.layerMsg({
+          tip: "Sign error!",
           time: 3000,
-          bgColor: '#ea4b40',
-          icon: require('@/assets/image/Prompt.svg')
-        })
+          bgColor: "#ea4b40",
+          icon: require("@/assets/image/Prompt.svg")
+        });
       }
     },
-    sendRawTransion (data) {
-      const that = this
+    sendRawTransion(data) {
       try {
-        that.web3.eth.sendRawTransaction(data.serializedTx, function (err, hash) {
+        this.web3.eth.sendRawTransaction(data.serializedTx, (err, hash) => {
           if (err) {
-            console.log(err)
-            that.$$.layerMsg({
+            console.log(err);
+            this.$$.layerMsg({
               tip: err,
               time: 5000,
-              bgColor: '#ea4b40',
-              icon: require('@/assets/image/Prompt.svg')
-            })
+              bgColor: "#ea4b40",
+              icon: require("@/assets/image/Prompt.svg")
+            });
           } else {
-            for (let i = 0; i < that.bitIconTypeData.length; i++) {
-              if (data.coin === that.bitIconTypeData[i].currency) {
-                that.bitIconTypeData[i].btnView = true
+            for (let i = 0; i < this.bitIconTypeData.length; i++) {
+              if (data.coin === this.bitIconTypeData[i].currency) {
+                this.bitIconTypeData[i].btnView = true;
               }
             }
             let storeData = {
@@ -292,234 +358,282 @@ export default {
               balanceDoller: 0,
               flag: true,
               coin: data.coin
-            }
-            that.$store.commit('storeCoinInfo', storeData)
-            $('#confirmDcrm').modal('hide')
-            that.$$.layerMsg({
-              tip: 'Request success',
+            };
+            this.$store.commit("storeCoinInfo", storeData);
+            $("#confirmDcrm").modal("hide");
+            this.$$.layerMsg({
+              tip: "Request success",
               time: 3000,
-              bgColor: '#5dba5a',
-              icon: require('@/assets/image/Prompt.svg')
-            })
+              bgColor: "#5dba5a",
+              icon: require("@/assets/image/Prompt.svg")
+            });
             // resolve(hash)
           }
-        })
+        });
       } catch (error) {
-        that.$$.web3({
-          method: 'eth_sendRawTransaction',
+        this.$$.web3({
+          method: "eth_sendRawTransaction",
           params: [data.serializedTx]
-        }).then(function (res) {
+        }).then(res => {
           if (res.error) {
-            that.$$.layerMsg({
+            this.$$.layerMsg({
               tip: res.error,
               time: 4000,
-              bgColor: '#ea4b40',
-              icon: require('@/assets/image/Prompt.svg')
-            })
+              bgColor: "#ea4b40",
+              icon: require("@/assets/image/Prompt.svg")
+            });
           } else {
-            for (let i = 0; i < that.bitIconTypeData.length; i++) {
-              if (data.coin === that.bitIconTypeData[i].currency) {
-                that.bitIconTypeData[i].btnView = true
+            for (let i = 0; i < this.bitIconTypeData.length; i++) {
+              if (data.coin === this.bitIconTypeData[i].currency) {
+                this.bitIconTypeData[i].btnView = true;
               }
             }
-            that.$$.layerMsg({
-              tip: 'Request success',
+            this.$$.layerMsg({
+              tip: "Request success",
               time: 3000,
-              bgColor: '#5dba5a',
-              icon: require('@/assets/image/Prompt.svg')
-            })
+              bgColor: "#5dba5a",
+              icon: require("@/assets/image/Prompt.svg")
+            });
             let storeData = {
               balance: 0,
               balanceDoller: 0,
               flag: true,
               coin: data.coin
-            }
-            that.$store.commit('storeCoinInfo', storeData)
+            };
+            this.$store.commit("storeCoinInfo", storeData);
           }
-        })
+        });
       }
     },
-    getBalanceData () {
-      const that = this
-      if (!that.walletAddress) {
-        return
+    getBalanceData() {
+      if (!this.walletAddress) {
+        return;
       }
-      that.setWeb3()
-      let coinInfo = that.$store.state.coinInfo
-      // console.log(that.walletAddress)
-      that.myAssetsTotal = 0
+      this.setWeb3();
+      let coinInfo = this.$store.state.coinInfo;
+      // console.log(this.walletAddress)
+      this.myAssetsTotal = 0;
       for (let i = 0; i < coinInfo.length; i++) {
-        let coin = coinInfo[i].coin
+        let coin = coinInfo[i].coin;
         let storeData = {
-          balance: '',
-          balanceDoller: '',
-          flag: '',
+          balance: "",
+          balanceDoller: "",
+          flag: "",
           coin: coin
-        }
-        if (coin === 'FSN') {
+        };
+        if (coin === "FSN") {
           try {
-            let balanceWei = that.web3.eth.getBalance(that.walletAddress)
-            let balanceGwei = that.web3.fromWei(balanceWei, 'ether').toString()
-            let balanceUSD = that.changeCoinDoller(coin, balanceGwei)
-            that.myAssetsTotal = Number(that.myAssetsTotal) + Number(balanceUSD)
+            let balanceWei = this.web3.eth.getBalance(this.walletAddress);
+            let balanceGwei = this.web3.fromWei(balanceWei, "ether").toString();
+            let balanceUSD = this.changeCoinDoller(coin, balanceGwei);
+            this.myAssetsTotal =
+              Number(this.myAssetsTotal) + Number(balanceUSD);
             storeData = {
               balance: balanceGwei,
               balanceDoller: balanceUSD,
               flag: true,
               coin: coin
-            }
-            
-            balanceGwei = Number(balanceGwei) === 0 ? '0.00' : that.$$.thousandBit(balanceGwei, 'no')
-            balanceUSD = Number(balanceUSD) === 0 ? '0.00' : that.$$.thousandBit(balanceUSD, 2)
-            that.bitIconTypeData[0].availbleBalance = balanceGwei
-            that.bitIconTypeData[0].totalBalance = balanceGwei
-            that.bitIconTypeData[0].totalBalanceDoller = balanceUSD
-            that.$store.commit('storeCoinInfo', storeData)
+            };
+
+            balanceGwei =
+              Number(balanceGwei) === 0
+                ? "0.00"
+                : this.$$.thousandBit(balanceGwei, "no");
+            balanceUSD =
+              Number(balanceUSD) === 0
+                ? "0.00"
+                : this.$$.thousandBit(balanceUSD, 2);
+            this.bitIconTypeData[0].availbleBalance = balanceGwei;
+            this.bitIconTypeData[0].totalBalance = balanceGwei;
+            this.bitIconTypeData[0].totalBalanceDoller = balanceUSD;
+            this.$store.commit("storeCoinInfo", storeData);
           } catch (error) {
-            console.log(error)
-            that.$$.web3({
-              method: 'eth_getBalance',
-              params: [that.walletAddress, 'latest']
-            }).then(function (res) {
+            console.log(error);
+            this.$$.web3({
+              method: "eth_getBalance",
+              params: [this.walletAddress, "latest"]
+            }).then(res => {
               if (!res.error) {
-                let balanceWei = that.web3.eth.getBalance(that.walletAddress)
-                let balanceGwei = that.web3.fromWei(balanceWei, 'ether').toString()
-                let balanceUSD = that.changeCoinDoller(coin, balanceGwei)
-                that.myAssetsTotal = Number(that.myAssetsTotal) + Number(balanceUSD)
+                let balanceWei = this.web3.eth.getBalance(this.walletAddress);
+                let balanceGwei = this.web3
+                  .fromWei(balanceWei, "ether")
+                  .toString();
+                let balanceUSD = this.changeCoinDoller(coin, balanceGwei);
+                this.myAssetsTotal =
+                  Number(this.myAssetsTotal) + Number(balanceUSD);
                 storeData = {
                   balance: balanceGwei,
                   balanceDoller: balanceUSD,
                   flag: true,
                   coin: coin
-                }
-                balanceGwei = Number(balanceGwei) === 0 ? '0.00' : that.$$.thousandBit(balanceGwei, 'no')
-                balanceUSD = Number(balanceUSD) === 0 ? '0.00' : that.$$.thousandBit(balanceUSD, 2)
-                that.bitIconTypeData[0].availbleBalance = balanceGwei
-                that.bitIconTypeData[0].totalBalance = balanceGwei
-                that.bitIconTypeData[0].totalBalanceDoller = balanceUSD
-                that.$store.commit('storeCoinInfo', storeData)
+                };
+                balanceGwei =
+                  Number(balanceGwei) === 0
+                    ? "0.00"
+                    : this.$$.thousandBit(balanceGwei, "no");
+                balanceUSD =
+                  Number(balanceUSD) === 0
+                    ? "0.00"
+                    : this.$$.thousandBit(balanceUSD, 2);
+                this.bitIconTypeData[0].availbleBalance = balanceGwei;
+                this.bitIconTypeData[0].totalBalance = balanceGwei;
+                this.bitIconTypeData[0].totalBalanceDoller = balanceUSD;
+                this.$store.commit("storeCoinInfo", storeData);
               } else {
-                let balanceWei = that.web3.eth.getBalance(that.walletAddress)
-                let balanceGwei = that.web3.fromWei(balanceWei, 'ether').toString()
-                let balanceUSD = that.changeCoinDoller(coin, balanceGwei)
-                that.myAssetsTotal = Number(that.myAssetsTotal) + Number(balanceUSD)
+                let balanceWei = this.web3.eth.getBalance(this.walletAddress);
+                let balanceGwei = this.web3
+                  .fromWei(balanceWei, "ether")
+                  .toString();
+                let balanceUSD = this.changeCoinDoller(coin, balanceGwei);
+                this.myAssetsTotal =
+                  Number(this.myAssetsTotal) + Number(balanceUSD);
                 storeData = {
                   balance: balanceGwei,
                   balanceDoller: balanceUSD,
                   flag: true,
                   coin: coin
-                }
-                balanceGwei = Number(balanceGwei) === 0 ? '0.00' : that.$$.thousandBit(balanceGwei, 'no')
-                balanceUSD = Number(balanceUSD) === 0 ? '0.00' : that.$$.thousandBit(balanceUSD, 2)
-                that.bitIconTypeData[0].availbleBalance = balanceGwei
-                that.bitIconTypeData[0].totalBalance = balanceGwei
-                that.bitIconTypeData[0].totalBalanceDoller = balanceUSD
-                that.$$.layerMsg({
+                };
+                balanceGwei =
+                  Number(balanceGwei) === 0
+                    ? "0.00"
+                    : this.$$.thousandBit(balanceGwei, "no");
+                balanceUSD =
+                  Number(balanceUSD) === 0
+                    ? "0.00"
+                    : this.$$.thousandBit(balanceUSD, 2);
+                this.bitIconTypeData[0].availbleBalance = balanceGwei;
+                this.bitIconTypeData[0].totalBalance = balanceGwei;
+                this.bitIconTypeData[0].totalBalanceDoller = balanceUSD;
+                this.$$.layerMsg({
                   tip: res,
                   time: 3000,
-                  bgColor: '#ea4b40',
-                  icon: require('@/assets/image/Prompt.svg')
-                })
+                  bgColor: "#ea4b40",
+                  icon: require("@/assets/image/Prompt.svg")
+                });
               }
-            })
+            });
           }
         } else {
-          that.newWeb3.lilo.dcrmGetBalance(that.walletAddress, coin).then(function(res){
-            if (!isNaN(res)) {
-              // let balanceGwei = that.web3.fromWei(res, 'ether')
-              let balanceWei = res
-              let balanceGwei = that.web3.fromWei(res, 'ether').toString()
-              let balanceUSD = that.changeCoinDoller(coin, balanceGwei)
-              that.myAssetsTotal = Number(that.myAssetsTotal) + Number(balanceUSD)
-              storeData = {
-                balance: balanceGwei,
-                balanceDoller: balanceUSD,
-                flag: true,
-                coin: coin
-              }
-              balanceGwei = Number(balanceGwei) === 0 ? '0.00' : that.$$.thousandBit(balanceGwei, 'no')
-              balanceUSD = Number(balanceUSD) === 0 ? '0.00' : that.$$.thousandBit(balanceUSD, 2)
-              for (let j = 0; j < that.bitIconTypeData.length; j++) {
-                if (that.bitIconTypeData[j].currency === coin) {
-                  that.bitIconTypeData[j].availbleBalance = balanceGwei
-                  that.bitIconTypeData[j].totalBalance = balanceGwei
-                  that.bitIconTypeData[j].totalBalanceDoller = balanceUSD
-                  that.bitIconTypeData[j].btnView = true
+          this.newWeb3.lilo
+            .dcrmGetBalance(this.walletAddress, coin)
+            .then(res => {
+              if (!isNaN(res)) {
+                // let balanceGwei = this.web3.fromWei(res, 'ether')
+                let balanceWei = res;
+                let balanceGwei = this.web3.fromWei(res, "ether").toString();
+                let balanceUSD = this.changeCoinDoller(coin, balanceGwei);
+                this.myAssetsTotal =
+                  Number(this.myAssetsTotal) + Number(balanceUSD);
+                storeData = {
+                  balance: balanceGwei,
+                  balanceDoller: balanceUSD,
+                  flag: true,
+                  coin: coin
+                };
+                balanceGwei =
+                  Number(balanceGwei) === 0
+                    ? "0.00"
+                    : this.$$.thousandBit(balanceGwei, "no");
+                balanceUSD =
+                  Number(balanceUSD) === 0
+                    ? "0.00"
+                    : this.$$.thousandBit(balanceUSD, 2);
+                for (let j = 0; j < this.bitIconTypeData.length; j++) {
+                  if (this.bitIconTypeData[j].currency === coin) {
+                    this.bitIconTypeData[j].availbleBalance = balanceGwei;
+                    this.bitIconTypeData[j].totalBalance = balanceGwei;
+                    this.bitIconTypeData[j].totalBalanceDoller = balanceUSD;
+                    this.bitIconTypeData[j].btnView = true;
+                  }
                 }
-              }
-              that.$store.commit('storeCoinInfo', storeData)
-            } else {
-              // let balanceGwei = that.web3.fromWei(0, 'ether')
-              let balanceWei = 0
-              let balanceGwei = that.web3.fromWei(0, 'ether').toString()
-              let balanceUSD = that.changeCoinDoller(coin, balanceGwei)
-              that.myAssetsTotal = Number(that.myAssetsTotal) + Number(balanceUSD)
-              storeData = {
-                balance: balanceGwei,
-                balanceDoller: balanceUSD,
-                flag: false,
-                coin: coin
-              }
-              balanceGwei = Number(balanceGwei) === 0 ? '0.00' : that.$$.thousandBit(balanceGwei, 'no')
-              balanceUSD = Number(balanceUSD) === 0 ? '0.00' : that.$$.thousandBit(balanceUSD, 2)
-              for (let j = 0; j < that.bitIconTypeData.length; j++) {
-                if (that.bitIconTypeData[j].currency === coin) {
-                  that.bitIconTypeData[j].availbleBalance = balanceGwei
-                  that.bitIconTypeData[j].totalBalance = balanceGwei
-                  that.bitIconTypeData[j].totalBalanceDoller = balanceUSD
-                  that.bitIconTypeData[j].btnView = false
+                this.$store.commit("storeCoinInfo", storeData);
+              } else {
+                // let balanceGwei = this.web3.fromWei(0, 'ether')
+                let balanceWei = 0;
+                let balanceGwei = this.web3.fromWei(0, "ether").toString();
+                let balanceUSD = this.changeCoinDoller(coin, balanceGwei);
+                this.myAssetsTotal =
+                  Number(this.myAssetsTotal) + Number(balanceUSD);
+                storeData = {
+                  balance: balanceGwei,
+                  balanceDoller: balanceUSD,
+                  flag: false,
+                  coin: coin
+                };
+                balanceGwei =
+                  Number(balanceGwei) === 0
+                    ? "0.00"
+                    : this.$$.thousandBit(balanceGwei, "no");
+                balanceUSD =
+                  Number(balanceUSD) === 0
+                    ? "0.00"
+                    : this.$$.thousandBit(balanceUSD, 2);
+                for (let j = 0; j < this.bitIconTypeData.length; j++) {
+                  if (this.bitIconTypeData[j].currency === coin) {
+                    this.bitIconTypeData[j].availbleBalance = balanceGwei;
+                    this.bitIconTypeData[j].totalBalance = balanceGwei;
+                    this.bitIconTypeData[j].totalBalanceDoller = balanceUSD;
+                    this.bitIconTypeData[j].btnView = false;
+                  }
                 }
+                this.$store.commit("storeCoinInfo", storeData);
               }
-              that.$store.commit('storeCoinInfo', storeData)
-            }
-          })
+            });
         }
       }
-      that.$store.commit('storeWalletLoadFlag', false)
+      this.$store.commit("storeWalletLoadFlag", false);
     },
-    changeCoinDoller (coin, balance) {
-      const that = this
-      let dollerNum = 0
-      let coinData = [{
-        coin: 'FSN',
-        url: 'https://api.coinmarketcap.com/v1/ticker/fusion/'
-      }, {
-        coin: 'BTC',
-        url: 'https://api.coinmarketcap.com/v1/ticker/bitcoin/'
-      }, {
-        coin: 'ETH',
-        url: 'https://api.coinmarketcap.com/v1/ticker/ethereum/'
-      }, {
-        coin: 'BNB',
-        url: 'https://api.coinmarketcap.com/v1/ticker/binance-coin/'
-      }, {
-        coin: 'MKR',
-        url: 'https://api.coinmarketcap.com/v1/ticker/maker/'
-      }, {
-        coin: 'GUSD',
-        url: 'https://api.coinmarketcap.com/v1/ticker/gemini-dollar/'
-      }, {
-        coin: 'HT',
-        url: 'https://api.coinmarketcap.com/v1/ticker/huobi-token/'
-      }, {
-        coin: 'BNT',
-        url: 'https://api.coinmarketcap.com/v1/ticker/bancor/'
-      }]
+    changeCoinDoller(coin, balance) {
+      let dollerNum = 0;
+      let coinData = [
+        {
+          coin: "FSN",
+          url: "https://api.coinmarketcap.com/v1/ticker/fusion/"
+        },
+        {
+          coin: "BTC",
+          url: "https://api.coinmarketcap.com/v1/ticker/bitcoin/"
+        },
+        {
+          coin: "ETH",
+          url: "https://api.coinmarketcap.com/v1/ticker/ethereum/"
+        },
+        {
+          coin: "BNB",
+          url: "https://api.coinmarketcap.com/v1/ticker/binance-coin/"
+        },
+        {
+          coin: "MKR",
+          url: "https://api.coinmarketcap.com/v1/ticker/maker/"
+        },
+        {
+          coin: "GUSD",
+          url: "https://api.coinmarketcap.com/v1/ticker/gemini-dollar/"
+        },
+        {
+          coin: "HT",
+          url: "https://api.coinmarketcap.com/v1/ticker/huobi-token/"
+        },
+        {
+          coin: "BNT",
+          url: "https://api.coinmarketcap.com/v1/ticker/bancor/"
+        }
+      ];
       // let endTime = Date.parse(new Date())
       // let startTime = endTime - (1000 * 60 * 60 * 24)
       // let periodTime = '/' + startTime + '/' + endTime
       for (let i = 0; i < coinData.length; i++) {
         if (coin === coinData[i].coin) {
-          dollerNum = that.getDoller(coinData[i].url)
-          break
+          dollerNum = this.getDoller(coinData[i].url);
+          break;
         }
       }
-      dollerNum = dollerNum * balance
+      dollerNum = dollerNum * balance;
       // console.log(periodTime)
       // console.log(coin + ':' + dollerNum)
-      return dollerNum
+      return dollerNum;
     },
-    getDoller (url) {
+    getDoller(url) {
       // $.ajax({
       //   type: "get",
       //   async: false,
@@ -527,10 +641,10 @@ export default {
       //   dataType: "jsonp",
       //   jsonp: "callback",
       //   jsonpCallback: "weather",
-      //   success: function (res) {
+      //   success: (res) => {
       //     console.log(res)
       //   },
-      //   error: function (res) {
+      //   error: (res) => {
       //     console.log(res)
       //   }
       // })
@@ -540,32 +654,31 @@ export default {
       // script.src = url + time
       // document.body.appendChild(script)
       // return
-      let callbackData = 0
+      let callbackData = 0;
       $.ajax({
         url: url,
-        type: 'get',
+        type: "get",
         // contentType: 'application/json',
-        datatype: 'jsonp',
+        datatype: "jsonp",
         async: false,
-        success: function (res) {
+        success: res => {
           // console.log(res[0].price_usd)
           if (res.length > 0) {
-            callbackData = res[0].price_usd
+            callbackData = res[0].price_usd;
           } else {
-            callbackData = 0
+            callbackData = 0;
           }
         },
-        error: function (res) {
-          callbackData = 0
+        error: res => {
+          callbackData = 0;
         }
-      })
-      return callbackData
+      });
+      return callbackData;
     }
   },
-  beforeDestroy () {
-    let that = this
-    clearInterval(that.refreshBalance)
-    that.refreshBalance = null
+  beforeDestroy() {
+    clearInterval(this.refreshBalance);
+    this.refreshBalance = null;
   }
-}
+};
 </script>

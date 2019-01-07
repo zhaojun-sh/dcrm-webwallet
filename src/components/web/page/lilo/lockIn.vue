@@ -4,12 +4,26 @@
       <div class="receiveAddress_box">
         <h3 v-html="addressTitle"></h3>
         <div class="receiveAddress_pwd">
-          <input type="text" class="input-text input" v-model="coinAddress" readonly="readonly" id="walletAdressHide"/>
+          <input
+            type="text"
+            class="input-text input"
+            v-model="coinAddress"
+            readonly="readonly"
+            id="walletAdressHide"
+          >
           <!-- <input type="hidden" readonly v-model="privateKey" id="privateKeyHide" /> -->
         </div>
         <div class="receiveAddress_btn flex-c">
-          <button class="btn blue flex-c" @click="qrcode(coinAddress)"><div class="icon"><img src="@/assets/image/QRcode.svg"></div>Show QR code</button>
-          <button class="btn cyan flex-c" @click="copyAddress('#walletAdressHide')"><div class="icon"><img src="@/assets/image/copy.svg"></div>Copy clipboard</button>
+          <button class="btn blue flex-c" @click="qrcode(coinAddress)">
+            <div class="icon">
+              <img src="@/assets/image/QRcode.svg">
+            </div>Show QR code
+          </button>
+          <button class="btn cyan flex-c" @click="copyAddress('#walletAdressHide')">
+            <div class="icon">
+              <img src="@/assets/image/copy.svg">
+            </div>Copy clipboard
+          </button>
         </div>
       </div>
 
@@ -25,16 +39,24 @@
                 <th width="5%">Coin</th>
                 <th width="5%">Amount</th>
                 <th width="25%">Date</th>
-                <th width="">Information</th>
+                <th width>Information</th>
                 <th width="10%">Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="item in historyData" :key="item.index">
-                <td><span v-html="item.statusFsn" :class="item.statusFsn=='New'?'red':''"></span></td>
-                <td><span v-html="selectData.coin"></span></td>
-                <td><span v-html="item.value2"></span></td>
-                <td><span v-html="item.date"></span></td>
+                <td>
+                  <span v-html="item.statusFsn" :class="item.statusFsn=='New'?'red':''"></span>
+                </td>
+                <td>
+                  <span v-html="selectData.coin"></span>
+                </td>
+                <td>
+                  <span v-html="item.value2"></span>
+                </td>
+                <td>
+                  <span v-html="item.date"></span>
+                </td>
                 <td>
                   <div class="moreInfo_box" @click="MoreContent">
                     <span v-html="item.hash" :title="item.info" class="ellipsis moreInfo_hax"></span>
@@ -46,7 +68,11 @@
                   </div>
                 </td>
                 <td>
-                  <button class="btn" v-if="item.statusFsn === 'New'" @click="privateSure({nonce:item.nonce, gasPrice: item.gasPrice, gas: item.gas, value: item.value2,hash: item.hash})">Lockin</button>
+                  <button
+                    class="btn"
+                    v-if="item.statusFsn === 'New'"
+                    @click="privateSure({nonce:item.nonce, gasPrice: item.gasPrice, gas: item.gas, value: item.value2,hash: item.hash})"
+                  >Lockin</button>
                 </td>
               </tr>
             </tbody>
@@ -54,7 +80,13 @@
         </div>
       </div>
 
-      <div class="modal fade bs-example-modal-md" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="qrcodeBox">
+      <div
+        class="modal fade bs-example-modal-md"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="mySmallModalLabel"
+        id="qrcodeBox"
+      >
         <div class="modal-dialog modal-md modal-dialog-centered" role="document">
           <div class="modal-content">
             <div class="qrcodeCont_box">
@@ -66,18 +98,28 @@
           </div>
         </div>
       </div>
-
     </div>
 
-    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel" @click="modalClick">
+    <div
+      class="modal fade bs-example-modal-lg"
+      id="privateSure"
+      tabindex="-1"
+      role="dialog"
+      data-backdrop="static"
+      data-keyboard="false"
+      aria-labelledby="myModalLabel"
+      @click="modalClick"
+    >
       <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title" id="myModalLabel">LockIn</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
           </div>
           <div class="modal-body">
-            <router-view @sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
+            <router-view @sendSignData="getSignData" :sendDataPage="dataPage"></router-view>
           </div>
         </div>
       </div>
@@ -146,241 +188,257 @@
           </div>
         </div>
       </div>
-    </div> -->
-
-
+    </div>-->
   </div>
 </template>
 
 <script>
-import QRCode from 'qrcodejs2'
-import Lilo from '@/assets/js/lilo'
+import QRCode from "qrcodejs2";
+import Lilo from "@/assets/js/lilo";
 export default {
-  name: 'receive',
-  props: ['selectData'],
-  data () {
+  name: "receive",
+  props: ["selectData"],
+  data() {
     return {
-      addressTitle: '',
-      walletAddress: '',
-      coinAddress: '',
+      addressTitle: "",
+      walletAddress: "",
+      coinAddress: "",
       historyData: [],
-      web3: '',
+      web3: "",
       dataPage: {},
-      serializedTx: '',
-      newWeb3: '',
-      dcrmAddress: ''
-    }
+      serializedTx: "",
+      newWeb3: "",
+      dcrmAddress: ""
+    };
   },
   watch: {
-    selectData (cur, old) {
-      const that = this
+    selectData(cur, old) {
       if (cur.coin !== old.coin) {
-        that.getInitData()
+        this.getInitData();
       }
     }
   },
-  mounted () {
-    const that = this
-    that.pageRefresh()
-    that.walletAddress = that.$store.state.addressInfo
-    // $('#selectValData').change(function () {
-    //   that.getInitData()
+  mounted() {
+    this.pageRefresh();
+    this.walletAddress = this.$store.state.addressInfo;
+    // $('#selectValData').change(event => {
+    //   $(event.currentTarget).getInitData()
     // })
     // $('#selectValData').change()
-    // that.getInitData()
-    if (that.selectData) {
-      that.getInitData()
+    // this.getInitData()
+    if (this.selectData) {
+      this.getInitData();
     }
   },
   methods: {
-    getInitData () {
-      const that = this
-      // console.log(that.selectData)
-      that.titleChange(that.selectData.coin)
-      that.setWeb3()
-      that.dcrmAddress = that.coinAddress = that.selectData.address
-      that.getDatabaseInfo()
+    getInitData() {
+      // console.log(this.selectData)
+      this.titleChange(this.selectData.coin);
+      this.setWeb3();
+      this.dcrmAddress = this.coinAddress = this.selectData.address;
+      this.getDatabaseInfo();
     },
-    modalClick () {
-      const that = this
-      $('#privateSure').on('hide.bs.modal', function () {
-        that.$router.push('/LILO/lockIn')
-      })
+    modalClick() {
+      $("#privateSure").on("hide.bs.modal", () => {
+        this.$router.push("/LILO/lockIn");
+      });
     },
-    titleChange (bitType) {
-      const that = this
-      that.addressTitle = bitType + ' Deposit Address'
+    titleChange(bitType) {
+      this.addressTitle = bitType + " Deposit Address";
     },
-    setWeb3 () {
-      const that = this
-      that.$$.setWeb3(that)
+    setWeb3() {
+      this.$$.setWeb3(this);
       // let Web3 = require('web3')
       // let web3 = new Web3()
-      // // console.log(that.selectData.url)
+      // // console.log(this.selectData.url)
       // if (typeof web3 !== 'undefined') {
       //   // Web3 = new Web3(Web3.currentProvider)
-      //   web3 = new Web3(new Web3.providers.HttpProvider(that.$$.baseUrl))
+      //   web3 = new Web3(new Web3.providers.HttpProvider(this.$$.baseUrl))
       // } else {
-      //   web3 = new Web3(new Web3.providers.HttpProvider(that.selectData.url))
+      //   web3 = new Web3(new Web3.providers.HttpProvider(this.selectData.url))
       // }
-      // that.web3 = web3
-      // console.log(that.$$.baseUrl)
-      that.newWeb3 = new Lilo(that.$$.baseUrl)
+      // this.web3 = web3
+      // console.log(this.$$.baseUrl)
+      this.newWeb3 = new Lilo(this.$$.baseUrl);
     },
-    getSignData (data) {
-      const that = this
+    getSignData(data) {
       if (data) {
-        that.serializedTx = data
-        that.sendAmoundInfo()
-        $('#privateSure').modal('hide')
-        $('#sendInfo').modal('show')
+        this.serializedTx = data;
+        this.sendAmoundInfo();
+        $("#privateSure").modal("hide");
+        $("#sendInfo").modal("show");
       } else {
-        $('#privateSure').modal('hide')
-        $('#sendInfo').modal('hide')
-        that.$$.layerMsg({
-          tip: 'Sign error!',
+        $("#privateSure").modal("hide");
+        $("#sendInfo").modal("hide");
+        this.$$.layerMsg({
+          tip: "Sign error!",
           time: 3000,
-          bgColor: '#ea4b40',
-          icon: require('@/assets/image/Prompt.svg')
-        })
+          bgColor: "#ea4b40",
+          icon: require("@/assets/image/Prompt.svg")
+        });
       }
     },
-    sendAmoundInfo () {
-      const that = this
-      that.setWeb3()
+    sendAmoundInfo() {
+      this.setWeb3();
       try {
-        that.web3.eth.sendRawTransaction(that.serializedTx, function(err, hash) {
+        this.web3.eth.sendRawTransaction(this.serializedTx, (err, hash) => {
           if (!err) {
-            that.$$.layerMsg({
-              tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + hash,
+            this.$$.layerMsg({
+              tip:
+                "Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： " +
+                hash,
               time: 5000,
-              bgColor: '#5dba5a',
-              icon: require('@/assets/image/Prompt.svg')
-            })
-            that.updateDatabaseInfo({
-              hash: that.dataPage.hash,
+              bgColor: "#5dba5a",
+              icon: require("@/assets/image/Prompt.svg")
+            });
+            this.updateDatabaseInfo({
+              hash: this.dataPage.hash,
               fsnhash: hash
-            })
-            that.$store.commit('storeWalletLoadFlag', true)
+            });
+            this.$store.commit("storeWalletLoadFlag", true);
           } else {
-            that.$$.layerMsg({
+            this.$$.layerMsg({
               tip: err,
               time: 4000,
-              bgColor: '#ea4b40',
-              icon: require('@/assets/image/Prompt.svg')
-            })
+              bgColor: "#ea4b40",
+              icon: require("@/assets/image/Prompt.svg")
+            });
           }
-        })
+        });
       } catch (error) {
-        that.$$.web3({
-          method: 'eth_sendRawTransaction',
-          params: [that.serializedTx]
-        }).then(function (res) {
+        this.$$.web3({
+          method: "eth_sendRawTransaction",
+          params: [this.serializedTx]
+        }).then(res => {
           if (res.error) {
-            that.$$.layerMsg({
+            this.$$.layerMsg({
               tip: res.error,
               time: 4000,
-              bgColor: '#ea4b40',
-              icon: require('@/assets/image/Prompt.svg')
-            })
+              bgColor: "#ea4b40",
+              icon: require("@/assets/image/Prompt.svg")
+            });
           } else {
-            that.updateDatabaseInfo({
-              hash: that.dataPage.hash,
+            this.updateDatabaseInfo({
+              hash: this.dataPage.hash,
               fsnhash: hash
-            })
-            that.$$.layerMsg({
-              tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + res.result,
+            });
+            this.$$.layerMsg({
+              tip:
+                "Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： " +
+                res.result,
               time: 5000,
-              bgColor: '#5dba5a',
-              icon: require('@/assets/image/Prompt.svg')
-            })
-            that.$store.commit('storeWalletLoadFlag', true)
+              bgColor: "#5dba5a",
+              icon: require("@/assets/image/Prompt.svg")
+            });
+            this.$store.commit("storeWalletLoadFlag", true);
           }
-        })
+        });
       }
     },
-    privateSure (data) {
-      const that = this
-      // that.setBaseSendData()
-      that.setWeb3()
-      // console.log(that.web3.eth.getTransactionCount(that.walletAddress))
-      that.dataPage = {
-        nonce: that.web3.eth.getTransactionCount(that.walletAddress),
-        gasPrice: Number(data.gasPrice),//Number类型 
+    privateSure(data) {
+      // this.setBaseSendData()
+      this.setWeb3();
+      // console.log(this.web3.eth.getTransactionCount(this.walletAddress))
+      this.dataPage = {
+        nonce: this.web3.eth.getTransactionCount(this.walletAddress),
+        gasPrice: Number(data.gasPrice), //Number类型
         gasLimit: Number(data.gas) * 6,
-        from: that.walletAddress,
-        to: '0x00000000000000000000000000000000000000dc',
-        // value: Number(that.web3.toWei(data.value, 'ether')),//Number类型
-        value: Number(0),//Number类型
-        data: 'LOCKIN:' + data.hash + ':' + that.web3.toWei(data.value, 'ether') + ':' + that.selectData.coin,
-        sendType: 'LOCKIN',
-        coin: that.selectData.coin,
+        from: this.walletAddress,
+        to: "0x00000000000000000000000000000000000000dc",
+        // value: Number(this.web3.toWei(data.value, 'ether')),//Number类型
+        value: Number(0), //Number类型
+        data:
+          "LOCKIN:" +
+          data.hash +
+          ":" +
+          this.web3.toWei(data.value, "ether") +
+          ":" +
+          this.selectData.coin,
+        sendType: "LOCKIN",
+        coin: this.selectData.coin,
         hash: data.hash
-      }
-      console.log(that.dataPage)
-      that.$router.push('/pwdLockIn')
-      $('#privateSure').modal('show')
+      };
+      console.log(this.dataPage);
+      this.$router.push("/pwdLockIn");
+      $("#privateSure").modal("show");
     },
-    MoreContent (e) {
-      const that = this
-      $(e.target.parentNode).parents('tr').siblings('tr').find('.list').hide()
-      $(e.target.parentNode).find('.list').toggle()
+    MoreContent(e) {
+      $(e.target.parentNode)
+        .parents("tr")
+        .siblings("tr")
+        .find(".list")
+        .hide();
+      $(e.target.parentNode)
+        .find(".list")
+        .toggle();
     },
-    qrcode (cont) {
-      $('#qrcode').html('')
-      let qrcodeInit = new QRCode('qrcode', {
+    qrcode(cont) {
+      $("#qrcode").html("");
+      let qrcodeInit = new QRCode("qrcode", {
         width: 300,
         height: 340, // 高度
         text: cont // 二维码内容
         // render: 'canvas' // 设置渲染方式（有两种方式 table和canvas，默认是canvas）
         // background: '#f0f'
         // foreground: '#ff0'
-      })
-      $('#qrcodeBox').modal('show')
+      });
+      $("#qrcodeBox").modal("show");
     },
-    copyAddress (id) {
-      $(id).select()
-      document.execCommand('Copy')
-      this.$$.layerMsg('Copy Success')
+    copyAddress(id) {
+      $(id).select();
+      document.execCommand("Copy");
+      this.$$.layerMsg("Copy Success");
     },
-    pageRefresh () {
-      const that = this
-      if (that.selectData) {
-        that.titleChange(that.selectData.coin)
+    pageRefresh() {
+      if (this.selectData) {
+        this.titleChange(this.selectData.coin);
       }
-      if (location.href.indexOf('lockOut') === -1) {
-        $('.transferBtn_btn').find('a:eq(0)').addClass('router-link-active')
+      if (location.href.indexOf("lockOut") === -1) {
+        $(".transferBtn_btn")
+          .find("a:eq(0)")
+          .addClass("router-link-active");
       }
     },
-    getHistory (data) {
-      const that = this
+    getHistory(data) {
       $.ajax({
         // url: 'http://api-rinkeby.etherscan.io/api?module=account&action=txlist&address=' + that.coinAddress,
         // url: 'http://api-rinkeby.etherscan.io/api?module=account&action=tokentx&address=' + that.coinAddress,
-        url: 'https://api-rinkeby.etherscan.io/api?module=account&action=' + that.selectData.token + '&address=' + that.coinAddress,
-        type: 'post',
-        datatype: 'json',
-        success: function (res) {
+        url:
+          "https://api-rinkeby.etherscan.io/api?module=account&action=" +
+          this.selectData.token +
+          "&address=" +
+          this.coinAddress,
+        type: "post",
+        datatype: "json",
+        success: res => {
           // console.log(res)
-          that.setWeb3()
-          that.historyData = []
-          let arrObj = []
-          let newArr = []
-          let objArr = {}
+          this.setWeb3();
+          this.historyData = [];
+          let arrObj = [];
+          let newArr = [];
+          let objArr = {};
           if (data.length > 0) {
             for (let i = 0; i < data.length; i++) {
-              arrObj.push(data[i])
+              arrObj.push(data[i]);
             }
           }
           // console.log(typeof res.result)
-          if (res.result && res.result.length > 0 && (typeof res.result).toLowerCase() === 'object') {
+          if (
+            res.result &&
+            res.result.length > 0 &&
+            (typeof res.result).toLowerCase() === "object"
+          ) {
             for (let i = 0; i < res.result.length; i++) {
               // console.log(res.result[i])
-              if (that.selectData.coin === 'ETH') {
-                 arrObj.push(res.result[i])
+              if (this.selectData.coin === "ETH") {
+                arrObj.push(res.result[i]);
               } else {
-                if  (res.result[i].to.toLowerCase() === that.coinAddress.toLowerCase() && res.result[i].tokenSymbol === that.selectData.coin) {
-                  arrObj.push(res.result[i])
+                if (
+                  res.result[i].to.toLowerCase() ===
+                    this.coinAddress.toLowerCase() &&
+                  res.result[i].tokenSymbol === this.selectData.coin
+                ) {
+                  arrObj.push(res.result[i]);
                 }
               }
             }
@@ -388,106 +446,116 @@ export default {
           // console.log(arrObj)
           for (let i = 0; i < arrObj.length; i++) {
             if (!objArr[arrObj[i].hash]) {
-              newArr.push(arrObj[i])
-              objArr[arrObj[i].hash] = true
+              newArr.push(arrObj[i]);
+              objArr[arrObj[i].hash] = true;
             }
           }
           // console.log(newArr)
           for (let i = 0; i < newArr.length; i++) {
             if (newArr[i].fsnhash) {
-              newArr[i].statusFsn = 'Success'
-              newArr[i].date = that.$$.timeChange({date: newArr[i].date, type:'yyyy-mm-dd hh:mm'})
+              newArr[i].statusFsn = "Success";
+              newArr[i].date = this.$$.timeChange({
+                date: newArr[i].date,
+                type: "yyyy-mm-dd hh:mm"
+              });
             } else {
-              newArr[i].statusFsn = 'New'
-              newArr[i].date = that.$$.timeChange({date: Number(newArr[i].timeStamp) * 1000, type:'yyyy-mm-dd hh:mm'})
+              newArr[i].statusFsn = "New";
+              newArr[i].date = this.$$.timeChange({
+                date: Number(newArr[i].timeStamp) * 1000,
+                type: "yyyy-mm-dd hh:mm"
+              });
             }
-            newArr[i].date = that.$$.timeChange({date: Number(newArr[i].timeStamp) * 1000, type:'yyyy-mm-dd hh:mm'})
+            newArr[i].date = this.$$.timeChange({
+              date: Number(newArr[i].timeStamp) * 1000,
+              type: "yyyy-mm-dd hh:mm"
+            });
             // console.log(123)
             // console.log(objArr[newArr[i].hash])
-            if (newArr[i].dataType !== 'DATABASE') {
-              newArr[i].coin = newArr[i].tokenSymbol ? newArr[i].tokenSymbol : that.selectData.coin
-              that.createDatabaseInfo(newArr[i])
+            if (newArr[i].dataType !== "DATABASE") {
+              newArr[i].coin = newArr[i].tokenSymbol
+                ? newArr[i].tokenSymbol
+                : this.selectData.coin;
+              this.createDatabaseInfo(newArr[i]);
             }
-            if (!newArr[i].fsnhash && newArr[i].hash.indexOf('0xx') === 0) {
-              newArr[i].statusFsn = '<span style="color:red">failure</span>'
+            if (!newArr[i].fsnhash && newArr[i].hash.indexOf("0xx") === 0) {
+              newArr[i].statusFsn = '<span style="color:red">failure</span>';
             }
-            newArr[i].hash = newArr[i].hash.indexOf('0xx') === 0 ? newArr[i].fsnhash : newArr[i].hash
-            newArr[i].value2 = that.web3.fromWei(newArr[i].value, 'ether')
-            that.historyData.push(newArr[i])
+            newArr[i].hash =
+              newArr[i].hash.indexOf("0xx") === 0
+                ? newArr[i].fsnhash
+                : newArr[i].hash;
+            newArr[i].value2 = this.web3.fromWei(newArr[i].value, "ether");
+            this.historyData.push(newArr[i]);
           }
-          let compare = function compare (property) {
-            return function (a, b) {
-              let value1 = a[property]
-              let value2 = b[property]
+          const compare = property => {
+            return (a, b) => {
+              const value1 = a[property];
+              const value2 = b[property];
               if (Date.parse(value1) > Date.parse(value2)) {
-                return -1
+                return -1;
               } else if (value1 < value2) {
-                return 1
+                return 1;
               } else {
-                return 0
+                return 0;
               }
               // return Date.parse(value1) - Date.parse(value2)
-            }
-          }
-          that.historyData.sort(compare('date'))
+            };
+          };
+          this.historyData.sort(compare("date"));
         }
-      })
+      });
     },
-    createDatabaseInfo (data) {
-      const that = this
+    createDatabaseInfo(data) {
       $.ajax({
-        url: that.$$.serverURL + '/lilo/create',
-        type: 'post',
-        datatype: 'json',
+        url: this.$$.serverURL + "/lilo/create",
+        type: "post",
+        datatype: "json",
         data: data,
-        success: function (res) {
+        success: res => {
           // console.log(res)
         }
-      })
+      });
     },
-    getDatabaseInfo () {
-      const that = this
-      // console.log(that.coinAddress)
-      if (!that.coinAddress) {
-        return
+    getDatabaseInfo() {
+      // console.log(this.coinAddress)
+      if (!this.coinAddress) {
+        return;
       }
       $.ajax({
-        url: that.$$.serverURL + '/lilo/lockInHistory',
-        type: 'post',
-        datatype: 'json',
-        data: {to: that.coinAddress},
-        success: function (res) {
+        url: this.$$.serverURL + "/lilo/lockInHistory",
+        type: "post",
+        datatype: "json",
+        data: { to: this.coinAddress },
+        success: res => {
           // console.log(res)
           for (let i = 0; i < res.info.length; i++) {
-            if (res.info[i].hash === '' || res.info[i].hash === undefined) {
-              res.info[i].hash = '0xx' + i
+            if (res.info[i].hash === "" || res.info[i].hash === undefined) {
+              res.info[i].hash = "0xx" + i;
             }
-            res.info[i].dataType = 'DATABASE'
+            res.info[i].dataType = "DATABASE";
           }
-          that.getHistory(res.info)
+          this.getHistory(res.info);
         },
-        error: function (res) {
-          that.getHistory([])
+        error: res => {
+          this.getHistory([]);
         }
-      })
+      });
     },
-    updateDatabaseInfo (data) {
-      const that = this
-      console.log(data)
+    updateDatabaseInfo(data) {
       $.ajax({
-        url: that.$$.serverURL + '/lilo/lockInChangeState',
-        type: 'post',
-        datatype: 'json',
-        data: {hash: data.hash, fsnhash: data.fsnhash, statusFsn: 'Success'},
-        success: function (res) {
+        url: this.$$.serverURL + "/lilo/lockInChangeState",
+        type: "post",
+        datatype: "json",
+        data: { hash: data.hash, fsnhash: data.fsnhash, statusFsn: "Success" },
+        success: res => {
           // console.log(res)
-          that.getDatabaseInfo()
+          this.getDatabaseInfo();
         },
-        error: function (res) {
-          // that.getHistory([])
+        error: res => {
+          // this.getHistory([])
         }
-      })
+      });
     }
   }
-}
+};
 </script>

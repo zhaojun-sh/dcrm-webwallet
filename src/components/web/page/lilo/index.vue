@@ -9,27 +9,23 @@
           <router-view :selectData="coinDataPage"></router-view>
         </transition>
       </div>
-    </div> -->
+    </div>-->
   </div>
 </template>
 
 <script>
 // import Lilo from '@/assets/js/lilo'
 export default {
-  name: 'Transfer',
-  data () {
+  name: "Transfer",
+  data() {
     return {
       // selectData: '',
-      selectVal: '',
+      selectVal: "",
       SetcoinAndUrl: [],
-      coinDataPage: '',
-      web3: '',
-      newWeb3: ''
-    }
-  },
-  mounted () {
-  },
-  methods: {
+      coinDataPage: "",
+      web3: "",
+      newWeb3: ""
+    };
   }
-}
+};
 </script>

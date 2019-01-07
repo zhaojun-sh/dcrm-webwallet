@@ -102,22 +102,21 @@ export default {
     };
   },
   mounted() {
-    let that = this;
-    that.$$.showSearchTop();
-    if (!that.$store.state.addressInfo) {
-      that.$router.push("/");
+    this.$$.showSearchTop();
+    if (!this.$store.state.addressInfo) {
+      this.$router.push("/");
     }
-    $(function() {
+    $(() => {
       $("[data-toggle='tooltip']").tooltip();
     });
-    // that.$$.web3({
+    // this.$$.web3({
     //   method: 'eth_getBalance',
     //   params: ['0x3A1b3B81Ed061581558a81F11d63E03129347437']
     //   // params: ['0x3A1b3B81Ed061581558a81F11d63E03129347437', 'latest']
-    // }).then(function (res) {
+    // }).then( (res) => {
     //   console.log(res.toString().indexOf('error'))
     // })
-    // let testData = that.$$.getWeb3({
+    // let testData = this.$$.getWeb3({
     //   method: 'eth_getBalance',
     //   params: ['0x3A1b3B81Ed061581558a81F11d63E03129347437', 'latest']
     // })
@@ -125,8 +124,7 @@ export default {
   },
   methods: {
     goBackupWallet() {
-      let that = this;
-      that.$router.push("/backupWallet");
+      this.$router.push("/backupWallet");
     },
     copyAddress(id, textId) {
       let copyText = $("#" + textId)
@@ -137,7 +135,7 @@ export default {
       $("#" + textId)
         .find(".tooltip-inner")
         .text("Copied");
-      setTimeout(function() {
+      setTimeout(() => {
         $("#" + textId)
           .find(".tooltip-inner")
           .text(copyText);
@@ -145,8 +143,7 @@ export default {
       this.$$.layerMsg("Copy Success");
     },
     refreshPage() {
-      let that = this;
-      that.$router.push("/loading");
+      this.$router.push("/loading");
       // history.go(0)
       //   top.location.hert = top.location.hert
     },
@@ -156,9 +153,8 @@ export default {
       return (str = str1 + "…" + str2);
     },
     getChildInfo(address) {
-      let that = this;
-      that.walletAdress = address;
-      that.walletAdressTop = that.cutOut(address);
+      this.walletAdress = address;
+      this.walletAdressTop = this.cutOut(address);
     }
   }
 };
