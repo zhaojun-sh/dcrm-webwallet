@@ -42,15 +42,11 @@
           <div class="rotateLoad">
             <img src="static/img/wait.svg">
           </div>
-          <p
-            style="margin-top:15px;font-size:16px;font-weight:bold;color:#333;padding-left:12px;"
-          >Loading…</p>
+          <p class="loading">Loading…</p>
         </div>
       </div>
-      <div
-        style="width:100%;height:100%;position:absolute;top:0;left:0;overflow:auto;overflow-x:hidden;"
-      >
-        <div style="width:100%;height:100%;position:relative;">
+      <div style="router-view">
+        <div style="router-view__wrapper">
           <transition name="fade">
             <router-view></router-view>
           </transition>
@@ -60,3 +56,28 @@
   </div>
 </template>
 
+<style scoped>
+.loading {
+  margin-top: 15px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  padding-left: 12px;
+}
+
+.router-view {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: auto;
+  overflow-x: hidden;
+}
+
+.router-view__wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+</style>
