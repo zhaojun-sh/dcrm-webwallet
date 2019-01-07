@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "bignumber.js": "^8.0.1",
     "body-parser": "^1.18.3",
     "bootstrap": "^4.0.0-beta.2",
     "bs58check": "^2.1.2",
