@@ -135,7 +135,7 @@ export default {
         // this.downloadName = this.$$.getBlob('text/json;charset=UTF-8', this.fileData)
         this.showPwd = this.walletRequirePass(this.fileData);
       };
-      reader.readAsText($(this)[0].files[0]);
+      reader.readAsText(event.currentTarget.files[0]);
     });
     this.$store.commit("storeWalletLoadFlag", true);
   },
@@ -174,7 +174,7 @@ export default {
       let walletData;
       try {
         walletData = new wallet(
-          new Buffer(that.fixPkey(that.privateKey), "hex")
+          new Buffer(this.fixPkey(this.privateKey), "hex")
         );
         this.checkAddress = walletData.getChecksumAddressString();
         this.downloadURL = "";
@@ -191,7 +191,7 @@ export default {
       }
     },
     sendInfoToParent() {
-      this.$emit("setAddress", that.checkAddress);
+      this.$emit("setAddress", this.checkAddress);
     },
     setStore() {
       this.$store.commit("storePrivateKey", this.privateKey);

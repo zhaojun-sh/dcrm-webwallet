@@ -404,8 +404,8 @@ export default {
     },
     getHistory(data) {
       $.ajax({
-        // url: 'http://api-rinkeby.etherscan.io/api?module=account&action=txlist&address=' + that.coinAddress,
-        // url: 'http://api-rinkeby.etherscan.io/api?module=account&action=tokentx&address=' + that.coinAddress,
+        // url: 'http://api-rinkeby.etherscan.io/api?module=account&action=txlist&address=' + this.coinAddress,
+        // url: 'http://api-rinkeby.etherscan.io/api?module=account&action=tokentx&address=' + this.coinAddress,
         url:
           "https://api-rinkeby.etherscan.io/api?module=account&action=" +
           this.selectData.token +
