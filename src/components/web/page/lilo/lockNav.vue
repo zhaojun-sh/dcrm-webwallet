@@ -3,7 +3,7 @@
     <div class="contentHeader_box flex-bc">
       <h1 class="contentHeader_title">Lockin / Lockout</h1>
       <div class="biticonSelect_box">
-        <div class="logo"><img src="../../../../assets/image/Fusion.svg"></div>
+        <div class="logo"><img src="@/assets/image/Fusion.svg"></div>
         <div class="arrow flex-c"><i class="i"></i></div>
         <select class="select" v-model="selectVal" id="selectValData">
           <option v-for="(item, index) in SetcoinAndUrl" :key="index" v-html="item.coin" :value="item.coin"></option>
@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import Lilo from '../../../../assets/js/lilo'
+import Lilo from '@/assets/js/lilo'
 export default {
   name: 'Transfer',
   data () {

@@ -76,8 +76,8 @@
 </style>
 
 <script>
-import wallet from '../../../../assets/js/wallet'
-import Lilo from '../../../../assets/js/lilo'
+import wallet from '@/assets/js/wallet'
+import Lilo from '@/assets/js/lilo'
 export default {
   name: 'createWallet',
   props: ['sendDataPage'],
@@ -157,7 +157,7 @@ export default {
             tip: 'Account error!',
             time: 3000,
             bgColor: '#ea4b40',
-            icon: require('../../../../assets/image/Prompt.svg')
+            icon: require('@/assets/image/Prompt.svg')
           })
           // $('#privateSure').modal('hide')
           $('#sendInfo').modal('hide')
@@ -175,7 +175,7 @@ export default {
           tip: e,
           time: 5000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
       }
     },
@@ -193,7 +193,7 @@ export default {
             tip: 'Account error!',
             time: 3000,
             bgColor: '#ea4b40',
-            icon: require('../../../../assets/image/Prompt.svg')
+            icon: require('@/assets/image/Prompt.svg')
           })
           // $('#privateSure').modal('hide')
           $('#sendInfo').modal('hide')
@@ -213,7 +213,7 @@ export default {
           tip: e,
           time: 5000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
       }
     },
@@ -262,7 +262,7 @@ export default {
           tip: getGasLimit,
           time: 5000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
         throw getGasLimit
       }
@@ -297,7 +297,7 @@ export default {
               tip: 'The address has been requested. Please refresh later. DCRM:' + val.result.split(':')[1],
               time: 8000,
               bgColor: '#5dba5a',
-              icon: require('../../../../assets/image/Prompt.svg')
+              icon: require('@/assets/image/Prompt.svg')
             })
             $('#privateSure').modal('hide')
           } else{
@@ -305,7 +305,7 @@ export default {
               tip: val.result,
               time: 8000,
               bgColor: '#ea4b40',
-              icon: require('../../../../assets/image/Prompt.svg')
+              icon: require('@/assets/image/Prompt.svg')
             })
           }
           return
@@ -357,7 +357,7 @@ export default {
           tip: 'Account error!',
           time: 3000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
         // $('#privateSure').modal('hide')
         $('#sendInfo').modal('hide')

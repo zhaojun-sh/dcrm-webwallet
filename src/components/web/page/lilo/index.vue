@@ -14,7 +14,7 @@
 </template>
 
 <script>
-// import Lilo from '../../../../assets/js/lilo'
+// import Lilo from '@/assets/js/lilo'
 export default {
   name: 'Transfer',
   data () {

@@ -8,9 +8,9 @@
           <!-- <input type="text" v-model="walletAdress" id="walletAdressHide" class="inputOpacity"/> -->
         </div>
         <div class="receiveAddress_btn flex-c" id="receiveAddressBtn">
-          <button class="btn blue flex-c" @click="qrcode(coinAddress)"><div class="icon"><img src="../../../../assets/image/QRcode.svg"></div>Show QR code</button>
+          <button class="btn blue flex-c" @click="qrcode(coinAddress)"><div class="icon"><img src="@/assets/image/QRcode.svg"></div>Show QR code</button>
           <button class="btn cyan flex-c" @click="copyAddress('walletAdressHide', 'receiveAddressBtn')" data-toggle="tooltip" data-placement="bottom" title="Copy clipboard">
-            <div class="icon"><img src="../../../../assets/image/copy.svg"></div>
+            <div class="icon"><img src="@/assets/image/copy.svg"></div>
             Copy clipboard
           </button>
         </div>

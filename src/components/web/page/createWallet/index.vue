@@ -2,8 +2,8 @@
   <div class="supCoinView_container">
     <div class="walletBtn_box">
       <ul>
-        <li><router-link to="/createWallet" class="btnStyle btnBlue flex-c"><div class="icon"><img src="../../../../assets/image/pageWhite.svg"></div>Create wallet</router-link></li>
-        <li><router-link to="/importWallet" class="btnStyle btnWhite flex-c"><div class="icon"><img src="../../../../assets/image/Importwallet-blue.svg"></div>Import wallet</router-link></li>
+        <li><router-link to="/createWallet" class="btnStyle btnBlue flex-c"><div class="icon"><img src="@/assets/image/pageWhite.svg"></div>Create wallet</router-link></li>
+        <li><router-link to="/importWallet" class="btnStyle btnWhite flex-c"><div class="icon"><img src="@/assets/image/Importwallet-blue.svg"></div>Import wallet</router-link></li>
       </ul>
     </div>
     <div class="supCoinView_box">
@@ -38,14 +38,14 @@ export default {
   mounted () {
     let that = this
     that.iconData = [
-      {icon: require('../../../../assets/image/btc.svg'), title: 'Bitcoin (BTC)'},
-      {icon: require('../../../../assets/image/eth.svg'), title: 'Ethereum (ETH)'},
-      {icon: require('../../../../assets/image/fsn.svg'), title: 'FUSION (FSN)'},
-      {icon: require('../../../../assets/image/bnb.svg'), title: 'Binance (BNB)'},
-      {icon: require('../../../../assets/image/mkr.svg'), title: 'Maker (MKR)'},
-      {icon: require('../../../../assets/image/gusd.svg'), title: 'Gemini Dollar (GUSD)'},
-      {icon: require('../../../../assets/image/ht.svg'), title: 'HuobiToken (HT)'},
-      {icon: require('../../../../assets/image/bnt.svg'), title: 'Bancor (BNT)'}
+      {icon: require('@/assets/image/btc.svg'), title: 'Bitcoin (BTC)'},
+      {icon: require('@/assets/image/eth.svg'), title: 'Ethereum (ETH)'},
+      {icon: require('@/assets/image/fsn.svg'), title: 'FUSION (FSN)'},
+      {icon: require('@/assets/image/bnb.svg'), title: 'Binance (BNB)'},
+      {icon: require('@/assets/image/mkr.svg'), title: 'Maker (MKR)'},
+      {icon: require('@/assets/image/gusd.svg'), title: 'Gemini Dollar (GUSD)'},
+      {icon: require('@/assets/image/ht.svg'), title: 'HuobiToken (HT)'},
+      {icon: require('@/assets/image/bnt.svg'), title: 'Bancor (BNT)'}
     ]
     let toPath = location.href.toUpperCase()
     if (toPath.lastIndexOf('/') === (toPath.length - 1)) {

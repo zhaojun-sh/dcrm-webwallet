@@ -22,7 +22,7 @@
           <div class="backupCont_input">
             <input type="password" class="input-text input input1" readonly v-model="privateKey" id="privateKey" />
             <input type="text" class="input-text input input1" v-model="privateKey" id="privateKeyInfo"  style="opacity: 0;"/>
-            <div class="eyesBox showAndHideEyes" id="eyesView"><div class="eyes"><img src="../../../../assets/image/Visible.svg"></div></div>
+            <div class="eyesBox showAndHideEyes" id="eyesView"><div class="eyes"><img src="@/assets/image/Visible.svg"></div></div>
           </div>
           <button class="btn" @click="copyAddress('privateKeyInfo', 'receiveAddressBtn')" data-toggle="tooltip" data-placement="bottom" title="Copy clipboard">Copy clipboard</button>
         </div>
@@ -41,7 +41,7 @@
               <h3 class="title">Private Key (unencrypted)</h3>
               <div id="privateQrcode" data-eyes="1"></div>
               <div class="qrcodeView_black"></div>
-              <div class="qrcodeView_eyes showAndHideEyes"><img src="../../../../assets/image/Visible.svg"></div>
+              <div class="qrcodeView_eyes showAndHideEyes"><img src="@/assets/image/Visible.svg"></div>
             </div>
           </li>
         </ul>
@@ -78,15 +78,15 @@ export default {
       $('#privateQrcode').html('')
       if (pwdAndTxt === 'password') {
         $('#privateKey').attr('type', 'text')
-        $('#eyesView').find('img').attr('src', require('../../../../assets/image/Hide.svg'))
+        $('#eyesView').find('img').attr('src', require('@/assets/image/Hide.svg'))
         that.qrcode(that.privateKey, 'privateQrcode')
-        $('.qrcodeView_eyes').find('img').attr('src', require('../../../../assets/image/Hide.svg'))
+        $('.qrcodeView_eyes').find('img').attr('src', require('@/assets/image/Hide.svg'))
         $('#privateQrcode').attr('data-eyes', '0')
         $('.qrcodeView_black').hide()
       } else {
         $('#privateKey').attr('type', 'password')
-        $('#eyesView').find('img').attr('src', require('../../../../assets/image/Visible.svg'))
-        $('.qrcodeView_eyes').find('img').attr('src', require('../../../../assets/image/Visible.svg'))
+        $('#eyesView').find('img').attr('src', require('@/assets/image/Visible.svg'))
+        $('.qrcodeView_eyes').find('img').attr('src', require('@/assets/image/Visible.svg'))
         $('#privateQrcode').attr('data-eyes', '1')
         $('.qrcodeView_black').show()
       }

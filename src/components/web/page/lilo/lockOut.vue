@@ -147,7 +147,7 @@
 </template>
 
 <script>
-import Lilo from '../../../../assets/js/lilo'
+import Lilo from '@/assets/js/lilo'
 export default {
   name: 'receive',
   props: ['selectData'],
@@ -271,7 +271,7 @@ export default {
           tip: getGasLimit,
           time: 4000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
         throw getGasLimit
       }
@@ -317,7 +317,7 @@ export default {
           tip: 'Sign error!',
           time: 3000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
       }
     },
@@ -328,7 +328,7 @@ export default {
           tip: that.selectData.coin + ' Receiving Address is not null.',
           time: 2000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
         return
       }
@@ -337,7 +337,7 @@ export default {
           tip: 'You can`t transfer money to yourself.',
           time: 5000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
         return
       }
@@ -346,7 +346,7 @@ export default {
           tip: 'The address needs to start with 0x',
           time: 5000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
         return
       }
@@ -356,7 +356,7 @@ export default {
           tip: getAmountTip.msg,
           time: 3000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
         return
       }
@@ -435,7 +435,7 @@ export default {
               tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + hash,
               time: 5000,
               bgColor: '#5dba5a',
-              icon: require('../../../../assets/image/Prompt.svg')
+              icon: require('@/assets/image/Prompt.svg')
             })
             that.$store.commit('storeWalletLoadFlag', true)
           } else {
@@ -446,7 +446,7 @@ export default {
               tip: err,
               time: 4000,
               bgColor: '#ea4b40',
-              icon: require('../../../../assets/image/Prompt.svg')
+              icon: require('@/assets/image/Prompt.svg')
             })
           }
           // console.log(12431234)
@@ -463,7 +463,7 @@ export default {
               tip: res.error,
               time: 4000,
               bgColor: '#ea4b40',
-              icon: require('../../../../assets/image/Prompt.svg')
+              icon: require('@/assets/image/Prompt.svg')
             })
           } else {
             dataBase.txhax = res.result
@@ -473,7 +473,7 @@ export default {
               tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + res.result,
               time: 5000,
               bgColor: '#5dba5a',
-              icon: require('../../../../assets/image/Prompt.svg')
+              icon: require('@/assets/image/Prompt.svg')
             })
             that.$store.commit('storeWalletLoadFlag', true)
           }

@@ -8,7 +8,7 @@
     <div class="myAssetsSear_box flex-ec">
       <div class="myAssetsSear_input">
         <input type="text" placeholder="FSN" class="input-text" @keyup="searchInput" v-model="searchContent"/>
-        <div class="searchIcon"><div class="icon flex-c"><img src="../../../../assets/image/search.png"></div></div>
+        <div class="searchIcon"><div class="icon flex-c"><img src="@/assets/image/search.png"></div></div>
       </div>
     </div>
 
@@ -92,7 +92,7 @@
 </template>
 
 <script>
-import Lilo from '../../../../assets/js/lilo'
+import Lilo from '@/assets/js/lilo'
 export default {
   name: 'myAssets',
   data () {
@@ -265,7 +265,7 @@ export default {
           tip: 'Sign error!',
           time: 3000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
       }
     },
@@ -279,7 +279,7 @@ export default {
               tip: err,
               time: 5000,
               bgColor: '#ea4b40',
-              icon: require('../../../../assets/image/Prompt.svg')
+              icon: require('@/assets/image/Prompt.svg')
             })
           } else {
             for (let i = 0; i < that.bitIconTypeData.length; i++) {
@@ -299,7 +299,7 @@ export default {
               tip: 'Request success',
               time: 3000,
               bgColor: '#5dba5a',
-              icon: require('../../../../assets/image/Prompt.svg')
+              icon: require('@/assets/image/Prompt.svg')
             })
             // resolve(hash)
           }
@@ -314,7 +314,7 @@ export default {
               tip: res.error,
               time: 4000,
               bgColor: '#ea4b40',
-              icon: require('../../../../assets/image/Prompt.svg')
+              icon: require('@/assets/image/Prompt.svg')
             })
           } else {
             for (let i = 0; i < that.bitIconTypeData.length; i++) {
@@ -326,7 +326,7 @@ export default {
               tip: 'Request success',
               time: 3000,
               bgColor: '#5dba5a',
-              icon: require('../../../../assets/image/Prompt.svg')
+              icon: require('@/assets/image/Prompt.svg')
             })
             let storeData = {
               balance: 0,
@@ -418,7 +418,7 @@ export default {
                   tip: res,
                   time: 3000,
                   bgColor: '#ea4b40',
-                  icon: require('../../../../assets/image/Prompt.svg')
+                  icon: require('@/assets/image/Prompt.svg')
                 })
               }
             })

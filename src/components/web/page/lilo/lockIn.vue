@@ -8,8 +8,8 @@
           <!-- <input type="hidden" readonly v-model="privateKey" id="privateKeyHide" /> -->
         </div>
         <div class="receiveAddress_btn flex-c">
-          <button class="btn blue flex-c" @click="qrcode(coinAddress)"><div class="icon"><img src="../../../../assets/image/QRcode.svg"></div>Show QR code</button>
-          <button class="btn cyan flex-c" @click="copyAddress('#walletAdressHide')"><div class="icon"><img src="../../../../assets/image/copy.svg"></div>Copy clipboard</button>
+          <button class="btn blue flex-c" @click="qrcode(coinAddress)"><div class="icon"><img src="@/assets/image/QRcode.svg"></div>Show QR code</button>
+          <button class="btn cyan flex-c" @click="copyAddress('#walletAdressHide')"><div class="icon"><img src="@/assets/image/copy.svg"></div>Copy clipboard</button>
         </div>
       </div>
 
@@ -154,7 +154,7 @@
 
 <script>
 import QRCode from 'qrcodejs2'
-import Lilo from '../../../../assets/js/lilo'
+import Lilo from '@/assets/js/lilo'
 export default {
   name: 'receive',
   props: ['selectData'],
@@ -241,7 +241,7 @@ export default {
           tip: 'Sign error!',
           time: 3000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
       }
     },
@@ -255,7 +255,7 @@ export default {
               tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + hash,
               time: 5000,
               bgColor: '#5dba5a',
-              icon: require('../../../../assets/image/Prompt.svg')
+              icon: require('@/assets/image/Prompt.svg')
             })
             that.updateDatabaseInfo({
               hash: that.dataPage.hash,
@@ -267,7 +267,7 @@ export default {
               tip: err,
               time: 4000,
               bgColor: '#ea4b40',
-              icon: require('../../../../assets/image/Prompt.svg')
+              icon: require('@/assets/image/Prompt.svg')
             })
           }
         })
@@ -281,7 +281,7 @@ export default {
               tip: res.error,
               time: 4000,
               bgColor: '#ea4b40',
-              icon: require('../../../../assets/image/Prompt.svg')
+              icon: require('@/assets/image/Prompt.svg')
             })
           } else {
             that.updateDatabaseInfo({
@@ -292,7 +292,7 @@ export default {
               tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + res.result,
               time: 5000,
               bgColor: '#5dba5a',
-              icon: require('../../../../assets/image/Prompt.svg')
+              icon: require('@/assets/image/Prompt.svg')
             })
             that.$store.commit('storeWalletLoadFlag', true)
           }

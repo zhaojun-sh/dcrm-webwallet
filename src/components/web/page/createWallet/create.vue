@@ -30,7 +30,7 @@
 </style>
 
 <script>
-import wallet from '../../../../assets/js/wallet'
+import wallet from '@/assets/js/wallet'
 export default {
   name: 'createWallet',
   data () {
@@ -61,7 +61,7 @@ export default {
           tip: 'Your password must be at least 9 characters. Please ensure it is a strong password.',
           time: 2000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
       } else {
         that.createKey()

@@ -76,7 +76,7 @@
 </style>
 
 <script>
-import wallet from '../../../../assets/js/wallet'
+import wallet from '@/assets/js/wallet'
 export default {
   name: 'createWallet',
   // props: ['wAdress'],
@@ -148,7 +148,7 @@ export default {
           tip: e,
           time: 2000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
         // that.showPwdBtn = false
       }
@@ -167,7 +167,7 @@ export default {
           tip: e,
           time: 2000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
         // that.showPwdBtn = false
       }
