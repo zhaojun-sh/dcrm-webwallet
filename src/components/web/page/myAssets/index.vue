@@ -1,18 +1,18 @@
 <template>
-  <div>
+  <div style="background:#fff;min-height:100%">
     <div class="contentHeader_box flex-bc">
       <h1 class="contentHeader_title">My Assets</h1>
-      <h2 class="contentHeader_title" v-html="myAssetsTotal"></h2>
+      <h2 class="contentHeader_title">$ {{myAssetsTotal}}</h2>
     </div>
 
     <div class="myAssetsSear_box flex-ec">
       <div class="myAssetsSear_input">
         <input type="text" placeholder="FSN" class="input-text" @keyup="searchInput" v-model="searchContent"/>
-        <div class="searchIcon"><div class="icon flex-c"><img src="../../../../assets/image/search.png"></div></div>
+        <div class="searchIcon"><div class="icon flex-c"><img src="@/assets/image/search.png"></div></div>
       </div>
     </div>
 
-    <div class="myAssetsTable_box">
+    <div class="myAssetsTable_box table-responsive">
       <table>
         <thead>
           <tr>
@@ -39,9 +39,12 @@
             <td><span class="span" v-html="item.totalBalance"></span><p class="p">$ {{item.totalBalanceDoller}}</p></td>
             <td>
               <div style="text-align:left">
-                <router-link :to="{path:'/Transfer/tranReceive', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView">Receive</router-link>
-                <router-link :to="{path:'/Transfer/tranSend', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView">Send</router-link>
-                <a class="setBtn" v-if="!item.btnView" @click="privateSure(item.currency)">Request</a>
+                <!-- {{item.btnView}} -->
+                <router-link :to="{path:'/Transfer/tranReceive', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView === 2">Receive</router-link>
+                <router-link :to="{path:'/Transfer/tranSend', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView === 2">Send</router-link>
+                <a class="setBtn" v-if="item.btnView === 0" @click="privateSure(item.currency, item.btnView)">Request</a>
+                <a class="setBtn" v-if="item.btnView === 1" @click="privateSure(item.currency, item.btnView)" style="opacity:0.5">Pending</a>
+                <!-- <a class="setBtn" @click="privateSure(item.currency)">Request</a> -->
               </div>
             </td>
           </tr>
@@ -50,19 +53,35 @@
     </div>
 
     <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" @click="modalClick">
-      <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title" id="myModalLabel">Unlock</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
           <div class="modal-body">
-            <router-view v-on:sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
+            <router-view @sendSignData="getSignData" :sendDataPage="dataPage"></router-view>
           </div>
-          <!-- <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
-          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade bs-example-modal-lg" id="confirmDcrm" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Request address confirmation</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <div class="modal-body">
+            <div class="">
+              Do you request?
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">No, get me out of here!</button>
+            <button type="button" class="btn btn-primary" @click="sendRawTransion(confirmData)">Yes, I am sure!</button>
+          </div>
         </div>
       </div>
     </div>
@@ -71,72 +90,65 @@
 </template>
 
 <script>
-import wallet from '../../../../assets/js/wallet'
-import Lilo from '../../../../assets/js/lilo'
+import Lilo from "@/assets/js/lilo"
 export default {
-  name: 'myAssets',
+  name: "myAssets",
   data () {
     return {
-      myAssetsTotal: '',
+      myAssetsTotal: "",
       bitIconTypeData: [],
       bitIconTypeSearch: [],
-      walletAddress: '',
-      web3: '',
-      newWeb3: '',
+      walletAddress: "",
+      web3: "",
+      newWeb3: "",
       dataPage: {},
       selectOption: [],
-      searchContent: '',
-      refreshBalance: ''
+      searchContent: "",
+      refreshBalance: "",
+      confirmData: ""
     }
   },
-  beforeCreate () {
-    const that = this
-    that.$$.loadingStart()
-  },
-  created () {
-    const that = this
-    that.$$.loadingEnd()
+  watch: {
+    myAssetsTotal (cur) {
+      this.myAssetsTotal = this.$$.thousandBit(this.myAssetsTotal, 2)
+    }
   },
   mounted () {
-    let that = this
-    that.walletAddress = that.$store.state.addressInfo
-    that.getInitData()
-    that.setWeb3()
+    this.walletAddress = this.$store.state.addressInfo
+    this.getInitData()
+    this.setWeb3()
     
-    if (that.$store.state.walletLoadFlag) {
-      that.getBalanceData()
+    if (this.$store.state.walletLoadFlag) {
+      this.getBalanceData()
     }
-    that.refreshBalance = setInterval(() => {
-      that.getBalanceData()
-    }, 25000)
+    this.refreshBalance = setInterval(() => {
+      this.getBalanceData()
+    }, 250000)
   },
   methods: {
     modalClick () {
-      const that = this
-      $('#privateSure').on('hide.bs.modal', function () {
-        that.$router.push('/MyAssets')
+      $("#privateSure").on("hide.bs.modal", () => {
+        this.$router.push("/MyAssets")
       })
     },
     myAssetsTotalBalance () {
-      const that = this
-      that.myAssetsTotal = 0
-      for (let i = 0; i < that.bitIconTypeData.length; i++) {
-        that.myAssetsTotal += that.$$.thousandToNum(that.bitIconTypeData[i].totalBalance)
+      this.myAssetsTotal = 0
+      for (let i = 0; i < this.bitIconTypeData.length; i++) {
+        this.myAssetsTotal += this.$$.thousandToNum(this.bitIconTypeData[i].totalBalance)
       }
-      that.myAssetsTotal = that.$$.thousandBit(that.myAssetsTotal)
+      this.myAssetsTotal = this.$$.thousandBit(this.myAssetsTotal)
     },
     searchInput () {
-      const that = this
-      that.bitIconTypeSearch = []
-      let searchTxt = that.searchContent
-      if (searchTxt === '') {
-        that.bitIconTypeSearch = that.bitIconTypeData
+      this.bitIconTypeSearch = []
+      let searchTxt = this.searchContent ? this.searchContent : this.searchContent.toLowerCase()
+      if (searchTxt === "") {
+        this.bitIconTypeSearch = this.bitIconTypeData
       } else {
-        if (!isNaN(that.searchContent)) {
-          searchTxt = that.$$.thousandBit(that.searchContent, 'no')
+        if (!isNaN(this.searchContent)) {
+          searchTxt = this.$$.thousandBit(this.searchContent, "no")
         }
-        for (let i = 0; i < that.bitIconTypeData.length; i++) {
-          let searchArr = that.bitIconTypeData[i]
+        for (let i = 0; i < this.bitIconTypeData.length; i++) {
+          let searchArr = this.bitIconTypeData[i]
           let searchObj = {
             nameSimplicity: searchArr.nameSimplicity,
             nameFull: searchArr.nameFull,
@@ -145,220 +157,229 @@ export default {
             totalBalance: searchArr.totalBalance,
             totalBalanceDoller: searchArr.totalBalanceDoller
           }
-          if (searchObj.nameSimplicity.indexOf(searchTxt) !== -1 || searchObj.nameFull.indexOf(searchTxt) !== -1 || searchObj.availbleBalance.indexOf(searchTxt) !== -1 || searchObj.freeze.indexOf(searchTxt) !== -1 || searchObj.totalBalance.indexOf(searchTxt) !== -1 || searchObj.totalBalanceDoller.indexOf(searchTxt) !== -1) {
-            that.bitIconTypeSearch.push(searchArr)
+          if (searchObj.nameSimplicity.toLowerCase().indexOf(searchTxt) !== -1 || searchObj.nameFull.toLowerCase().indexOf(searchTxt) !== -1 || searchObj.availbleBalance.indexOf(searchTxt) !== -1 || searchObj.freeze.indexOf(searchTxt) !== -1 || searchObj.totalBalance.indexOf(searchTxt) !== -1 || searchObj.totalBalanceDoller.indexOf(searchTxt) !== -1) {
+            this.bitIconTypeSearch.push(searchArr)
           }
+        }
       }
-        // console.log(that.bitIconTypeData.toString())
+      this.myAssetsTotal = 0
+      for (let i = 0; i < this.bitIconTypeSearch.length; i++) {
+        this.myAssetsTotal += Number(this.$$.thousandToNum(this.bitIconTypeSearch[i].totalBalanceDoller))
       }
+      this.myAssetsTotal = this.$$.thousandBit(this.myAssetsTotal, 2)
     },
     getInitData () {
-      const that = this
-      let coinInfo = that.$store.state.coinInfo
+      let coinInfo = this.$store.state.coinInfo
       let bitCoinInfo = []
       for (let i = 0;i < coinInfo.length; i++) {
-        let balance = Number(coinInfo[i].balance) === 0 ? '0.00' : that.$$.thousandBit(coinInfo[i].balance, 'no')
-        // console.log(balance)
+        let balance = Number(coinInfo[i].balance) === 0 ? "0.00" : this.$$.thousandBit(coinInfo[i].balance, "no")
+        let balanceDollar = Number(coinInfo[i].balanceDollar) === 0 ? "0.00" : this.$$.thousandBit(coinInfo[i].balanceDollar, 2)
         bitCoinInfo.push({
           logo: coinInfo[i].logo,
           nameSimplicity: coinInfo[i].coin,
           nameFull: coinInfo[i].coinAll,
           availbleBalance: balance,
-          freeze: Number(coinInfo[i].freeze) === 0 ? '0.00' : that.$$.thousandBit(coinInfo[i].freeze, 'no'),
+          freeze: Number(coinInfo[i].freeze) === 0 ? "0.00" : this.$$.thousandBit(coinInfo[i].freeze, "no"),
           totalBalance: balance,
-          totalBalanceDoller: balance,
+          totalBalanceDoller: balanceDollar,
           currency: coinInfo[i].coin,
-          receive: '',
-          send: '',
+          receive: "",
+          send: "",
           btnView: coinInfo[i].flag
         })
+        this.myAssetsTotal = Number(this.myAssetsTotal) + Number(coinInfo[i].balanceDollar)
       }
-      that.bitIconTypeSearch = that.bitIconTypeData = bitCoinInfo
+      this.myAssetsTotal = this.$$.thousandBit(this.myAssetsTotal, 2)
+      this.bitIconTypeSearch = this.bitIconTypeData = bitCoinInfo
     },
     setWeb3 () {
-      const that = this
-      that.$$.setWeb3(that)
-      that.newWeb3 = new Lilo(that.$$.baseUrl)
+      this.$$.setWeb3(this)
+      this.newWeb3 = new Lilo(this.$$.baseUrl)
     },
-    privateSure (data) {
-      const that = this
-      that.dataPage = {
-        coin: data,
-        sendType: 'MYWALLET',
-        from: that.walletAddress,
-        nonce: '',
-        gasPrice: ''
-      }
-      try {
-        that.dataPage.nonce = that.web3.eth.getTransactionCount(that.walletAddress, 'pending')
-      } catch (error) {
-        that.nonceNum = that.$$.getWeb3({
-          method: 'eth_getTransactionCount',
-          params: [that.walletAddress, 'pending']
-        }).result
-      }
-      try {
-        that.dataPage.gasPrice = that.web3.eth.gasPrice.toString(10)
-      } catch (error) {
-        that.dataPage.gasPrice = that.$$.getWeb3({
-          method: 'eth_gasPrice',
-          params: []
-        }).result.toString(10)
-      }
-      that.$router.push('/pwdMyAssets')
-      $('#privateSure').modal('show')
-    },
-    getSignData (data) {
-      const that = this
-      if (data) {
-        for (let i = 0; i < that.bitIconTypeData.length; i++) {
-          if (data === that.bitIconTypeData[i].currency) {
-            that.bitIconTypeData[i].btnView = true
-          }
-        }
-        $('#privateSure').modal('hide')
-        that.$$.layerMsg({
-          tip: 'Request success',
+    privateSure (data, flag) {
+      if (flag === 1) {
+        this.$$.layerMsg({
+          tip: "Please refresh the page to view!",
           time: 3000,
-          bgColor: '#5dba5a',
-          icon: require('../../../../assets/image/Prompt.svg')
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
         })
-        let storeData = {
-          balance: 0,
-          balanceDoller: 0,
-          flag: true,
-          coin: data
-        }
-        that.$store.commit('storeCoinInfo', storeData)
-      } else {
-        $('#privateSure').modal('hide')
-        that.$$.layerMsg({
-          tip: 'Sign error!',
-          time: 3000,
-          bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
-        })
-      }
-    },
-    getBalanceData () {
-      const that = this
-      if (!that.walletAddress) {
         return
       }
-      that.setWeb3()
-      let coinInfo = that.$store.state.coinInfo
-      // console.log(that.walletAddress)
+      this.dataPage = {
+        coin: data,
+        sendType: "MYWALLET",
+        from: this.walletAddress,
+        nonce: "",
+      }
+      try {
+        this.dataPage.nonce = this.web3.eth.getTransactionCount(this.walletAddress, "pending")
+      } catch (error) {
+        this.nonceNum = this.$$.getWeb3({
+          method: "eth_getTransactionCount",
+          params: [this.walletAddress, "pending"]
+        }).result
+      }
+      this.$router.push("/pwdMyAssets")
+      $("#privateSure").modal("show")
+    },
+    getSignData (data) {
+      if (data) {
+        if (data.nowFlag) {
+          this.sendRawTransion(data)
+        } else {
+          this.confirmData = data
+          $("#confirmDcrm").modal("show")
+        }
+        $("#privateSure").modal("hide")
+      } else {
+        $("#privateSure").modal("hide")
+        this.$$.layerMsg({
+          tip: "Sign error!",
+          time: 3000,
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
+        })
+      }
+    },
+    sendRawTransion (data) {
+      this.web3.eth.sendRawTransaction(data.serializedTx, (err, hash) => {
+        if (err) {
+          console.log(err)
+          this.$$.layerMsg({
+            tip: err,
+            time: 5000,
+            bgColor: "#ea4b40",
+            icon: this.$$.promptSvg
+          })
+        } else {
+          for (let i = 0; i < this.bitIconTypeData.length; i++) {
+            if (data.coin === this.bitIconTypeData[i].currency) {
+              this.bitIconTypeData[i].btnView = 1
+            }
+          }
+          let storeData = {
+            balance: 0,
+            balanceDollar: 0,
+            flag: 1,
+            coin: data.coin
+          }
+          this.$store.commit("storeCoinInfo", storeData)
+          $("#confirmDcrm").modal("hide")
+          this.$$.layerMsg({
+            tip: "Request success,Save your TX Hash in case you need it later：" + hash +", and refresh the page to view after 15 seconds.",
+            time: 3000,
+            bgColor: "#5dba5a",
+            icon: this.$$.promptSvg
+          })
+        }
+      })
+    },
+    getBalanceData () {
+      if (!this.walletAddress) {
+        return
+      }
+      this.setWeb3()
+      let coinInfo = this.$store.state.coinInfo
+      this.myAssetsTotal = 0
       for (let i = 0; i < coinInfo.length; i++) {
         let coin = coinInfo[i].coin
-        let storeData = {
-          balance: '',
-          balanceDoller: '',
-          flag: ''
-        }
-        if (coin === 'FSN') {
+        if (coin === "FSN") {
           try {
-            let balanceChange = that.web3.fromWei(that.web3.eth.getBalance(that.walletAddress), 'ether').toString()
-            storeData = {
-              balance: balanceChange,
-              balanceDoller: balanceChange,
-              flag: true,
-              coin: coin
-            }
-            balanceChange = Number(balanceChange) === 0 ? '0.00' : that.$$.thousandBit(balanceChange, 'no')
-            that.bitIconTypeData[0].availbleBalance = balanceChange
-            that.bitIconTypeData[0].totalBalance = balanceChange
-            that.bitIconTypeData[0].totalBalanceDoller = balanceChange
-            that.$store.commit('storeCoinInfo', storeData)
+            let balanceWei = this.web3.eth.getBalance(this.walletAddress)
+            this.setBalance(coin, balanceWei, 2)
           } catch (error) {
-            console.log(error)
-            that.$$.web3({
-              method: 'eth_getBalance',
-              params: [that.walletAddress, 'latest']
-            }).then(function (res) {
-              if (!res.error) {
-                let balanceChange = that.web3.fromWei(res.result, 'ether').toString()
-                storeData = {
-                  balance: balanceChange,
-                  balanceDoller: balanceChange,
-                  flag: true,
-                  coin: coin
-                }
-                balanceChange = Number(balanceChange) === 0 ? '0.00' : that.$$.thousandBit(balanceChange, 'no')
-                that.bitIconTypeData[0].availbleBalance = balanceChange
-                that.bitIconTypeData[0].totalBalance = balanceChange
-                that.bitIconTypeData[0].totalBalanceDoller = balanceChange
-                that.$store.commit('storeCoinInfo', storeData)
-              } else {
-                let balanceChange = that.web3.fromWei(0, 'ether').toString()
-                storeData = {
-                  balance: balanceChange,
-                  balanceDoller: balanceChange,
-                  flag: true,
-                  coin: coin
-                }
-                balanceChange = Number(balanceChange) === 0 ? '0.00' : that.$$.thousandBit(balanceChange, 'no')
-                that.bitIconTypeData[0].availbleBalance = balanceChange
-                that.bitIconTypeData[0].totalBalance = balanceChange
-                that.bitIconTypeData[0].totalBalanceDoller = balanceChange
-                that.$$.layerMsg({
-                  tip: res,
-                  time: 3000,
-                  bgColor: '#ea4b40',
-                  icon: require('../../../../assets/image/Prompt.svg')
-                })
-              }
+            this.setBalance(coin, 0, 2)
+            this.$$.layerMsg({
+              tip: error,
+              time: 3000,
+              bgColor: "#ea4b40",
+              icon: this.$$.promptSvg
             })
           }
         } else {
-          that.newWeb3.lilo.dcrmGetBalance(that.walletAddress, coin).then(function(res){
+          // this.newWeb3.lilo.dcrmGetBalance(this.walletAddress, coin).then(function(res){
+          this.newWeb3.lilo.dcrmGetBalance(this.walletAddress, coin).then((res) => {
             if (!isNaN(res)) {
-              let balanceChange = that.web3.fromWei(res, 'ether')
-              storeData = {
-                balance: balanceChange,
-                balanceDoller: balanceChange,
-                flag: true,
-                coin: coin
-              }
-              balanceChange = Number(balanceChange) === 0 ? '0.00' : that.$$.thousandBit(balanceChange, 'no')
-              for (let j = 0; j < that.bitIconTypeData.length; j++) {
-                if (that.bitIconTypeData[j].currency === coin) {
-                  that.bitIconTypeData[j].availbleBalance = balanceChange
-                  that.bitIconTypeData[j].totalBalance = balanceChange
-                  that.bitIconTypeData[j].totalBalanceDoller = balanceChange
-                  that.bitIconTypeData[j].btnView = true
-                }
-              }
-              that.$store.commit('storeCoinInfo', storeData)
+              this.setBalance(coin, res, 2)
             } else {
-              let balanceChange = that.web3.fromWei(0, 'ether')
-              storeData = {
-                balance: balanceChange,
-                balanceDoller: balanceChange,
-                flag: false,
-                coin: coin
-              }
-              balanceChange = Number(balanceChange) === 0 ? '0.00' : that.$$.thousandBit(balanceChange, 'no')
-              for (let j = 0; j < that.bitIconTypeData.length; j++) {
-                if (that.bitIconTypeData[j].currency === coin) {
-                  that.bitIconTypeData[j].availbleBalance = balanceChange
-                  that.bitIconTypeData[j].totalBalance = balanceChange
-                  that.bitIconTypeData[j].totalBalanceDoller = balanceChange
-                  that.bitIconTypeData[j].btnView = false
-                }
-              }
-              that.$store.commit('storeCoinInfo', storeData)
+              this.setBalance(coin, 0, 0)
             }
           })
         }
       }
-      that.$store.commit('storeWalletLoadFlag', false)
-      // that.getInitData()
+      this.$store.commit("storeWalletLoadFlag", false)
+    },
+    setBalance (coin, balance, flag) {
+      let storeData = {
+        balance: "",
+        balanceDollar: "",
+        flag: "",
+        coin: coin
+      }
+      let balanceWei = balance
+      let balanceGwei = 0
+      if (coin === "BTC") {
+        balanceGwei = this.$$.fromWei(balanceWei, "btc")
+      } else {
+        balanceGwei = this.web3.fromWei(balanceWei, "ether").toString()
+      }
+      let balanceUSD = this.changeCoinDoller(coin, balanceGwei)
+      this.myAssetsTotal = Number(this.myAssetsTotal) + Number(balanceUSD)
+      storeData = {
+        balance: balanceGwei,
+        balanceDollar: balanceUSD,
+        flag: flag,
+        coin: coin
+      }
+      balanceGwei = Number(balanceGwei) === 0 ? "0.00" : this.$$.thousandBit(balanceGwei, "no")
+      balanceUSD = Number(balanceUSD) === 0 ? "0.00" : this.$$.thousandBit(balanceUSD, 2)
+      for (let j = 0; j < this.bitIconTypeData.length; j++) {
+        if (this.bitIconTypeData[j].currency === coin) {
+          this.bitIconTypeData[j].availbleBalance = balanceGwei
+          this.bitIconTypeData[j].totalBalance = balanceGwei
+          this.bitIconTypeData[j].totalBalanceDoller = balanceUSD
+          this.bitIconTypeData[j].btnView = flag
+        }
+      }
+      this.$store.commit("storeCoinInfo", storeData)
+    },
+    changeCoinDoller (coin, balance) {
+      let dollerNum = 0
+      let coinData = this.$store.state.coinInfo
+      for (let i = 0; i < coinData.length; i++) {
+        if (coin === coinData[i].coin) {
+          dollerNum = this.getDoller(coinData[i].dollarURL)
+          break
+        }
+      }
+      dollerNum = dollerNum * balance
+      return dollerNum
+    },
+    getDoller (url) {
+      let callbackData = 0
+      $.ajax({
+        url: url,
+        type: "get",
+        datatype: "jsonp",
+        async: false,
+        success: function (res) {
+          if (res.length > 0) {
+            callbackData = res[0].price_usd
+          } else {
+            callbackData = 0
+          }
+        },
+        error: function (res) {
+          callbackData = 0
+        }
+      })
+      return callbackData
     }
   },
   beforeDestroy () {
-    let that = this
-    clearInterval(that.refreshBalance)
-    that.refreshBalance = null
+    clearInterval(this.refreshBalance)
+    this.refreshBalance = null
   }
 }
 </script>

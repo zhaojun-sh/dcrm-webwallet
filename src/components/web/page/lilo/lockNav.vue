@@ -1,20 +1,31 @@
 <template>
-  <div>
+  <div style="background:#fff">
     <div class="contentHeader_box flex-bc">
       <h1 class="contentHeader_title">Lockin / Lockout</h1>
       <div class="biticonSelect_box">
-        <div class="logo"><img src="../../../../assets/image/Fusion.svg"></div>
+        <div class="logo"><img src="@/assets/image/Fusion.svg"></div>
         <div class="arrow flex-c"><i class="i"></i></div>
         <select class="select" v-model="selectVal" id="selectValData">
-          <option v-for="(item, index) in SetcoinAndUrl" :key="index" v-html="item.coin" :value="item.coin"></option>
+          <option
+            v-for="(item, index) in SetcoinAndUrl"
+            :key="index"
+            v-html="item.coin"
+            :value="item.coin"
+          ></option>
         </select>
       </div>
     </div>
 
     <div class="transferBtn_box">
       <div class="transferBtn_btn flex-sc">
-        <router-link to="/LILO/lockIn" class="tranBtn flex-c">Deposit<i class="arrow"></i></router-link>
-        <router-link to="/LILO/lockOut" class="tranBtn flex-c">Withdraw<i class="arrow"></i></router-link>
+        <router-link to="/LILO/lockIn" class="tranBtn flex-c">
+          Deposit
+          <i class="arrow"></i>
+        </router-link>
+        <router-link to="/LILO/lockOut" class="tranBtn flex-c">
+          Withdraw
+          <i class="arrow"></i>
+        </router-link>
       </div>
     </div>
 
@@ -29,75 +40,57 @@
 </template>
 
 <script>
-import Lilo from '../../../../assets/js/lilo'
+import Lilo from "@/assets/js/lilo"
 export default {
-  name: 'Transfer',
+  name: "Transfer",
   data () {
     return {
-      // selectData: '',
-      selectVal: '',
+      selectVal: "",
       SetcoinAndUrl: [],
-      walletAddress: '',
-      coinDataPage: '',
-      web3: '',
-      newWeb3: ''
+      walletAddress: "",
+      coinDataPage: "",
+      web3: "",
+      newWeb3: ""
     }
   },
   watch: {
     selectVal (cur, oold) {
-      const that = this
-      // console.log(cur)
-      that.getCoinInfo(cur)
+      this.getCoinInfo(cur)
     }
   },
   mounted () {
-    const that = this
-    that.selectVal = that.$route.query.currency ? that.$route.query.currency : 'ETH'
-    that.walletAddress = that.$store.state.addressInfo
-    for (let i = 0; i < that.$store.state.coinInfo.length; i++) {
-      if (that.$store.state.coinInfo[i].coin !== 'FSN') {
-        that.SetcoinAndUrl.push(that.$store.state.coinInfo[i])
+    this.selectVal = this.$route.query.currency
+      ? this.$route.query.currency
+      : "ETH"
+    this.walletAddress = this.$store.state.addressInfo
+    for (let i = 0; i < this.$store.state.coinInfo.length; i++) {
+      if (this.$store.state.coinInfo[i].coin !== "FSN") {
+        this.SetcoinAndUrl.push(this.$store.state.coinInfo[i])
       }
     }
-    that.getCoinInfo(that.selectVal)
+    this.getCoinInfo(this.selectVal)
   },
   methods: {
     getCoinInfo (coin) {
-      const that = this
-      // console.log(that.SetcoinAndUrl)
-      for (let i = 0; i < that.SetcoinAndUrl.length; i++) {
-        if (coin === that.SetcoinAndUrl[i].coin) {
-          // console.log(coin)
-          that.setWeb3()
-            // console.log(123)
-          that.newWeb3.lilo.dcrmGetAddr(that.walletAddress, coin).then(function (val) {
-            // console.log(val)
-            that.coinDataPage = {
+      for (let i = 0; i < this.SetcoinAndUrl.length; i++) {
+        if (coin === this.SetcoinAndUrl[i].coin) {
+          this.setWeb3()
+          this.newWeb3.lilo.dcrmGetAddr(this.walletAddress, coin).then((val) => {
+            this.coinDataPage = {
               coin: coin,
               address: val,
-              limit: that.SetcoinAndUrl[i].limit,
-              number: that.SetcoinAndUrl[i].number,
-              token: that.SetcoinAndUrl[i].token
+              limit: this.SetcoinAndUrl[i].limit,
+              number: this.SetcoinAndUrl[i].number,
+              token: this.SetcoinAndUrl[i].token
             }
-            // console.log(that.coinDataPage)
-            that.$store.commit('storeDcrmAddress', val)
+            this.$store.commit("storeDcrmAddress", val)
           })
         }
       }
-      // }
     },
     setWeb3 () {
-      const that = this
-      that.$$.setWeb3(that)
-      // let Web3 = require('web3')
-      
-      // if (typeof web3 !== 'undefined') {
-      //   Web3 = new Web3(Web3.currentProvider)
-      // } else {
-      //   Web3 = new Web3(new Web3.providers.HttpProvider(url))
-      // }
-      // that.web3 = Web3
-      that.newWeb3 = new Lilo(that.$$.baseUrl)
+      this.$$.setWeb3(this)
+      this.newWeb3 = new Lilo(this.$$.baseUrl)
     }
   }
 }

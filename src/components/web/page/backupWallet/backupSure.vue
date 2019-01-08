@@ -10,16 +10,31 @@
         <div class="selectType_type flex-ai-c">
           <ul>
             <li>
-              <input type="radio" name="selectType" id="aria1" class="input" checked>
+              <input
+                type="radio"
+                name="selectType"
+                id="aria1"
+                class="input"
+                checked
+              >
               <label class="flex-sc labelStyle" for="aria1" data-show="keystore">
-                <div class="radioBox flex-c"><i class="radio"></i></div>
+                <div class="radioBox flex-c">
+                  <i class="radio"></i>
+                </div>
                 <p class="p">Keystore / JSON File</p>
               </label>
             </li>
             <li>
-              <input type="radio" name="selectType" id="aria2" class="input">
+              <input
+                type="radio"
+                name="selectType"
+                id="aria2"
+                class="input"
+              >
               <label class="flex-sc labelStyle" for="aria2" data-show="private">
-                <div class="radioBox flex-c"><i class="radio"></i></div>
+                <div class="radioBox flex-c">
+                  <i class="radio"></i>
+                </div>
                 <p class="p">Private Key</p>
               </label>
             </li>
@@ -33,11 +48,21 @@
             </hgroup>
             <div class="selectType_contentBox">
               <div class="selectType_KSbtn">
-                <p class="p">SELECT WALLET FILE...</p>
-                <input type="file" class="file" id="fileUpload">
+                <p class="p" id="fileName">SELECT WALLET FILE...</p>
+                <input
+                  type="file"
+                  class="file"
+                  id="fileUpload"
+                >
               </div>
               <div class="selectType_contTnput" v-if="showPwd">
-                <input type="password" placeholder="Enter a password" class="input-text input" v-model="password" @keyup="changePwd">
+                <input 
+                  type="password"
+                  placeholder="Enter a Private Key"
+                  class="input-text input"
+                  v-model="password"
+                  @keyup="changePwd"
+                >
               </div>
 
               <div class="createInfo_btn flex-c" v-if="showPwdBtn">
@@ -52,7 +77,13 @@
             </hgroup>
             <div class="selectType_contentBox">
               <div class="selectType_contTnput">
-                <input type="password" placeholder="Enter a password" class="input-text input" v-model="privateKey" @keyup="changePrv">
+                <input
+                  type="password"
+                  placeholder="Enter a password"
+                  class="input-text input pwdChange"
+                  v-model="privateKey"
+                  @keyup="changePrv"
+                >
               </div>
 
               <div class="createInfo_btn flex-c">
@@ -76,149 +107,153 @@
 </style>
 
 <script>
-import wallet from '../../../../assets/js/wallet'
+import wallet from "@/assets/js/wallet"
 export default {
-  name: 'createWallet',
-  // props: ['wAdress'],
+  name: "createWallet",
   data () {
     return {
-      password: '',
-      fileJSON: '',
+      password: "",
+      fileJSON: "",
       showPwd: false,
       showPwdBtn: false,
-      fileData: '',
-      privateKey: '',
-      publicKey: '',
-      checkAddress: '',
-      downloadURL: '',
-      downloadName: ''
+      fileData: "",
+      privateKey: "",
+      publicKey: "",
+      checkAddress: "",
+      downloadURL: "",
+      downloadName: ""
     }
   },
-  beforeCreate () {
-    const that = this
-    that.$$.loadingStart()
-  },
-  created () {
-    const that = this
-    that.$$.loadingEnd()
-  },
   mounted () {
-    let that = this
-    $('.selectType_type').on('click', 'label', function () {
-      let showID = $(this).attr('data-show')
-      $('[data-view]').hide()
-      $('[data-view=' + showID + ']').show()
-      that.showPwd = false
-      that.showPwdBtn = false
-      that.password = ''
-      $('#fileUpload').val('')
-      that.privateKey = ''
-      that.publicKey = ''
-      that.checkAddress = ''
-      that.downloadName = ''
-      that.downloadURL = ''
+    $(".selectType_type").on("click", "label", event => {
+      let showID = $(event.currentTarget).attr("data-show")
+      $("[data-view]").hide()
+      $("[data-view=" + showID + "]").show()
+      this.showPwd = false
+      this.showPwdBtn = false
+      this.password = ""
+      $("#fileUpload").val("")
+      this.privateKey = ""
+      this.publicKey = ""
+      this.checkAddress = ""
+      this.downloadName = ""
+      this.downloadURL = ""
+      $("#fileName").text("SELECT WALLET FILE...")
     })
-    $('#fileUpload').change(function () {
+    $("#fileUpload").change(event => {
       let reader = new FileReader()
-      that.password = ''
-      let _this = this
-      reader.onload = function (onLoadEvent) {
-        that.fileData = onLoadEvent.currentTarget.result
-        // that.downloadName = $(_this)[0].files[0].name
-        // that.downloadName = that.$$.getBlob('text/json;charset=UTF-8', that.fileData)
-        that.showPwd = that.walletRequirePass(that.fileData)
+      this.password = ""
+      // let _this = this
+      let fileName = $(event.currentTarget)[0].files[0].name
+      reader.onload = onLoadEvent => {
+        this.fileData = onLoadEvent.currentTarget.result
+        this.showPwd = this.walletRequirePass(this.fileData)
+        if (this.showPwd) {
+          $("#fileName").text(fileName)
+        } else {
+          $("#fileName").text("SELECT WALLET FILE...")
+        }
       }
-      reader.readAsText($(this)[0].files[0])
+      reader.readAsText($(event.currentTarget)[0].files[0])
+    })
+    $(".pwdChange").on("change", () => {
+      this.showPwdBtn = true
     })
   },
   methods: {
     goBackupWallet () {
-      let that = this
-      that.setStore()
-      that.sendInfoToParent()
-      that.$router.push('/backupWallet')
+      this.setStore()
+      this.sendInfoToParent()
+      this.$router.push("/backupWallet")
     },
     inputFileBtn () {
-      let that = this
       let walletData
       try{
-        walletData = wallet.getWalletFromPrivKeyFile(that.fileData, that.password)
-        that.checkAddress = walletData.getChecksumAddressString()
-        that.privateKey = walletData.getPrivateKeyString()
-        that.downloadName = walletData.getV3Filename()
-        that.downloadURL = that.$$.getBlob('text/json;charset=UTF-8', that.fileData)
-        // console.log(that.checkAddress)
-        that.goBackupWallet()
+        walletData = wallet.getWalletFromPrivKeyFile(
+          this.fileData,
+          this.password
+        )
+        this.checkAddress = walletData.getChecksumAddressString()
+        this.privateKey = walletData.getPrivateKeyString()
+        this.downloadName = walletData.getV3Filename()
+        this.downloadURL = this.$$.getBlob(
+          "text/json;charset=UTF-8",
+          this.fileData
+        )
+        if (this.checkAddress.toLowerCase() !== this.$store.state.addressInfo.toLowerCase()) {
+          this.$$.layerMsg({
+            tip: "Account error!",
+            time: 3000,
+            bgColor: "#ea4b40",
+            icon: this.$$.promptSvg
+          })
+          return
+        }
+        this.goBackupWallet()
       } catch (e) {
-        that.$$.layerMsg({
+        this.$$.layerMsg({
           tip: e,
           time: 2000,
-          bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
         })
-        // that.showPwdBtn = false
       }
     },
     inputPwdBtn () {
-      let that = this
       let walletData
       try {
-        walletData = new wallet(new Buffer(that.fixPkey(that.privateKey), 'hex'))
-        that.checkAddress = walletData.getChecksumAddressString()
-        that.downloadURL = ''
-        that.downloadName = ''
-        that.goBackupWallet()
+        walletData = new wallet(
+          new Buffer(this.fixPkey(this.privateKey), "hex")
+        )
+        this.checkAddress = walletData.getChecksumAddressString()
+        this.downloadURL = ""
+        this.downloadName = ""
+        if (this.checkAddress.toLowerCase() !== this.$store.state.addressInfo.toLowerCase()) {
+          this.$$.layerMsg({
+            tip: "Account error!",
+            time: 3000,
+            bgColor: "#ea4b40",
+            icon: this.$$.promptSvg
+          })
+          return
+        }
+        this.goBackupWallet()
       } catch (e) {
-        that.$$.layerMsg({
+        this.$$.layerMsg({
           tip: e,
           time: 2000,
-          bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
         })
-        // that.showPwdBtn = false
       }
     },
     sendInfoToParent () {
-      let that = this
-      that.$emit('setAddress', that.checkAddress)
+      this.$emit("setAddress", this.checkAddress)
     },
     setStore () {
-      let that = this
-      that.$store.commit('storePrivateKey', that.privateKey)
-      // that.$store.commit('storePubliceKey', that.publicKey)
-      that.$store.commit('storeAddress', that.checkAddress)
-      that.$store.commit('storeKeystoreURL', that.downloadURL)
-      that.$store.commit('storeDownload', that.downloadName)
-      sessionStorage.setItem('localFromAddress', that.checkAddress)
+      this.$store.commit("storePrivateKey", this.privateKey)
+      this.$store.commit("storeAddress", this.checkAddress)
+      this.$store.commit("storeKeystoreURL", this.downloadURL)
+      this.$store.commit("storeDownload", this.downloadName)
     },
     changePrv (e) {
-      let that = this
-      if (that.privateKey.length < 6) {
-        that.showPwdBtn = false
-      } else {
-        that.showPwdBtn = true
-        if (e.which === 13) {
-          that.inputPwdBtn()
-        }
+      this.showPwdBtn = true
+      if (e.which === 13) {
+        this.inputPwdBtn()
       }
     },
     changePwd (e) {
-      let that = this
-      if (that.password.length < 6) {
-        that.showPwdBtn = false
-      } else {
-        that.showPwdBtn = true
-        if (e.which === 13) {
-          that.inputFileBtn()
-        }
+      this.showPwdBtn = true
+      if (e.which === 13) {
+        this.inputFileBtn()
       }
     },
     walletRequirePass (ethjson) {
         let jsonArr
         try {
-            jsonArr = JSON.parse(ethjson)
+          jsonArr = JSON.parse(ethjson)
         } catch (err) {
-            throw 'This is not a valid wallet file. '
+          throw "This is not a valid wallet file. "
         }
         if (jsonArr.encseed != null) {
           return true
@@ -231,12 +266,12 @@ export default {
         } else if (jsonArr.publisher == "MyEtherWallet" && !jsonArr.encrypted) {
           return false
         } else {
-          throw 'Sorry! We don\'t recognize this type of wallet file. '
+          throw "Sorry! We don\"t recognize this type of wallet file. "
         }
     },
     fixPkey (key) {
       if (key.indexOf("0x") === 0) {
-        return key.slice(2);
+        return key.slice(2)
       }
       return key
     }

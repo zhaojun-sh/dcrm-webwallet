@@ -1,36 +1,21 @@
 <template>
-  <div>
-
-  </div>
+  <div></div>
 </template>
 
 <script>
 export default {
-  name: 'loading',
+  name: "loading",
   data () {
-    return {
-
-    }
-  },
-  beforeCreate () {
-    const that = this
-    that.$$.loadingStart()
+    return {}
   },
   mounted () {
-    let that = this
-    that.$store.commit('storeWalletLoadFlag', true)
-    that.goBack()
+    this.$store.commit("storeWalletLoadFlag", true)
+    this.goBack()
   },
   methods: {
     goBack () {
       history.go(-1)
     }
-  },
-  destroyed () {
-    let that = this
-    setTimeout(function () {
-      that.$$.loadingEnd()
-    }, 600)
   }
 }
 </script>

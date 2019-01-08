@@ -1,7 +1,6 @@
 
 function newWeb3 (providers) {
   let idInit = 0
-  let that = this
   this.lilo = {
     dcrmReqAddr: function (fromAddress, coin, pwd) {
       let inputdata = {
@@ -10,7 +9,7 @@ function newWeb3 (providers) {
         jsonrpc: '2.0',
         id: ++idInit
       }
-      let callback = new Promise(function (resolve, reject) {
+      let callback = new Promise(function (resolve) {
         $.ajax({
           url: providers,
           type: 'post',
@@ -30,32 +29,55 @@ function newWeb3 (providers) {
                 resolve(data)
               }
             } else if (data && data.error) {
-              reject(data)
+              resolve(data)
             }
           },
           error: function (e) {
             console.log('error', e)
-            reject(e)
+            resolve(e)
           }
         })
       })
       return callback
     },
-    // dcrmConfimAddr: function (address, coin, pwd) {
-    //   let sendData = {}
-    //   let callback
-    //   sendData = {
-    //     from: address,
-    //     pwd: pwd,
-    //     data: 'DCRMCONFIRMADDR:' + address + ':' + coin
-    //   }
-    //   callback = new Promise(function (resolve) {
-    //     new SendTransactionPub(web3, sendData).then(function (res) {
-    //       resolve(res)
-    //     })
-    //   })
-    //   return callback
-    // },
+    dcrmConfimAddr: function (data, coin) {
+      let inputdata = {
+        params: [data, coin],
+        method: 'lilo_dcrmConfirmAddr',
+        jsonrpc: '2.0',
+        id: ++idInit
+      }
+      let callback = new Promise(function (resolve) {
+        $.ajax({
+          url: providers,
+          type: 'post',
+          data: JSON.stringify(inputdata),
+          dataType: 'json',
+          contentType: 'application/json',
+          success: function (data) {
+            if (data && data.result) {
+              if (data.result.indexOf('{') === 0) {
+                let $data = JSON.parse(data.result)
+                sessionStorage.setItem('dcrmFromAddress', $data.DcrmAddr)
+                resolve($data.DcrmAddr)
+                // that.lilo.dcrmConfimAddr($data.DcrmAddr, coin, pwd).then(function (val) {
+                //   resolve(val)
+                // })
+              } else {
+                resolve(data)
+              }
+            } else if (data && data.error) {
+              resolve(data)
+            }
+          },
+          error: function (e) {
+            console.log('error', e)
+            resolve(e)
+          }
+        })
+      })
+      return callback
+    },
     dcrmGetAddr: function (coinbase, coin) {
       let inputdata = {
         params: [coinbase, coin],
