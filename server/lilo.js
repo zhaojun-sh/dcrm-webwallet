@@ -1,9 +1,12 @@
 const express = require('express')
 const router = express.Router()
-const mongoose = require('mongoose')
+const pub = require('./public')
+const mongoose = pub.mongoose
+// const mongoose = require('mongoose')
 const Schema = mongoose.Schema
+// console.log(pub)
 // mongoose.connect('mongodb://localhost:27017/fsn')
-mongoose.connect('mongodb://localhost:27017/fsn')
+// mongoose.connect('mongodb://localhost:27017/fsn', { useNewUrlParser: true })
 const liloSchema = new Schema({
   blockHash: {type: String},
   blockNumber: {type: String},
@@ -27,7 +30,8 @@ const liloSchema = new Schema({
   txreceipt_status: {type: String},
   value: {type: String},
   statusFsn: {type: String},
-  coin: {type: String}
+  coin: {type: String},
+  tokenSymbol: {type: String}
 })
 
 const LiloModel = mongoose.model('lilo', liloSchema)
@@ -56,7 +60,8 @@ router.post('/create', function (req, res) {
     txreceipt_status: req.body.txreceipt_status ? req.body.txreceipt_status : '',
     value: req.body.value ? req.body.value : '',
     statusFsn: req.body.statusFsn ? req.body.statusFsn : '',
-    coin: req.body.coin ? req.body.coin : ''
+    coin: req.body.coin ? req.body.coin : '',
+    tokenSymbol: req.body.tokenSymbol ? req.body.tokenSymbol : ''
   })
   let data = {
     msg: 'error',
@@ -83,28 +88,13 @@ router.post('/lockInHistory', function (req, res) {
     msg: 'error',
     info: ''
   }
-  let to_address = req.body.to ? req.body.to.toLowerCase() : ''
-  LiloModel.find({to: to_address}, function (err, result) {
+  let toAddress = req.body.to ? req.body.to.toLowerCase() : ''
+  LiloModel.find({to: toAddress}, function (err, result) {
     if (err) {
       data.msg = 'errpr'
       data.info = err
     } else {
       data.msg = 'success'
-      let compare = function compare (property) {
-        return function (a, b) {
-          let value1 = a[property]
-          let value2 = b[property]
-          if (Date.parse(value1) > Date.parse(value2)) {
-            return -1
-          } else if (value1 < value2) {
-            return 1
-          } else {
-            return 0
-          }
-          // return Date.parse(value1) - Date.parse(value2)
-        }
-      }
-      result.sort(compare('date'))
       data.info = result
       res.json(data)
     }
@@ -116,8 +106,8 @@ router.post('/lockInChangeState', function (req, res) {
     msg: 'error',
     info: ''
   }
-  // let to_address = req.body.to ? req.body.to.toLowerCase() : ''
-  // console.log(req.body)
+  // let toAddress = req.body.to ? req.body.to.toLowerCase() : ''
+  console.log(req.body)
   LiloModel.find({hash: req.body.hash}, function (err, result) {
   // LiloModel.update({hash: req.body.hash}, {$set: {fsnhash: req.body.fsnhash}}, function (err, result) {
     if (err) {
@@ -125,8 +115,9 @@ router.post('/lockInChangeState', function (req, res) {
       data.info = err
     } else {
       let updateData = result[0]
-      // console.log(updateData)
+      console.log(updateData)
       updateData.fsnhash = req.body.fsnhash
+      updateData.statusFsn = req.body.statusFsn
       updateData.save()
       data.msg = 'success'
       data.info = result
@@ -140,8 +131,8 @@ router.post('/lockOutHistory', function (req, res) {
     msg: 'error',
     info: ''
   }
-  let from_address = req.body.from ? req.body.from.toLowerCase() : ''
-  LiloModel.find({from: from_address, coin: req.body.coin}, function (err, result) {
+  let fromAddress = req.body.from ? req.body.from.toLowerCase() : ''
+  LiloModel.find({from: fromAddress, coin: req.body.coin}, function (err, result) {
     if (err) {
       data.msg = 'errpr'
       data.info = err

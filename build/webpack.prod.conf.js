@@ -38,6 +38,9 @@ const webpackConfig = merge(baseWebpackConfig, {
       uglifyOptions: {
         compress: {
           warnings: false
+        },
+        mangle: {
+          safari10: true
         }
       },
       sourceMap: config.build.productionSourceMap,
@@ -75,6 +78,7 @@ const webpackConfig = merge(baseWebpackConfig, {
         // more options:
         // https://github.com/kangax/html-minifier#options-quick-reference
       },
+      favicon: path.resolve('./favicon.ico'),
       // necessary to consistently work with multiple chunks via CommonsChunkPlugin
       chunksSortMode: 'dependency'
     }),

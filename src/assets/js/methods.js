@@ -1,13 +1,23 @@
 let $$ = {}
-// $$.baseUrl = 'https://mainnet.infura.io/'
-// $$.baseUrl = 'https://rinkeby.etherscan.io/api'
-// $$.baseUrl = 'http://47.92.168.85:40405/'
-// $$.baseUrl = 'http://54.169.254.177:40415'// FSN
-$$.baseUrl = 'http://47.92.255.230:8111'// FSN
-// $$.baseUrl = 'http://54.183.185.30:8018'// 以太坊
-// $$.baseUrl = 'http://47.92.255.230:40415/' //
 
-$$.serverURL = 'http://localhost:8081'
+let idNum = 0
+// $$.baseUrl = 'http://54.169.254.177:40415'
+// $$.baseUrl = 'http://54.164.7.63:40415'
+// $$.baseUrl = window.location.protocol + '//54.164.7.63:40445'
+$$.baseUrl = window.location.protocol + '//api.dcrm.network'
+// $$.baseUrl = 'http://104.210.49.28:40445'
+// $$.baseUrl = window.location.protocol + '//104.210.49.28:40445'
+// $$.baseUrl = 'http://10.192.32.92:40445'
+// $$.baseUrl = 'http://47.92.255.230:40415/'
+// $$.baseUrl = 'http://47.92.255.230:8111'
+
+// $$.serverURL = 'http://localhost:8087'
+// $$.serverURL = 'http://localhost:8085'
+// $$.serverURL = 'https://localhost:8085'
+// $$.serverURL = 'http://54.164.7.63:8087'
+// $$.serverURL = 'https://wallet.dcrm.network:8085'
+// $$.serverURL = window.location.protocol + '//wallet.dcrm.network:8087'
+$$.serverURL = window.location.protocol + '//wallet.dcrm.network:8085'
 
 $$.thousandBit = (num, dec = 2) => {
   num = Number(num)
@@ -16,7 +26,16 @@ $$.thousandBit = (num, dec = 2) => {
     num = num.toFixed(dec)
   } else {
     if (isNaN(dec)) {
-      num = num.toLocaleString().replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toLocaleString()
+      // console.log(num)
+      if (num.toString().indexOf('.') === -1) {
+        num = num.toLocaleString().replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toLocaleString()
+      } else {
+        let numSplit = num.toString().split('.')
+        numSplit[1] = numSplit[1].length > 9 ? numSplit[1].substr(0, 8) : numSplit[1]
+        // console.log(numSplit)
+        num = numSplit[0].toLocaleString().replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toLocaleString()
+        num = num + '.' + numSplit[1]
+      }
     } else {
       num = num.toFixed(dec).replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toLocaleString()
     }
@@ -30,7 +49,8 @@ $$.thousandChange = function (num, dec) {
 }
 
 $$.thousandToNum = (num) => {
-  return num.replace(/,/, '')
+  // console.log(num)
+  return num.toString().replace(/,/g, '')
 }
 
 $$.bigNumber = (num) => {
@@ -44,7 +64,7 @@ $$.timeChange = (data) => {
   let Y = time.getFullYear()
   let M = (time.getMonth() + 1) < 10 ? ('0' + (time.getMonth() + 1)) : (time.getMonth() + 1)
   let D = time.getDate() < 10 ? ('0' + time.getDate()) : time.getDate()
-  let h = time.getHours()
+  let h = time.getHours() < 10 ? ('0' + time.getHours()) : time.getHours()
   let m = time.getMinutes() < 10 ? ('0' + time.getMinutes()) : time.getMinutes()
   let s = time.getSeconds() < 10 ? ('0' + time.getSeconds()) : time.getSeconds()
   // console.log(Date.parse(data.date))
@@ -171,16 +191,32 @@ $$.showSearchTop = () => {
 }
 
 $$.getBlob = (mime, str) => {
-  var _typeof = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol' ? function (obj) { 
+  var _typeof = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol' ? function (obj) {
     return typeof obj
   } : function (obj) {
     return obj && typeof Symbol === 'function' && obj.constructor === Symbol && obj !== Symbol.prototype ? 'symbol' : typeof obj
   }
   var str1 = (typeof str === 'undefined' ? 'undefined' : _typeof(str)) === 'object' ? JSON.stringify(str) : str
   if (str1 == null) return ''
-  var blob = new Blob([str1], {
-    type: mime
-  })
+  // var blob = new Blob([str1], {
+  //   type: mime
+  // })
+  let blob
+  try {
+    blob = new Blob([str1], {type: mime})
+  } catch (e) {
+    // TypeError old chrome and FF
+    let BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder
+    if (e.name === 'TypeError' && window.BlobBuilder) {
+      blob = new BlobBuilder()
+      blob.append([str1.buffer])
+      blob = blob.getBlob(mime)
+    } else {
+      let tip = 'Browser does not support'
+      alert(tip)
+      throw tip
+    }
+  }
   return window.URL.createObjectURL(blob)
 }
 
@@ -200,5 +236,179 @@ $$.getBlob = (mime, str) => {
 // $('.moreInfo_box').on('click', '.moreInfo_hax', function () {
 //   console.log(123)
 // })
+
+$$.loadingStart = (data) => {
+  let initData = {
+    img: require('../image/wait.svg'),
+    color: '#999',
+    txt: data !== undefined ? data : 'Loading……'
+  }
+
+  if ((typeof data).toLowerCase() === 'object') {
+    initData = {
+      img: data.img ? data.img : require('../image/wait.svg'),
+      color: data.color ? data.color : '#999',
+      txt: data.img ? data.txt : 'Loading……'
+    }
+  }
+
+  let _div = document.createElement('div')
+  _div.className = 'OnLodaing'
+  _div.style.width = '100vw'
+  _div.style.height = '100vh'
+  _div.style.position = 'fixed'
+  _div.style.top = '0'
+  _div.style.left = '0'
+  _div.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'
+  _div.style.zIndex = '99999'
+  _div.style.display = 'flex'
+  _div.style.justifyContent = 'center'
+  _div.style.alignItems = 'center'
+
+  let _Load = document.createElement('div')
+  _Load.innerHTML = '<div class="rotateLoad"><img src="' + initData.img + '" /></div><p style="margin-top:15px;font-size:16px;font-weight:bold;color:#333;padding-left:12px;' + initData.color + '">' + initData.txt + '</p>'
+  _Load.style.textAlign = 'center'
+  // let _img = ''
+
+  _div.appendChild(_Load)
+  document.body.appendChild(_div)
+}
+
+$$.loadingEnd = () => {
+  // document.getElementsByClassName('OnLodaing').remove()
+  $('.OnLodaing').remove()
+}
+$$.loadingEndIndex = () => {
+  // document.getElementsByClassName('OnLodaing').remove()
+  $('.OnLodaingIndex').remove()
+  // console.log($('.OnLodaingIndex'))
+}
+
+$$.limitCoin = function (num, limit, type) {
+  let callback = {
+    flag: true,
+    msg: ''
+  }
+  if (num < limit) {
+    callback = {
+      flag: true,
+      msg: 'The amount cannot be less than ' + limit
+    }
+  } else if (type && type === 'INT' && Number(num).toString().indexOf('.') !== -1) {
+    callback = {
+      flag: true,
+      msg: 'Please enter an integer'
+    }
+  } else {
+    callback = {
+      flag: false,
+      msg: ''
+    }
+  }
+  return callback
+}
+
+$$.web3 = function (data) {
+  let that = this
+  // console.log(data)
+  let dataInit = {
+    id: ++idNum,
+    jsonrpc: '2.0',
+    method: data.method,
+    params: data.params
+  }
+  // console.log(dataInit)
+  let callback = new Promise(function (resolve) {
+    $.ajax({
+      url: that.baseUrl,
+      type: 'post',
+      datatype: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify(dataInit),
+      success: function (res) {
+        resolve(res)
+      },
+      error: function (res) {
+        resolve(res)
+      }
+    })
+  })
+  return callback
+  // console.log($('body'))
+}
+
+$$.getWeb3 = function (data) {
+  let that = this
+  // console.log(data)
+  let dataInit = {
+    id: ++idNum,
+    jsonrpc: '2.0',
+    method: data.method,
+    params: data.params
+  }
+  // console.log(dataInit)
+  let callback = function () {
+    let callbackData
+    $.ajax({
+      url: that.baseUrl,
+      type: 'post',
+      datatype: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify(dataInit),
+      async: false,
+      success: function (res) {
+        callbackData = res
+        // console.log(res)
+      },
+      error: function (res) {
+        callbackData = res
+      }
+    })
+    return callbackData
+  }
+  return callback()
+}
+
+// import Lilo from 'lilo'
+// let Lilo = require('Lilo')
+$$.setWeb3 = function (vueWeb3) {
+  let that = this
+  let Web3 = require('web3')
+  let web3
+  try {
+    web3 = new Web3(new Web3.providers.HttpProvider(that.baseUrl))
+  } catch (error) {
+    web3 = new Web3()
+    console.log(error)
+  }
+  vueWeb3.web3 = web3
+  // vueWeb3.newWeb3 = new Lilo(that.baseUrl)
+}
+
+$$.coinExchange = function (coin) {
+  coin = coin.toLowerCase()
+  if (coin === 'btc') {
+    return 8
+  }
+}
+
+$$.toWei = function (num, coin) {
+  let that = this
+  let e = that.coinExchange(coin)
+  num = isNaN(num) ? 0 : num
+  // console.log(num)
+  num = that.thousandBit(Number(num) * Math.pow(10, e), 'no')
+  // console.log(num)
+  num = that.thousandToNum(num)
+  // console.log(num)
+  return Number(num)
+}
+
+$$.fromWei = function (num, coin) {
+  let that = this
+  let e = that.coinExchange(coin)
+  num = isNaN(num) ? 0 : num
+  return Number(num) * Math.pow(10, -e)
+}
 
 export default $$

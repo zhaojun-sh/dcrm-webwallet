@@ -42,22 +42,18 @@ export default {
     }
   },
   mounted () {
-    let that = this
-    that.keystoreURL = that.$store.state.keystoreURL
-    that.keystoreName = that.$store.state.downloadName
-    console.log(that.keystoreName)
-    if (!that.keystoreURL) {
+    this.keystoreURL = this.$store.state.keystoreURL
+    this.keystoreName = this.$store.state.downloadName
+    if (!this.keystoreURL) {
       history.go(-1)
     }
+    this.$store.commit('storeAddress', '')
   },
   methods: {
     goBackupWallet () {
-      let that = this
-      // that.$router.push('/backupWallet')
-      that.$router.push('/')
+      this.$router.push('/')
     },
     downloadChange () {
-      let that = this
       $('#understandBtn').removeAttr('disabled')
     }
   }

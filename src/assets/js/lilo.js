@@ -1,7 +1,6 @@
 
 function newWeb3 (providers) {
   let idInit = 0
-  let that = this
   this.lilo = {
     dcrmReqAddr: function (fromAddress, coin, pwd) {
       let inputdata = {
@@ -10,7 +9,7 @@ function newWeb3 (providers) {
         jsonrpc: '2.0',
         id: ++idInit
       }
-      let callback = new Promise(function (resolve, reject) {
+      let callback = new Promise(function (resolve) {
         $.ajax({
           url: providers,
           type: 'post',
@@ -30,28 +29,51 @@ function newWeb3 (providers) {
                 resolve(data)
               }
             } else if (data && data.error) {
-              reject(data)
+              resolve(data)
             }
           },
           error: function (e) {
             console.log('error', e)
-            reject(e)
+            resolve(e)
           }
         })
       })
       return callback
     },
-    dcrmConfimAddr: function (address, coin, pwd) {
-      let sendData = {}
-      let callback
-      sendData = {
-        from: address,
-        pwd: pwd,
-        data: 'DCRMCONFIRMADDR:' + address + ':' + coin
+    dcrmConfimAddr: function (data, coin) {
+      let inputdata = {
+        params: [data, coin],
+        method: 'lilo_dcrmConfirmAddr',
+        jsonrpc: '2.0',
+        id: ++idInit
       }
-      callback = new Promise(function (resolve) {
-        new SendTransactionPub(web3, sendData).then(function (res) {
-          resolve(res)
+      let callback = new Promise(function (resolve) {
+        $.ajax({
+          url: providers,
+          type: 'post',
+          data: JSON.stringify(inputdata),
+          dataType: 'json',
+          contentType: 'application/json',
+          success: function (data) {
+            if (data && data.result) {
+              if (data.result.indexOf('{') === 0) {
+                let $data = JSON.parse(data.result)
+                sessionStorage.setItem('dcrmFromAddress', $data.DcrmAddr)
+                resolve($data.DcrmAddr)
+                // that.lilo.dcrmConfimAddr($data.DcrmAddr, coin, pwd).then(function (val) {
+                //   resolve(val)
+                // })
+              } else {
+                resolve(data)
+              }
+            } else if (data && data.error) {
+              resolve(data)
+            }
+          },
+          error: function (e) {
+            console.log('error', e)
+            resolve(e)
+          }
         })
       })
       return callback
@@ -71,17 +93,21 @@ function newWeb3 (providers) {
           dataType: 'json',
           contentType: 'application/json',
           success: function (data) {
+            // console.log(data)
             if (data && data.result) {
               let $data = data.result.indexOf('{') === 0 ? JSON.parse(data.result) : data.result
               sessionStorage.setItem('dcrmFromAddress', $data.DcrmAddr)
+              // console.log(1)
               resolve($data)
-            } else if (data && data.error) {
-              reject(data)
+            } else {
+              // console.log(2)
+              resolve(data.result)
             }
+            // console.log(3)
           },
           error: function (e) {
             console.log('error', e)
-            reject(e)
+            resolve(e)
           }
         })
       })
@@ -136,74 +162,74 @@ function newWeb3 (providers) {
               let $data = data.result.indexOf('{') === 0 ? JSON.parse(data.result) : data.result
               resolve($data)
             } else if (data && data.error) {
-              reject(data)
+              resolve(data)
             }
           },
           error: function (e) {
             console.log('error', e)
-            reject(e)
+            resolve(e)
           }
         })
       })
       return callback
-    },
-    dcrmSendTransaction: function (toAddress, value, coin, pwd) {
-      let fromAddress = sessionStorage.getItem('dcrmFromAddress')
-      let sendData = {
-        from: fromAddress,
-        to: toAddress,
-        value: value,
-        pwd: pwd,
-        data: 'LOCKOUT:' + toAddress + ':' + value + ':' + coin
-      }
-      let callback
-      if (!fromAddress) {
-        that.lilo.dcrmGetAddr(sessionStorage.getItem('localFromAddress'), coin).then(function (val) {
-          sendData.from = val
-          callback = new Promise(function (resolve) {
-            new SendTransactionPub(that, sendData).then(function (res) {
-              resolve(res)
-            })
-          })
-        })
-      } else {
-        callback = new Promise(function (resolve) {
-          new SendTransactionPub(that, sendData).then(function (res) {
-            resolve(res)
-          })
-        })
-      }
-      return callback
-    },
-    dcrmLockout: function (toAddress, value, coin, pwd, data) {
-      let fromAddress = sessionStorage.getItem('dcrmFromAddress')
-      let sendData = {
-        from: fromAddress,
-        to: toAddress,
-        value: value,
-        pwd: pwd,
-        data: 'LOCKOUT:' + toAddress + ':' + value + ':' + coin
-      }
-      console.log(sendData)
-      let callback
-      if (!fromAddress) {
-        that.lilo.dcrmGetAddr(sessionStorage.getItem('localFromAddress'), coin).then(function (val) {
-          sendData.from = val
-          callback = new Promise(function (resolve) {
-            new SendTransactionPub(that, sendData, data).then(function (res) {
-              resolve(res)
-            })
-          })
-        })
-      } else {
-        callback = new Promise(function (resolve) {
-          new SendTransactionPub(that, sendData).then(function (res) {
-            resolve(res)
-          })
-        })
-      }
-      return callback
     }
+    // dcrmSendTransaction: function (toAddress, value, coin, pwd) {
+    //   let fromAddress = sessionStorage.getItem('dcrmFromAddress')
+    //   let sendData = {
+    //     from: fromAddress,
+    //     to: toAddress,
+    //     value: value,
+    //     pwd: pwd,
+    //     data: 'LOCKOUT:' + toAddress + ':' + value + ':' + coin
+    //   }
+    //   let callback
+    //   if (!fromAddress) {
+    //     that.lilo.dcrmGetAddr(sessionStorage.getItem('localFromAddress'), coin).then(function (val) {
+    //       sendData.from = val
+    //       callback = new Promise(function (resolve) {
+    //         new SendTransactionPub(that, sendData).then(function (res) {
+    //           resolve(res)
+    //         })
+    //       })
+    //     })
+    //   } else {
+    //     callback = new Promise(function (resolve) {
+    //       new SendTransactionPub(that, sendData).then(function (res) {
+    //         resolve(res)
+    //       })
+    //     })
+    //   }
+    //   return callback
+    // },
+    // dcrmLockout: function (toAddress, value, coin, pwd, data) {
+    //   let fromAddress = sessionStorage.getItem('dcrmFromAddress')
+    //   let sendData = {
+    //     from: fromAddress,
+    //     to: toAddress,
+    //     value: value,
+    //     pwd: pwd,
+    //     data: 'LOCKOUT:' + toAddress + ':' + value + ':' + coin
+    //   }
+    //   console.log(sendData)
+    //   let callback
+    //   if (!fromAddress) {
+    //     that.lilo.dcrmGetAddr(sessionStorage.getItem('localFromAddress'), coin).then(function (val) {
+    //       sendData.from = val
+    //       callback = new Promise(function (resolve) {
+    //         new SendTransactionPub(that, sendData, data).then(function (res) {
+    //           resolve(res)
+    //         })
+    //       })
+    //     })
+    //   } else {
+    //     callback = new Promise(function (resolve) {
+    //       new SendTransactionPub(that, sendData).then(function (res) {
+    //         resolve(res)
+    //       })
+    //     })
+    //   }
+    //   return callback
+    // }
   }
   return this
   // return this.returnWeb3

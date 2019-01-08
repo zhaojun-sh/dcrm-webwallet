@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="contentHeader_box flex-bc">
-      <h1 class="contentHeader_title">MY Wallet</h1>
+      <h1 class="contentHeader_title">My Wallet</h1>
     </div>
 
     <div class="contView_box backupInfo_box">
@@ -17,13 +17,14 @@
           </div>
         </div>
 
-        <div class="backupCont_box">
+        <div class="backupCont_box" id="receiveAddressBtn">
           <h3 class="title">Private Key (unencrypted)</h3>
           <div class="backupCont_input">
             <input type="password" class="input-text input input1" readonly v-model="privateKey" id="privateKey" />
-            <div class="eyesBox showAndHideEyes" id="eyesView"><div class="eyes"><img src="../../../../assets/image/Visible.svg"></div></div>
+            <input type="text" class="input-text input input1" v-model="privateKey" id="privateKeyInfo"  style="opacity: 0;"/>
+            <div class="eyesBox showAndHideEyes" id="eyesView"><div class="eyes"><img src="@/assets/image/Visible.svg"></div></div>
           </div>
-          <button class="btn">Print Paper Wallet</button>
+          <button class="btn" @click="copyAddress('privateKeyInfo', 'receiveAddressBtn')" data-toggle="tooltip" data-placement="bottom" title="Copy clipboard">Copy clipboard</button>
         </div>
       </div>
 
@@ -40,7 +41,7 @@
               <h3 class="title">Private Key (unencrypted)</h3>
               <div id="privateQrcode" data-eyes="1"></div>
               <div class="qrcodeView_black"></div>
-              <div class="qrcodeView_eyes showAndHideEyes"><img src="../../../../assets/image/Visible.svg"></div>
+              <div class="qrcodeView_eyes showAndHideEyes"><img src="@/assets/image/Visible.svg"></div>
             </div>
           </li>
         </ul>
@@ -60,8 +61,6 @@ export default {
   name: 'Transfer',
   data () {
     return {
-      // selectData: '',
-      // iconData: [],
       walletAdress: '',
       privateKey: '',
       keystoreName: '',
@@ -70,22 +69,22 @@ export default {
     }
   },
   mounted () {
-    let that = this
+    const that = this
     that.pageRefresh()
     $('.showAndHideEyes').click(function () {
       let pwdAndTxt = $('#privateKey').attr('type')
       $('#privateQrcode').html('')
       if (pwdAndTxt === 'password') {
         $('#privateKey').attr('type', 'text')
-        $('#eyesView').find('img').attr('src', require('../../../../assets/image/Hide.svg'))
+        $('#eyesView').find('img').attr('src', require('@/assets/image/Hide.svg'))
         that.qrcode(that.privateKey, 'privateQrcode')
-        $('.qrcodeView_eyes').find('img').attr('src', require('../../../../assets/image/Hide.svg'))
+        $('.qrcodeView_eyes').find('img').attr('src', require('@/assets/image/Hide.svg'))
         $('#privateQrcode').attr('data-eyes', '0')
         $('.qrcodeView_black').hide()
       } else {
         $('#privateKey').attr('type', 'password')
-        $('#eyesView').find('img').attr('src', require('../../../../assets/image/Visible.svg'))
-        $('.qrcodeView_eyes').find('img').attr('src', require('../../../../assets/image/Visible.svg'))
+        $('#eyesView').find('img').attr('src', require('@/assets/image/Visible.svg'))
+        $('.qrcodeView_eyes').find('img').attr('src', require('@/assets/image/Visible.svg'))
         $('#privateQrcode').attr('data-eyes', '1')
         $('.qrcodeView_black').show()
       }
@@ -108,27 +107,33 @@ export default {
       // console.log(qrcodeInit)
     },
     pageRefresh () {
-      let that = this
-      that.walletAdress = that.$store.state.addressInfo
-      that.privateKey = that.$store.state.privateKey
-      that.keystoreURL = that.$store.state.keystoreURL
-      that.keystoreName = that.$store.state.downloadName
-      // console.log(that.keystoreURL)
-      // console.log(that.keystoreName)
-      if (that.keystoreURL && that.keystoreName) {
-        that.keystoreHide = true
+      this.walletAdress = this.$store.state.addressInfo
+      this.privateKey = this.$store.state.privateKey
+      this.keystoreURL = this.$store.state.keystoreURL
+      this.keystoreName = this.$store.state.downloadName
+      if (this.keystoreURL && this.keystoreName) {
+        this.keystoreHide = true
       }
-      if (that.walletAdress) {
-        that.qrcode(that.walletAdress, 'addressQrcode')
+      if (this.walletAdress) {
+        this.qrcode(this.walletAdress, 'addressQrcode')
       }
-      if (that.privateKey) {
-        that.qrcode(that.privateKey, 'privateQrcode')
+      if (this.privateKey) {
+        this.qrcode(this.privateKey, 'privateQrcode')
       }
-    }
+    },
+    copyAddress (id, textId) {
+      let copyText = $('#' + textId).find('.tooltip-inner').text()
+      document.getElementById(id).select()
+      document.execCommand('Copy')
+      $('#' + textId).find('.tooltip-inner').text('Copied')
+      setTimeout(function () {
+        $('#' + textId).find('.tooltip-inner').text(copyText)
+      }, 3000)
+      this.$$.layerMsg('Copy Success')
+    },
   },
   destroyed () {
-    const that = this
-    that.$store.commit('storePrivateKey', '')
+    this.$store.commit('storePrivateKey', '')
   }
 }
 </script>

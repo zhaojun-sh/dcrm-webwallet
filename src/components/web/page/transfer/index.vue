@@ -1,12 +1,12 @@
 <template>
-  <div>
+  <div style="background:#fff">
     <div class="contentHeader_box flex-bc">
       <h1 class="contentHeader_title">Receive / Send</h1>
       <div class="biticonSelect_box">
-        <div class="logo"><img src="../../../../assets/image/Fusion.svg"></div>
+        <div class="logo"><img src="@/assets/image/Fusion.svg"></div>
         <div class="arrow flex-c"><i class="i"></i></div>
         <select class="select" v-model="selectVal">
-          <option v-for="(item, index) in SetcoinAndUrl" :key="index" v-html="item.value" :value="item.value" :data-coinUrl="item.url"></option>
+          <option v-for="(item, index) in SetcoinAndUrl" :key="index" v-html="item.coin" :value="item.coin"></option>
         </select>
       </div>
     </div>
@@ -29,14 +29,14 @@
 </template>
 
 <script>
-import Lilo from '../../../../assets/js/lilo'
+import Lilo from '@/assets/js/lilo'
 export default {
   name: 'Transfer',
   data () {
     return {
       // selectData: '',
       selectVal: '',
-      SetcoinAndUrl: this.$store.state.coinAndUrl,
+      SetcoinAndUrl: this.$store.state.coinInfo,
       coinDataPage: {},
       web3: '',
       newWeb3: ''
@@ -44,55 +44,42 @@ export default {
   },
   watch: {
     selectVal (cur, oold) {
-      const that = this
-      console.log(cur)
-      that.getCoinInfo(cur)
+      this.getCoinInfo(cur)
     }
   },
   mounted () {
-    let that = this
-    that.selectVal = that.$route.query.currency ? that.$route.query.currency : 'FSN'
-    that.getCoinInfo(that.selectVal)
+    this.selectVal = this.$route.query.currency ? this.$route.query.currency : 'FSN'
+    this.getCoinInfo(this.selectVal)
   },
   methods: {
     getCoinInfo (coin) {
-      const that = this
-      if (coin === 'FSN') {
-        that.coinDataPage = {
-          value: coin,
-          url: that.$$.baseUrl,
-          address: that.$store.state.addressInfo
-        }
-      } else {
-        for (let i = 0; i < that.SetcoinAndUrl.length; i++) {
-          if (coin === that.SetcoinAndUrl[i].value) {
-            that.setWeb3(that.SetcoinAndUrl[i].url)
-            that.newWeb3.lilo.dcrmGetAddr(that.$store.state.addressInfo, coin).then(function (val) {
-              // that.dcrmAddress = val
-              // console.log(val)
-              that.coinDataPage = {
-                value: coin,
-                url: that.SetcoinAndUrl[i].url,
-                address: val
+      for (let i = 0; i < this.SetcoinAndUrl.length; i++) {
+        if (this.SetcoinAndUrl[i].coin === 'FSN') {
+          this.coinDataPage = {
+            coin: coin,
+            address: this.$store.state.addressInfo,
+            limit: this.SetcoinAndUrl[i].limit,
+            number: this.SetcoinAndUrl[i].number
+          }
+        } else {
+          if (coin === this.SetcoinAndUrl[i].coin) {
+            this.setWeb3()
+            this.newWeb3.lilo.dcrmGetAddr(this.$store.state.addressInfo, coin).then((val) => {
+              this.coinDataPage = {
+                coin: coin,
+                address: val,
+                limit: this.SetcoinAndUrl[i].limit,
+                number: this.SetcoinAndUrl[i].number
               }
-              console.log(that.coinDataPage)
-              that.$store.commit('storeDcrmAddress', val)
+              this.$store.commit('storeDcrmAddress', val)
             })
           }
         }
       }
     },
-    setWeb3 (url) {
-      const that = this
-      let Web3 = require('web3')
-      
-      if (typeof web3 !== 'undefined') {
-        Web3 = new Web3(Web3.currentProvider)
-      } else {
-        Web3 = new Web3(new Web3.providers.HttpProvider(url))
-      }
-      that.web3 = Web3
-      that.newWeb3 = new Lilo(url)
+    setWeb3 () {
+      this.$$.setWeb3(this)
+      this.newWeb3 = new Lilo(this.$$.baseUrl)
     }
   }
 }

@@ -33,7 +33,7 @@
             </hgroup>
             <div class="selectType_contentBox">
               <div class="selectType_KSbtn">
-                <p class="p">SELECT WALLET FILE...</p>
+                <p class="p" id="fileName">SELECT WALLET FILE...</p>
                 <input type="file" class="file" id="fileUpload">
               </div>
               <div class="selectType_contTnput" v-if="showPwd">
@@ -52,7 +52,7 @@
             </hgroup>
             <div class="selectType_contentBox">
               <div class="selectType_contTnput">
-                <input type="password" placeholder="Enter a password" class="input-text input" v-model="privateKey" @keyup="changePrv">
+                <input type="password" placeholder="Enter a password" class="input-text input pwdChange" v-model="privateKey" @keyup="changePrv">
               </div>
 
               <div class="createInfo_btn flex-c">
@@ -76,8 +76,8 @@
 </style>
 
 <script>
-import wallet from '../../../../assets/js/wallet'
-import Lilo from '../../../../assets/js/lilo'
+import wallet from '@/assets/js/wallet'
+import Lilo from '@/assets/js/lilo'
 export default {
   name: 'createWallet',
   props: ['sendDataPage'],
@@ -96,7 +96,7 @@ export default {
     }
   },
   mounted () {
-    let that = this
+    const that = this
     $('.selectType_type').on('click', 'label', function () {
       let showID = $(this).attr('data-show')
       $('[data-view]').hide()
@@ -107,201 +107,277 @@ export default {
       $('#fileUpload').val('')
       that.privateKey = ''
       that.checkAddress = ''
+      $('#fileName').text('SELECT WALLET FILE...')
     })
     $('#fileUpload').change(function () {
       let reader = new FileReader()
+      that.password = ''
       let _this = this
+      let fileName = $(this)[0].files[0].name
       reader.onload = function (onLoadEvent) {
         that.fileData = onLoadEvent.currentTarget.result
         that.showPwd = that.walletRequirePass(that.fileData)
+        if (that.showPwd) {
+          $('#fileName').text(fileName)
+        } else {
+          $('#fileName').text('SELECT WALLET FILE...')
+        }
       }
       reader.readAsText($(this)[0].files[0])
     })
-    // console.log(that.sendDataPage)
+    $('.pwdChange').on('change', function () {
+      that.showPwdBtn = true
+    })
   },
   methods: {
     setWeb3 () {
-      const that = this
-      let Web3 = require('web3')
-      if (typeof web3 !== 'undefined') {
-        Web3 = new Web3(Web3.currentProvider)
-      } else {
-        Web3 = new Web3(new Web3.providers.HttpProvider(that.sendDataPage.url))
-      }
-      that.web3 = Web3
-      that.newWeb3 = new Lilo(that.sendDataPage.url)
+      this.$$.setWeb3(this)
+      this.newWeb3 = new Lilo(this.$$.baseUrl)
     },
     inputFileBtn () {
-      let that = this
       let walletData
       try{
-        walletData = wallet.getWalletFromPrivKeyFile(that.fileData, that.password)
-        that.privateKey = walletData.getPrivateKeyString()
-        that.checkAddress = walletData.getChecksumAddressString()
-        if (that.sendDataPage.sendType === 'LOCKOUT') {
-          that.getDcrmAddress()
-        } else if (that.sendDataPage.sendType === 'MYWALLET') {
-          that.getDecrAddress(that.privateKey)
+        walletData = wallet.getWalletFromPrivKeyFile(this.fileData, this.password)
+        this.privateKey = walletData.getPrivateKeyString()
+        this.checkAddress = walletData.getChecksumAddressString()
+        if (this.checkAddress.toLowerCase() !== this.sendDataPage.from.toLowerCase()) {
+          this.$$.layerMsg({
+            tip: 'Account error!',
+            time: 3000,
+            bgColor: '#ea4b40',
+            icon: require('@/assets/image/Prompt.svg')
+          })
+          $('#sendInfo').modal('hide')
+          return
+        }
+        if (this.sendDataPage.sendType === 'LOCKOUT' || this.sendDataPage.sendType === 'LOCKIN' || this.sendDataPage.sendType === 'SENDDCRM') {
+          this.getDcrmAddress()
+        } else if (this.sendDataPage.sendType === 'MYWALLET') {
+          this.getDecrAddress(this.privateKey)
         } else {
-          that.signSendData()
+          this.signSendData()
         }
       } catch (e) {
-        that.$$.layerMsg({
+        this.$$.layerMsg({
           tip: e,
-          time: 2000,
+          time: 5000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
       }
     },
     
     inputPwdBtn () {
-      let that = this
-      console.log(that.sendDataPage)
       let walletData
       try {
-        walletData = new wallet(new Buffer(that.fixPkey(that.privateKey), 'hex'))
-        that.privateKey = walletData.getPrivateKeyString()
-        that.checkAddress = walletData.getChecksumAddressString()
-        if (that.sendDataPage.sendType === 'LOCKOUT' || that.sendDataPage.sendType === 'LOCKIN') {
-          // console.log('lock')
-          that.getDcrmAddress()
-        } else if (that.sendDataPage.sendType === 'MYWALLET') {
-          that.getDecrAddress(that.privateKey)
+        walletData = new wallet(new Buffer(this.fixPkey(this.privateKey), 'hex'))
+        this.privateKey = walletData.getPrivateKeyString()
+        this.checkAddress = walletData.getChecksumAddressString()
+        if (this.checkAddress.toLowerCase() !== this.sendDataPage.from.toLowerCase()) {
+          this.$$.layerMsg({
+            tip: 'Account error!',
+            time: 3000,
+            bgColor: '#ea4b40',
+            icon: require('@/assets/image/Prompt.svg')
+          })
+          $('#sendInfo').modal('hide')
+          return
+        }
+        if (this.sendDataPage.sendType === 'LOCKOUT' || this.sendDataPage.sendType === 'LOCKIN' || this.sendDataPage.sendType === 'SENDDCRM') {
+          this.getDcrmAddress()
+        } else if (this.sendDataPage.sendType === 'MYWALLET') {
+          this.getDecrAddress(this.privateKey)
         }else {
-          that.signSendData()
+          this.signSendData()
         }
       } catch (e) {
         console.log(e)
-        that.$$.layerMsg({
+        this.$$.layerMsg({
           tip: e,
-          time: 2000,
+          time: 5000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
       }
     },
     getDcrmAddress () {
-      const that = this
-      that.setWeb3()
-      that.newWeb3.lilo.dcrmGetAddr(that.$store.state.addressInfo, that.sendDataPage.coin).then(function (val) {
-        that.dcrmAddress = val
-        that.signSendData()
+      this.setWeb3()
+      // this.newWeb3.lilo.dcrmGetAddr(this.$store.state.addressInfo, this.sendDataPage.coin).then(function (val) {
+      this.newWeb3.lilo.dcrmGetAddr(this.$store.state.addressInfo, this.sendDataPage.coin).then((val) => {
+        this.dcrmAddress = val
+        this.signSendData()
       })
     },
     getDecrAddress (pwd) {
-      const that = this
-      that.setWeb3()
-      that.newWeb3.lilo.dcrmReqAddr(that.sendDataPage.from, that.sendDataPage.coin, pwd).then(function (val) {
-        let rawTx = {
-          nonce: that.sendDataPage.nonce,
-          gasPrice: that.sendDataPage.gasPrice,
-          gasLimit: 21000 * 3,
-          from: that.sendDataPage.from,
-          to: '0x00000000000000000000000000000000000000dc',
-          value: 0,
-          data: 'DCRMCONFIRMADDR:' + val + ':' + that.sendDataPage.coin,
+      this.setWeb3()
+      let gasPriceNum
+      try {
+        gasPriceNum = this.web3.eth.gasPrice.toString(10)
+      } catch (error) {
+        gasPriceNum = this.$$.getWeb3({
+          method: 'eth_gasPrice',
+          params: []
+        }).result.toString(10)
+      }
+
+      let getGasLimit
+      try {
+        getGasLimit = this.web3.eth.estimateGas({to: this.toAddress})
+      } catch (error) {
+        try {
+          getGasLimit = this.$$.getWeb3({
+            method: 'eth_estimateGas',
+            params: [{to: this.toAddress}]
+          })
+          if (getGasLimit.error) {
+            getGasLimit = 'Error'
+          } else {
+            getGasLimit = getGasLimit.result
+          }
+        } catch (error) {
+          getGasLimit = error
         }
-        console.log(val)
-        console.log(rawTx)
-        let Tx = require('ethereumjs-tx')
-        pwd = pwd.indexOf('0x') === 0 ? pwd.substr(2) : pwd
-        let privateKey = new Buffer(pwd, 'hex')
+      }
+      if (getGasLimit && getGasLimit.toString().indexOf('Error') !== -1) {
+        this.$$.layerMsg({
+          tip: getGasLimit,
+          time: 5000,
+          bgColor: '#ea4b40',
+          icon: require('@/assets/image/Prompt.svg')
+        })
+        throw getGasLimit
+      }
+      let rawTx = {
+        nonce: this.sendDataPage.nonce,
+        gasPrice: Number(gasPriceNum),
+        gasLimit: Number(getGasLimit),
+        // gasLimit: 21000,
+        from: this.sendDataPage.from,
+        to: '0x00000000000000000000000000000000000000dc',
+        value: 0,
+        data: ''
+      }
+      let sendBack = {
+        coin: this.sendDataPage.coin,
+        serializedTx: '',
+        nowFlag: false,
+        dcrmAddress: ''
+      }
+      let Tx = require('ethereumjs-tx')
+      pwd = pwd.indexOf('0x') === 0 ? pwd.substr(2) : pwd
+      let privateKey = new Buffer(pwd, 'hex')
+      this.newWeb3.lilo.dcrmReqAddr(this.sendDataPage.from, this.sendDataPage.coin, pwd).then((val) => {
+        let dcrmAddressVal
+        if ((typeof val).toLowerCase() === 'object') {
+          if (val.result && val.result.indexOf('the account has request dcrm address already.the dcrm address is') === 0) {
+            dcrmAddressVal = val.result.split(':')[1]
+            sendBack.nowFlag = false
+          } else if (val.error && val.error.message.indexOf('the account has request dcrm address already.the dcrm address is') === 0) {
+            dcrmAddressVal = val.error.message.split(':')[1]
+            sendBack.nowFlag = false
+          } else if (val.result && val.result.indexOf('the account has confirm dcrm address already.the dcrm address is') === 0) {
+            this.$$.layerMsg({
+              tip: 'The address has been requested. Please refresh later. DCRM:' + val.result.split(':')[1],
+              time: 8000,
+              bgColor: '#5dba5a',
+              icon: require('@/assets/image/Prompt.svg')
+            })
+            $('#privateSure').modal('hide')
+            return
+          } else {
+            this.$$.layerMsg({
+              tip: val,
+              time: 8000,
+              bgColor: '#ea4b40',
+              icon: require('@/assets/image/Prompt.svg')
+            })
+            return
+          }
+        } else {
+          dcrmAddressVal = val
+          sendBack.nowFlag = true
+        }
+        sendBack.dcrmAddress = dcrmAddressVal
+        rawTx.data = 'DCRMCONFIRMADDR:' + dcrmAddressVal + ':' + this.sendDataPage.coin
         let tx = new Tx(rawTx)
         tx.sign(privateKey)
         let serializedTx = tx.serialize()
         let serializedTxString = serializedTx.toString('hex')
         serializedTxString = serializedTxString.indexOf('0x') === 0 ? serializedTxString : ('0x' + serializedTxString)
-        console.log(serializedTxString)
-        that.web3.eth.sendRawTransaction(serializedTxString, function (err, hash) {
-          if (err) {
-            console.log(err)
-          } else {
-            console.log(hash)
-            that.sendSignData(that.sendDataPage.coin)
-            // resolve(hash)
-          }
-        })
+        sendBack.serializedTx = serializedTxString
+        this.sendSignData(sendBack)
       })
     },
     signSendData () {
-      const that = this
-      if (that.checkAddress.toLowerCase() === that.sendDataPage.from.toLowerCase() || that.dcrmAddress.toLowerCase() === that.sendDataPage.from.toLowerCase()) {
+      if (this.checkAddress.toLowerCase() === this.sendDataPage.from.toLowerCase()) {
         let rawTx = {
-          nonce: that.sendDataPage.nonce,
-          gasPrice: Number(that.sendDataPage.gasPrice),//Number类型 
-          gasLimit: Number(that.sendDataPage.gasLimit),
-          from: that.sendDataPage.from,
-          to: that.sendDataPage.to,
-          value: Number(that.sendDataPage.value),//Number类型
-          data: that.sendDataPage.data
+          nonce: this.sendDataPage.nonce,
+          gasPrice: Number(this.sendDataPage.gasPrice),//Number类型 
+          gasLimit: Number(this.sendDataPage.gasLimit),
+          from: this.sendDataPage.from,
+          to: this.sendDataPage.to,
+          value: Number(this.sendDataPage.value),//Number类型
+          data: this.sendDataPage.data
         }
         let Tx = require('ethereumjs-tx')
-        let privateKey = new Buffer(that.fixPkey(that.privateKey), 'hex')
+        let privateKey = new Buffer(this.fixPkey(this.privateKey), 'hex')
         let tx = new Tx(rawTx)
         tx.sign(privateKey)
         let serializedTx = tx.serialize()
         let serializedTxString = serializedTx.toString('hex')
         serializedTxString = serializedTxString.indexOf('0x') === 0 ? serializedTxString : ('0x' + serializedTxString)
-        that.sendSignData(serializedTxString)
-        // console.log(serializedTxString)
+        this.sendSignData(serializedTxString)
       } else {    
-        that.$$.layerMsg({
+        this.$$.layerMsg({
           tip: 'Account error!',
           time: 3000,
           bgColor: '#ea4b40',
-          icon: require('../../../../assets/image/Prompt.svg')
+          icon: require('@/assets/image/Prompt.svg')
         })
-        // $('#privateSure').modal('hide')
         $('#sendInfo').modal('hide')
         return
       }
     },
     sendSignData (data) {
-      let that = this
-      that.$emit('sendSignData', data)
-      that.password = ''
+      this.$emit('sendSignData', data)
+      this.password = ''
       $('#fileUpload').val('')
-      that.privateKey = ''
-      that.checkAddress = ''
-      that.showPwdBtn = false
+      this.privateKey = ''
+      this.checkAddress = ''
+      this.showPwdBtn = false
     },
-    changePrv () {
-      let that = this
-      if (that.privateKey.length < 6) {
-        that.showPwdBtn = false
-      } else {
-        that.showPwdBtn = true
+    changePrv (e) {
+      this.showPwdBtn = true
+      if (e.which === 13) {
+        this.inputPwdBtn()
       }
     },
-    changePwd () {
-      let that = this
-      if (that.password.length < 6) {
-        that.showPwdBtn = false
-      } else {
-        that.showPwdBtn = true
+    changePwd (e) {
+      if (e.which === 13) {
+        this.inputFileBtn()
       }
+      this.showPwdBtn = true
     },
     walletRequirePass (ethjson) {
-        let jsonArr
-        try {
-            jsonArr = JSON.parse(ethjson)
-        } catch (err) {
-            throw 'This is not a valid wallet file. '
-        }
-        if (jsonArr.encseed != null) {
-          return true
-        } else if (jsonArr.Crypto != null || jsonArr.crypto != null) {
-          return true
-        } else if (jsonArr.hash != null && jsonArr.locked) {
-          return true
-        } else if (jsonArr.hash != null && !jsonArr.locked) {
-          return false
-        } else if (jsonArr.publisher == "MyEtherWallet" && !jsonArr.encrypted) {
-          return false
-        } else {
-          throw 'Sorry! We don\'t recognize this type of wallet file. '
-        }
+      let jsonArr
+      try {
+          jsonArr = JSON.parse(ethjson)
+      } catch (err) {
+          throw 'This is not a valid wallet file. '
+      }
+      if (jsonArr.encseed != null) {
+        return true
+      } else if (jsonArr.Crypto != null || jsonArr.crypto != null) {
+        return true
+      } else if (jsonArr.hash != null && jsonArr.locked) {
+        return true
+      } else if (jsonArr.hash != null && !jsonArr.locked) {
+        return false
+      } else if (jsonArr.publisher == "MyEtherWallet" && !jsonArr.encrypted) {
+        return false
+      } else {
+        throw 'Sorry! We don\'t recognize this type of wallet file. '
+      }
     },
     fixPkey (key) {
       if (key.indexOf("0x") === 0) {

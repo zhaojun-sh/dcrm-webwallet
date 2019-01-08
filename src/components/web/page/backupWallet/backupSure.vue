@@ -36,7 +36,6 @@
                 <p class="p" id="fileName">SELECT WALLET FILE...</p>
                 <input type="file" class="file" id="fileUpload">
               </div>
-              <p id="testid"></p>
               <div class="selectType_contTnput" v-if="showPwd">
                 <input type="password" placeholder="Enter a password" class="input-text input" v-model="password" @keyup="changePwd">
               </div>
@@ -111,27 +110,22 @@ export default {
       that.downloadURL = ''
       $('#fileName').text('SELECT WALLET FILE...')
     })
-    $('#fileUpload').on('change', function () {
+    $('#fileUpload').change(function () {
       let reader = new FileReader()
-      let _this = this
       that.password = ''
+      let _this = this
       let fileName = $(this)[0].files[0].name
-      reader.readAsText($(this)[0].files[0])
       reader.onload = function (onLoadEvent) {
-        that.fileData = onLoadEvent.currentTarget && onLoadEvent.currentTarget.result ? onLoadEvent.currentTarget.result : onLoadEvent.target.result
-        try {
-          that.showPwd = that.walletRequirePass(that.fileData)
-        } catch (error) {
-          alert(error)
-        }
+        that.fileData = onLoadEvent.currentTarget.result
+        that.showPwd = that.walletRequirePass(that.fileData)
         if (that.showPwd) {
           $('#fileName').text(fileName)
         } else {
           $('#fileName').text('SELECT WALLET FILE...')
         }
       }
+      reader.readAsText($(this)[0].files[0])
     })
-    that.$store.commit('storeWalletLoadFlag', true)
     $('.pwdChange').on('change', function () {
       that.showPwdBtn = true
     })
@@ -140,7 +134,7 @@ export default {
     goBackupWallet () {
       this.setStore()
       this.sendInfoToParent()
-      this.$router.push('/MyAssets')
+      this.$router.push('/backupWallet')
     },
     inputFileBtn () {
       let walletData
@@ -150,6 +144,15 @@ export default {
         this.privateKey = walletData.getPrivateKeyString()
         this.downloadName = walletData.getV3Filename()
         this.downloadURL = this.$$.getBlob('text/json;charset=UTF-8', this.fileData)
+        if (this.checkAddress.toLowerCase() !== this.$store.state.addressInfo.toLowerCase()) {
+          this.$$.layerMsg({
+            tip: 'Account error!',
+            time: 3000,
+            bgColor: '#ea4b40',
+            icon: require('@/assets/image/Prompt.svg')
+          })
+          return
+        }
         this.goBackupWallet()
       } catch (e) {
         this.$$.layerMsg({
@@ -167,6 +170,15 @@ export default {
         this.checkAddress = walletData.getChecksumAddressString()
         this.downloadURL = ''
         this.downloadName = ''
+        if (this.checkAddress.toLowerCase() !== this.$store.state.addressInfo.toLowerCase()) {
+          this.$$.layerMsg({
+            tip: 'Account error!',
+            time: 3000,
+            bgColor: '#ea4b40',
+            icon: require('@/assets/image/Prompt.svg')
+          })
+          return
+        }
         this.goBackupWallet()
       } catch (e) {
         this.$$.layerMsg({
@@ -199,25 +211,25 @@ export default {
       }
     },
     walletRequirePass (ethjson) {
-      let jsonArr
-      try {
-        jsonArr = JSON.parse(ethjson)
-      } catch (err) {
-        throw 'This is not a valid wallet file. '
-      }
-      if (jsonArr.encseed != null) {
-        return true
-      } else if (jsonArr.Crypto != null || jsonArr.crypto != null) {
-        return true
-      } else if (jsonArr.hash != null && jsonArr.locked) {
-        return true
-      } else if (jsonArr.hash != null && !jsonArr.locked) {
-        return false
-      } else if (jsonArr.publisher == "MyEtherWallet" && !jsonArr.encrypted) {
-        return false
-      } else {
-        throw 'Sorry! We don\'t recognize this type of wallet file. '
-      }
+        let jsonArr
+        try {
+            jsonArr = JSON.parse(ethjson)
+        } catch (err) {
+            throw 'This is not a valid wallet file. '
+        }
+        if (jsonArr.encseed != null) {
+          return true
+        } else if (jsonArr.Crypto != null || jsonArr.crypto != null) {
+          return true
+        } else if (jsonArr.hash != null && jsonArr.locked) {
+          return true
+        } else if (jsonArr.hash != null && !jsonArr.locked) {
+          return false
+        } else if (jsonArr.publisher == "MyEtherWallet" && !jsonArr.encrypted) {
+          return false
+        } else {
+          throw 'Sorry! We don\'t recognize this type of wallet file. '
+        }
     },
     fixPkey (key) {
       if (key.indexOf("0x") === 0) {
