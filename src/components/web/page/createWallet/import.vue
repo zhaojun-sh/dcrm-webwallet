@@ -10,16 +10,31 @@
         <div class="selectType_type flex-ai-c">
           <ul>
             <li>
-              <input type="radio" name="selectType" id="aria1" class="input" checked>
+              <input
+                type="radio"
+                name="selectType"
+                id="aria1"
+                class="input"
+                checked
+              >
               <label class="flex-sc labelStyle" for="aria1" data-show="keystore">
-                <div class="radioBox flex-c"><i class="radio"></i></div>
+                <div class="radioBox flex-c">
+                  <i class="radio"></i>
+                </div>
                 <p class="p">Keystore / JSON File</p>
               </label>
             </li>
             <li>
-              <input type="radio" name="selectType" id="aria2" class="input">
+              <input
+                type="radio"
+                name="selectType"
+                id="aria2"
+                class="input"
+              >
               <label class="flex-sc labelStyle" for="aria2" data-show="private">
-                <div class="radioBox flex-c"><i class="radio"></i></div>
+                <div class="radioBox flex-c">
+                  <i class="radio"></i>
+                </div>
                 <p class="p">Private Key</p>
               </label>
             </li>
@@ -34,11 +49,21 @@
             <div class="selectType_contentBox">
               <div class="selectType_KSbtn">
                 <p class="p" id="fileName">SELECT WALLET FILE...</p>
-                <input type="file" class="file" id="fileUpload">
+                <input
+                  type="file"
+                  class="file"
+                  id="fileUpload"
+                >
               </div>
               <p id="testid"></p>
               <div class="selectType_contTnput" v-if="showPwd">
-                <input type="password" placeholder="Enter a password" class="input-text input" v-model="password" @keyup="changePwd">
+                <input
+                  type="password"
+                  placeholder="Enter a password"
+                  class="input-text input"
+                  v-model="password"
+                  @keyup="changePwd"
+                >
               </div>
 
               <div class="createInfo_btn flex-c" v-if="showPwdBtn">
@@ -53,7 +78,13 @@
             </hgroup>
             <div class="selectType_contentBox">
               <div class="selectType_contTnput">
-                <input type="password" placeholder="Enter a password" class="input-text input pwdChange" v-model="privateKey" @keyup="changePrv">
+                <input
+                  type="password"
+                  placeholder="Enter a Private Key"
+                  class="input-text input pwdChange"
+                  v-model="privateKey"
+                  @keyup="changePrv"
+                >
               </div>
 
               <div class="createInfo_btn flex-c">
@@ -65,7 +96,11 @@
       </div>
 
       <div class="createInfo_tip pb-20">
-        <h3 class="h3">Fusion DCRM Wallet does not hold your keys for you. We cannot access accounts, recover keys, reset passwords,<br/>nor reverse transactions. Protect your keys & always check that you are on correct URL. You are responsible for your security.</h3>
+        <h3
+          class="h3"
+        >Fusion DCRM Wallet does not hold your keys for you. We cannot access accounts, recover keys, reset passwords,
+          <br/>nor reverse transactions. Protect your keys & always check that you are on correct URL. You are responsible for your security.
+        </h3>
       </div>
 
     </div>
@@ -77,114 +112,114 @@
 </style>
 
 <script>
-import wallet from '@/assets/js/wallet'
+import wallet from "@/assets/js/wallet"
 export default {
-  name: 'createWallet',
+  name: "createWallet",
   data () {
     return {
-      password: '',
-      fileJSON: '',
+      password: "",
+      fileJSON: "",
       showPwd: false,
       showPwdBtn: false,
-      fileData: '',
-      privateKey: '',
-      publicKey: '',
-      checkAddress: '',
-      downloadURL: '',
-      downloadName: ''
+      fileData: "",
+      privateKey: "",
+      publicKey: "",
+      checkAddress: "",
+      downloadURL: "",
+      downloadName: ""
     }
   },
   mounted () {
-    const that = this
-    $('.selectType_type').on('click', 'label', function () {
-      let showID = $(this).attr('data-show')
-      $('[data-view]').hide()
-      $('[data-view=' + showID + ']').show()
-      that.showPwd = false
-      that.showPwdBtn = false
-      that.password = ''
-      $('#fileUpload').val('')
-      that.privateKey = ''
-      that.publicKey = ''
-      that.checkAddress = ''
-      that.downloadName = ''
-      that.downloadURL = ''
-      $('#fileName').text('SELECT WALLET FILE...')
+    $(".selectType_type").on("click", "label", event => {
+      let showID = $(event.currentTarget).attr("data-show")
+      $("[data-view]").hide()
+      $("[data-view=" + showID + "]").show()
+      this.showPwd = false
+      this.showPwdBtn = false
+      this.password = ""
+      $("#fileUpload").val("")
+      this.privateKey = ""
+      this.publicKey = ""
+      this.checkAddress = ""
+      this.downloadName = ""
+      this.downloadURL = ""
+      $("#fileName").text("SELECT WALLET FILE...")
     })
-    $('#fileUpload').on('change', function () {
+    $("#fileUpload").change(event => {
       let reader = new FileReader()
-      let _this = this
-      that.password = ''
-      let fileName = $(this)[0].files[0].name
-      reader.readAsText($(this)[0].files[0])
-      reader.onload = function (onLoadEvent) {
-        that.fileData = onLoadEvent.currentTarget && onLoadEvent.currentTarget.result ? onLoadEvent.currentTarget.result : onLoadEvent.target.result
-        try {
-          that.showPwd = that.walletRequirePass(that.fileData)
-        } catch (error) {
-          alert(error)
-        }
-        if (that.showPwd) {
-          $('#fileName').text(fileName)
+      this.password = ""
+      let fileName = $(event.currentTarget)[0].files[0].name
+      reader.onload = onLoadEvent => {
+        this.fileData = onLoadEvent.currentTarget.result
+        this.showPwd = this.walletRequirePass(this.fileData)
+        if (this.showPwd) {
+          $("#fileName").text(fileName)
         } else {
-          $('#fileName').text('SELECT WALLET FILE...')
+          $("#fileName").text("SELECT WALLET FILE...")
         }
       }
+      reader.readAsText($(event.currentTarget)[0].files[0])
     })
-    that.$store.commit('storeWalletLoadFlag', true)
-    $('.pwdChange').on('change', function () {
-      that.showPwdBtn = true
+    this.$store.commit("storeWalletLoadFlag", true)
+    $(".pwdChange").on("change", () => {
+      this.showPwdBtn = true
     })
   },
   methods: {
     goBackupWallet () {
       this.setStore()
       this.sendInfoToParent()
-      this.$router.push('/MyAssets')
+      this.$router.push("/MyAssets")
     },
     inputFileBtn () {
       let walletData
       try{
-        walletData = wallet.getWalletFromPrivKeyFile(this.fileData, this.password)
+        walletData = wallet.getWalletFromPrivKeyFile(
+          this.fileData,
+          this.password
+        )
         this.checkAddress = walletData.getChecksumAddressString()
         this.privateKey = walletData.getPrivateKeyString()
         this.downloadName = walletData.getV3Filename()
-        this.downloadURL = this.$$.getBlob('text/json;charset=UTF-8', this.fileData)
+        this.downloadURL = this.$$.getBlob(
+          "text/json;charset=UTF-8",
+          this.fileData
+        )
         this.goBackupWallet()
       } catch (e) {
         this.$$.layerMsg({
           tip: e,
           time: 2000,
-          bgColor: '#ea4b40',
-          icon: require('@/assets/image/Prompt.svg')
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
         })
       }
     },
     inputPwdBtn () {
       let walletData
       try {
-        walletData = new wallet(new Buffer(this.fixPkey(this.privateKey), 'hex'))
+        walletData = new wallet(new Buffer(this.fixPkey(this.privateKey), "hex"))
         this.checkAddress = walletData.getChecksumAddressString()
-        this.downloadURL = ''
-        this.downloadName = ''
+        this.downloadURL = ""
+        this.downloadName = ""
         this.goBackupWallet()
       } catch (e) {
         this.$$.layerMsg({
           tip: e,
           time: 2000,
-          bgColor: '#ea4b40',
-          icon: require('@/assets/image/Prompt.svg')
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
         })
       }
     },
     sendInfoToParent () {
-      this.$emit('setAddress', this.checkAddress)
+      this.$emit("setAddress", this.checkAddress)
     },
     setStore () {
-      this.$store.commit('storePrivateKey', this.privateKey)
-      this.$store.commit('storeAddress', this.checkAddress)
-      this.$store.commit('storeKeystoreURL', this.downloadURL)
-      this.$store.commit('storeDownload', this.downloadName)
+      this.$store.commit("storePrivateKey", this.privateKey)
+      this.$store.commit("storeAddress", this.checkAddress)
+      this.$store.commit("storeKeystoreURL", this.downloadURL)
+      this.$store.commit("storeDownload", this.downloadName)
     },
     changePrv (e) {
       this.showPwdBtn = true
@@ -203,7 +238,7 @@ export default {
       try {
         jsonArr = JSON.parse(ethjson)
       } catch (err) {
-        throw 'This is not a valid wallet file. '
+        throw "This is not a valid wallet file. "
       }
       if (jsonArr.encseed != null) {
         return true
@@ -216,7 +251,7 @@ export default {
       } else if (jsonArr.publisher == "MyEtherWallet" && !jsonArr.encrypted) {
         return false
       } else {
-        throw 'Sorry! We don\'t recognize this type of wallet file. '
+        throw "Sorry! We don\"t recognize this type of wallet file. "
       }
     },
     fixPkey (key) {

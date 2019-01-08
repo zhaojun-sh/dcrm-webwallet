@@ -19,6 +19,8 @@ $$.baseUrl = window.location.protocol + '//api.dcrm.network'
 // $$.serverURL = window.location.protocol + '//wallet.dcrm.network:8087'
 $$.serverURL = window.location.protocol + '//wallet.dcrm.network:8085'
 
+$$.promptSvg = require('@/assets/image/Prompt.svg')
+
 $$.thousandBit = (num, dec = 2) => {
   num = Number(num)
   if (isNaN(num)) {

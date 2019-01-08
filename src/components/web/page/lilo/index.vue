@@ -8,15 +8,15 @@
 
 <script>
 export default {
-  name: 'Transfer',
+  name: "Transfer",
   data () {
     return {
-      // selectData: '',
-      selectVal: '',
+      // selectData: "",
+      selectVal: "",
       SetcoinAndUrl: [],
-      coinDataPage: '',
-      web3: '',
-      newWeb3: ''
+      coinDataPage: "",
+      web3: "",
+      newWeb3: ""
     }
   },
   mounted () {

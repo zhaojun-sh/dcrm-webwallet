@@ -1,19 +1,15 @@
 <template>
-  <div>
-
-  </div>
+  <div></div>
 </template>
 
 <script>
 export default {
-  name: 'loading',
+  name: "loading",
   data () {
-    return {
-
-    }
+    return {}
   },
   mounted () {
-    this.$store.commit('storeWalletLoadFlag', true)
+    this.$store.commit("storeWalletLoadFlag", true)
     this.goBack()
   },
   methods: {

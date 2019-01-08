@@ -60,12 +60,8 @@
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
           <div class="modal-body">
-            <router-view @sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
+            <router-view @sendSignData="getSignData" :sendDataPage="dataPage"></router-view>
           </div>
-          <!-- <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
-          </div> -->
         </div>
       </div>
     </div>
@@ -94,22 +90,22 @@
 </template>
 
 <script>
-import Lilo from '@/assets/js/lilo'
+import Lilo from "@/assets/js/lilo"
 export default {
-  name: 'myAssets',
+  name: "myAssets",
   data () {
     return {
-      myAssetsTotal: '',
+      myAssetsTotal: "",
       bitIconTypeData: [],
       bitIconTypeSearch: [],
-      walletAddress: '',
-      web3: '',
-      newWeb3: '',
+      walletAddress: "",
+      web3: "",
+      newWeb3: "",
       dataPage: {},
       selectOption: [],
-      searchContent: '',
-      refreshBalance: '',
-      confirmData: ''
+      searchContent: "",
+      refreshBalance: "",
+      confirmData: ""
     }
   },
   watch: {
@@ -131,8 +127,8 @@ export default {
   },
   methods: {
     modalClick () {
-      $('#privateSure').on('hide.bs.modal', () => {
-        this.$router.push('/MyAssets')
+      $("#privateSure").on("hide.bs.modal", () => {
+        this.$router.push("/MyAssets")
       })
     },
     myAssetsTotalBalance () {
@@ -145,11 +141,11 @@ export default {
     searchInput () {
       this.bitIconTypeSearch = []
       let searchTxt = this.searchContent ? this.searchContent : this.searchContent.toLowerCase()
-      if (searchTxt === '') {
+      if (searchTxt === "") {
         this.bitIconTypeSearch = this.bitIconTypeData
       } else {
         if (!isNaN(this.searchContent)) {
-          searchTxt = this.$$.thousandBit(this.searchContent, 'no')
+          searchTxt = this.$$.thousandBit(this.searchContent, "no")
         }
         for (let i = 0; i < this.bitIconTypeData.length; i++) {
           let searchArr = this.bitIconTypeData[i]
@@ -176,19 +172,19 @@ export default {
       let coinInfo = this.$store.state.coinInfo
       let bitCoinInfo = []
       for (let i = 0;i < coinInfo.length; i++) {
-        let balance = Number(coinInfo[i].balance) === 0 ? '0.00' : this.$$.thousandBit(coinInfo[i].balance, 'no')
-        let balanceDollar = Number(coinInfo[i].balanceDollar) === 0 ? '0.00' : this.$$.thousandBit(coinInfo[i].balanceDollar, 2)
+        let balance = Number(coinInfo[i].balance) === 0 ? "0.00" : this.$$.thousandBit(coinInfo[i].balance, "no")
+        let balanceDollar = Number(coinInfo[i].balanceDollar) === 0 ? "0.00" : this.$$.thousandBit(coinInfo[i].balanceDollar, 2)
         bitCoinInfo.push({
           logo: coinInfo[i].logo,
           nameSimplicity: coinInfo[i].coin,
           nameFull: coinInfo[i].coinAll,
           availbleBalance: balance,
-          freeze: Number(coinInfo[i].freeze) === 0 ? '0.00' : this.$$.thousandBit(coinInfo[i].freeze, 'no'),
+          freeze: Number(coinInfo[i].freeze) === 0 ? "0.00" : this.$$.thousandBit(coinInfo[i].freeze, "no"),
           totalBalance: balance,
           totalBalanceDoller: balanceDollar,
           currency: coinInfo[i].coin,
-          receive: '',
-          send: '',
+          receive: "",
+          send: "",
           btnView: coinInfo[i].flag
         })
         this.myAssetsTotal = Number(this.myAssetsTotal) + Number(coinInfo[i].balanceDollar)
@@ -203,29 +199,29 @@ export default {
     privateSure (data, flag) {
       if (flag === 1) {
         this.$$.layerMsg({
-          tip: 'Please refresh the page to view!',
+          tip: "Please refresh the page to view!",
           time: 3000,
-          bgColor: '#ea4b40',
-          icon: require('@/assets/image/Prompt.svg')
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
         })
         return
       }
       this.dataPage = {
         coin: data,
-        sendType: 'MYWALLET',
+        sendType: "MYWALLET",
         from: this.walletAddress,
-        nonce: '',
+        nonce: "",
       }
       try {
-        this.dataPage.nonce = this.web3.eth.getTransactionCount(this.walletAddress, 'pending')
+        this.dataPage.nonce = this.web3.eth.getTransactionCount(this.walletAddress, "pending")
       } catch (error) {
         this.nonceNum = this.$$.getWeb3({
-          method: 'eth_getTransactionCount',
-          params: [this.walletAddress, 'pending']
+          method: "eth_getTransactionCount",
+          params: [this.walletAddress, "pending"]
         }).result
       }
-      this.$router.push('/pwdMyAssets')
-      $('#privateSure').modal('show')
+      this.$router.push("/pwdMyAssets")
+      $("#privateSure").modal("show")
     },
     getSignData (data) {
       if (data) {
@@ -233,16 +229,16 @@ export default {
           this.sendRawTransion(data)
         } else {
           this.confirmData = data
-          $('#confirmDcrm').modal('show')
+          $("#confirmDcrm").modal("show")
         }
-        $('#privateSure').modal('hide')
+        $("#privateSure").modal("hide")
       } else {
-        $('#privateSure').modal('hide')
+        $("#privateSure").modal("hide")
         this.$$.layerMsg({
-          tip: 'Sign error!',
+          tip: "Sign error!",
           time: 3000,
-          bgColor: '#ea4b40',
-          icon: require('@/assets/image/Prompt.svg')
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
         })
       }
     },
@@ -253,8 +249,8 @@ export default {
           this.$$.layerMsg({
             tip: err,
             time: 5000,
-            bgColor: '#ea4b40',
-            icon: require('@/assets/image/Prompt.svg')
+            bgColor: "#ea4b40",
+            icon: this.$$.promptSvg
           })
         } else {
           for (let i = 0; i < this.bitIconTypeData.length; i++) {
@@ -268,13 +264,13 @@ export default {
             flag: 1,
             coin: data.coin
           }
-          this.$store.commit('storeCoinInfo', storeData)
-          $('#confirmDcrm').modal('hide')
+          this.$store.commit("storeCoinInfo", storeData)
+          $("#confirmDcrm").modal("hide")
           this.$$.layerMsg({
-            tip: 'Request success,Save your TX Hash in case you need it later：' + hash +', and refresh the page to view after 15 seconds.',
+            tip: "Request success,Save your TX Hash in case you need it later：" + hash +", and refresh the page to view after 15 seconds.",
             time: 3000,
-            bgColor: '#5dba5a',
-            icon: require('@/assets/image/Prompt.svg')
+            bgColor: "#5dba5a",
+            icon: this.$$.promptSvg
           })
         }
       })
@@ -288,7 +284,7 @@ export default {
       this.myAssetsTotal = 0
       for (let i = 0; i < coinInfo.length; i++) {
         let coin = coinInfo[i].coin
-        if (coin === 'FSN') {
+        if (coin === "FSN") {
           try {
             let balanceWei = this.web3.eth.getBalance(this.walletAddress)
             this.setBalance(coin, balanceWei, 2)
@@ -297,8 +293,8 @@ export default {
             this.$$.layerMsg({
               tip: error,
               time: 3000,
-              bgColor: '#ea4b40',
-              icon: require('@/assets/image/Prompt.svg')
+              bgColor: "#ea4b40",
+              icon: this.$$.promptSvg
             })
           }
         } else {
@@ -312,21 +308,21 @@ export default {
           })
         }
       }
-      this.$store.commit('storeWalletLoadFlag', false)
+      this.$store.commit("storeWalletLoadFlag", false)
     },
     setBalance (coin, balance, flag) {
       let storeData = {
-        balance: '',
-        balanceDollar: '',
-        flag: '',
+        balance: "",
+        balanceDollar: "",
+        flag: "",
         coin: coin
       }
       let balanceWei = balance
       let balanceGwei = 0
-      if (coin === 'BTC') {
-        balanceGwei = this.$$.fromWei(balanceWei, 'btc')
+      if (coin === "BTC") {
+        balanceGwei = this.$$.fromWei(balanceWei, "btc")
       } else {
-        balanceGwei = this.web3.fromWei(balanceWei, 'ether').toString()
+        balanceGwei = this.web3.fromWei(balanceWei, "ether").toString()
       }
       let balanceUSD = this.changeCoinDoller(coin, balanceGwei)
       this.myAssetsTotal = Number(this.myAssetsTotal) + Number(balanceUSD)
@@ -336,8 +332,8 @@ export default {
         flag: flag,
         coin: coin
       }
-      balanceGwei = Number(balanceGwei) === 0 ? '0.00' : this.$$.thousandBit(balanceGwei, 'no')
-      balanceUSD = Number(balanceUSD) === 0 ? '0.00' : this.$$.thousandBit(balanceUSD, 2)
+      balanceGwei = Number(balanceGwei) === 0 ? "0.00" : this.$$.thousandBit(balanceGwei, "no")
+      balanceUSD = Number(balanceUSD) === 0 ? "0.00" : this.$$.thousandBit(balanceUSD, 2)
       for (let j = 0; j < this.bitIconTypeData.length; j++) {
         if (this.bitIconTypeData[j].currency === coin) {
           this.bitIconTypeData[j].availbleBalance = balanceGwei
@@ -346,7 +342,7 @@ export default {
           this.bitIconTypeData[j].btnView = flag
         }
       }
-      this.$store.commit('storeCoinInfo', storeData)
+      this.$store.commit("storeCoinInfo", storeData)
     },
     changeCoinDoller (coin, balance) {
       let dollerNum = 0
@@ -364,8 +360,8 @@ export default {
       let callbackData = 0
       $.ajax({
         url: url,
-        type: 'get',
-        datatype: 'jsonp',
+        type: "get",
+        datatype: "jsonp",
         async: false,
         success: function (res) {
           if (res.length > 0) {

@@ -4,7 +4,13 @@
       <div class="receiveAddress_box">
         <h3 v-html="addressTitle"></h3>
         <div class="receiveAddress_pwd">
-          <input type="text" class="input-text input" v-model="coinAddress" readonly="readonly" id="walletAdressHide"/>
+          <input
+            type="text"
+            class="input-text input"
+            v-model="coinAddress"
+            readonly="readonly"
+            id="walletAdressHide"
+          />
           <!-- <input type="hidden" readonly v-model="privateKey" id="privateKeyHide" /> -->
         </div>
         <div class="receiveAddress_btn flex-c">
@@ -31,7 +37,7 @@
             </thead>
             <tbody>
               <tr v-for="item in historyData" :key="item.index">
-                <td><span v-html="item.statusFsn" :class="item.statusFsn !== 'Success'?'red':''"></span></td>
+                <td><span v-html="item.statusFsn" :class="item.statusFsn !== 'Success' ? 'red' : ''"></span></td>
                 <td><span v-html="selectData.coin"></span></td>
                 <td><span v-html="item.value2"></span></td>
                 <td><span v-html="item.date"></span></td>
@@ -77,98 +83,31 @@
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
           <div class="modal-body">
-            <router-view @sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
+            <router-view @sendSignData="getSignData" :sendDataPage="dataPage"></router-view>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- <div class="modal fade bs-example-modal-lg" id="sendInfo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">You are about to send...</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          </div>
-          <div class="modal-body">
-            <div class="sendInfo_box">
-              <ul>
-                <li>
-                  <h3>To Address:</h3>
-                  <span>{{toAddress}}</span>
-                </li>
-                <li>
-                  <h3>From Address:</h3>
-                  <span>{{walletAddress}}</span>
-                </li>
-                <li>
-                  <h3>Amount to Send:</h3>
-                  <span>{{sendAmound}}</span>
-                </li>
-                <li>
-                  <h3>Account Balance:</h3>
-                  <span>{{Number(balanceNum)}} {{selectData}}</span>
-                </li>
-                <li>
-                  <h3>Coin:</h3>
-                  <span>{{selectData}}</span>
-                </li>
-                <li>
-                  <h3>Network:</h3>
-                  <span>{{netWorkInfo}}</span>
-                </li>
-                <li>
-                  <h3>Gas Limit:</h3>
-                  <span>{{gasLimitNum}}</span>
-                </li>
-                <li>
-                  <h3>Gas Price:</h3>
-                  <span>{{gasPriceNum}}</span>
-                </li>
-                <li>
-                  <h3>Max TX Fee:</h3>
-                  <span>{{maxFee}}</span>
-                </li>
-                <li>
-                  <h3>Nonce:</h3>
-                  <span>{{nonceNum}}</span>
-                </li>
-                <li>
-                  <h3>Data:</h3>
-                  <span>(none)</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">No, get me out of here!</button>
-            <button type="button" class="btn btn-primary" @click="sendAmoundInfo">Yes, I am sure! Make transaction.</button>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
-
   </div>
 </template>
 
 <script>
-import QRCode from 'qrcodejs2'
-import Lilo from '@/assets/js/lilo'
+import QRCode from "qrcodejs2"
+import Lilo from "@/assets/js/lilo"
 export default {
-  name: 'receive',
-  props: ['selectData'],
+  name: "receive",
+  props: ["selectData"],
   data () {
     return {
-      addressTitle: '',
-      walletAddress: '',
-      coinAddress: '',
+      addressTitle: "",
+      walletAddress: "",
+      coinAddress: "",
       historyData: [],
-      web3: '',
+      web3: "",
       dataPage: {},
-      serializedTx: '',
-      newWeb3: '',
-      dcrmAddress: ''
+      serializedTx: "",
+      newWeb3: "",
+      dcrmAddress: ""
     }
   },
   watch: {
@@ -193,12 +132,12 @@ export default {
       this.getDatabaseInfo()
     },
     modalClick () {
-      $('#privateSure').on('hide.bs.modal', () => {
-        this.$router.push('/LILO/lockIn')
+      $("#privateSure").on("hide.bs.modal", () => {
+        this.$router.push("/LILO/lockIn")
       })
     },
     titleChange (bitType) {
-      this.addressTitle = bitType + ' Deposit Address'
+      this.addressTitle = bitType + " Deposit Address"
     },
     setWeb3 () {
       this.$$.setWeb3(this)
@@ -208,16 +147,16 @@ export default {
       if (data) {
         this.serializedTx = data
         this.sendAmoundInfo()
-        $('#privateSure').modal('hide')
-        $('#sendInfo').modal('show')
+        $("#privateSure").modal("hide")
+        $("#sendInfo").modal("show")
       } else {
-        $('#privateSure').modal('hide')
-        $('#sendInfo').modal('hide')
+        $("#privateSure").modal("hide")
+        $("#sendInfo").modal("hide")
         this.$$.layerMsg({
-          tip: 'Sign error!',
+          tip: "Sign error!",
           time: 3000,
-          bgColor: '#ea4b40',
-          icon: require('@/assets/image/Prompt.svg')
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
         })
       }
     },
@@ -226,22 +165,22 @@ export default {
       this.web3.eth.sendRawTransaction(this.serializedTx, (err, hash) => {
         if (!err) {
           this.$$.layerMsg({
-            tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + hash,
+            tip: "Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： " + hash,
             time: 5000,
-            bgColor: '#5dba5a',
-            icon: require('@/assets/image/Prompt.svg')
+            bgColor: "#5dba5a",
+            icon: this.$$.promptSvg
           })
           this.updateDatabaseInfo({
             hash: this.dataPage.hash,
             fsnhash: hash
           })
-          this.$store.commit('storeWalletLoadFlag', true)
+          this.$store.commit("storeWalletLoadFlag", true)
         } else {
           this.$$.layerMsg({
             tip: err,
             time: 4000,
-            bgColor: '#ea4b40',
-            icon: require('@/assets/image/Prompt.svg')
+            bgColor: "#ea4b40",
+            icon: this.$$.promptSvg
           })
         }
       })
@@ -251,64 +190,64 @@ export default {
       data.gasPrice = data.gasPrice ? data.gasPrice : this.web3.eth.gasPrice.toString(10)
       data.gas = data.gas ? data.gas : this.web3.eth.estimateGas({to: this.toAddress})
       let to_value
-      if (this.selectData.coin === 'BTC') {
-        to_value = this.$$.toWei(data.value, 'btc')
+      if (this.selectData.coin === "BTC") {
+        to_value = this.$$.toWei(data.value, "btc")
       } else {
-        to_value = this.web3.toWei(data.value, 'ether')
+        to_value = this.web3.toWei(data.value, "ether")
       }
       this.dataPage = {
         nonce: this.web3.eth.getTransactionCount(this.walletAddress),
         gasPrice: Number(data.gasPrice),//Number类型 
         gasLimit: Number(data.gas) * 6,
         from: this.walletAddress,
-        to: '0x00000000000000000000000000000000000000dc',
+        to: "0x00000000000000000000000000000000000000dc",
         value: Number(0),//Number类型
-        data: 'LOCKIN:' + data.hash + ':' + to_value + ':' + this.selectData.coin,
-        sendType: 'LOCKIN',
+        data: "LOCKIN:" + data.hash + ":" + to_value + ":" + this.selectData.coin,
+        sendType: "LOCKIN",
         coin: this.selectData.coin,
         hash: data.hash
       }
       console.log(this.dataPage)
-      this.$router.push('/pwdLockIn')
-      $('#privateSure').modal('show')
+      this.$router.push("/pwdLockIn")
+      $("#privateSure").modal("show")
     },
     MoreContent (e) {
-      $(e.target.parentNode).parents('tr').siblings('tr').find('.list').hide()
-      $(e.target.parentNode).find('.list').toggle()
+      $(e.target.parentNode).parents("tr").siblings("tr").find(".list").hide()
+      $(e.target.parentNode).find(".list").toggle()
     },
     qrcode (cont) {
-      $('#qrcode').html('')
-      let qrcodeInit = new QRCode('qrcode', {
+      $("#qrcode").html("")
+      let qrcodeInit = new QRCode("qrcode", {
         width: 300,
         height: 340, // 高度
         text: cont // 二维码内容
-        // render: 'canvas' // 设置渲染方式（有两种方式 table和canvas，默认是canvas）
-        // background: '#f0f'
-        // foreground: '#ff0'
+        // render: "canvas" // 设置渲染方式（有两种方式 table和canvas，默认是canvas）
+        // background: "#f0f"
+        // foreground: "#ff0"
       })
-      $('#qrcodeBox').modal('show')
+      $("#qrcodeBox").modal("show")
     },
     copyAddress (id) {
       $(id).select()
-      document.execCommand('Copy')
-      this.$$.layerMsg('Copy Success')
+      document.execCommand("Copy")
+      this.$$.layerMsg("Copy Success")
     },
     pageRefresh () {
       if (this.selectData) {
         this.titleChange(this.selectData.coin)
       }
-      if (location.href.indexOf('lockOut') === -1) {
-        $('.transferBtn_btn').find('a:eq(0)').addClass('router-link-active')
+      if (location.href.indexOf("lockOut") === -1) {
+        $(".transferBtn_btn").find("a:eq(0)").addClass("router-link-active")
       }
     },
     getHistory (data) {
       const that = this
       $.ajax({
-        url: 'https://api-rinkeby.etherscan.io/api?module=account&action=' + that.selectData.token + '&address=' + that.coinAddress,
-        type: 'post',
-        datatype: 'json',
+        url: "https://api-rinkeby.etherscan.io/api?module=account&action=" + that.selectData.token + "&address=" + that.coinAddress,
+        type: "post",
+        datatype: "json",
         success: function (res) {
-          if (res.result && res.result.length > 0 && (typeof res.result).toLowerCase() === 'object') {
+          if (res.result && res.result.length > 0 && (typeof res.result).toLowerCase() === "object") {
             res.result = res.result
           } else {
             res.result = []
@@ -318,24 +257,24 @@ export default {
       })
     },
     getStatus (txhax) {
-      let statusFsn = ''
+      let statusFsn = ""
       if (txhax.fsnhash) {
         this.setWeb3()
         try {
           let receipt = this.web3.eth.getTransactionReceipt(txhax.fsnhash)
           if (receipt && receipt.status) {
-            statusFsn = 'Success'
+            statusFsn = "Success"
           } else {
-            statusFsn = 'Failure'
+            statusFsn = "Failure"
           }
         } catch (error) {
-          statusFsn = 'Failure'
+          statusFsn = "Failure"
         }
       } else {
         if (txhax.hash) {
-          statusFsn = 'New'
+          statusFsn = "New"
         } else {
-          statusFsn = 'Failure'
+          statusFsn = "Failure"
         }
       }
       return statusFsn
@@ -351,11 +290,11 @@ export default {
           arrObj.push(data[i])
         }
       }
-      if (urldata && urldata.length > 0 && (typeof urldata).toLowerCase() === 'object') {
+      if (urldata && urldata.length > 0 && (typeof urldata).toLowerCase() === "object") {
         for (let i = 0; i < urldata.length; i++) {
-          if (this.selectData.coin === 'ETH' && urldata[i].to.toLowerCase() === this.coinAddress.toLowerCase()) {
+          if (this.selectData.coin === "ETH" && urldata[i].to.toLowerCase() === this.coinAddress.toLowerCase()) {
               arrObj.push(urldata[i])
-          } else if (this.selectData.coin === 'BTC'){
+          } else if (this.selectData.coin === "BTC"){
             arrObj.push(urldata[i])
           } else {
             if  (urldata[i].to.toLowerCase() === this.coinAddress.toLowerCase() && urldata[i].tokenSymbol === this.selectData.coin) {
@@ -373,26 +312,26 @@ export default {
       for (let i = 0; i < newArr.length; i++) {
         newArr[i].statusFsn = this.getStatus(newArr[i])
         if (newArr[i].date) {
-          newArr[i].date = this.$$.timeChange({date: newArr[i].date, type:'yyyy-mm-dd hh:mm'})
+          newArr[i].date = this.$$.timeChange({date: newArr[i].date, type:"yyyy-mm-dd hh:mm"})
         } else if (newArr[i].timeStamp) {
-          newArr[i].date = this.$$.timeChange({date: Number(newArr[i].timeStamp) * 1000, type:'yyyy-mm-dd hh:mm'})
+          newArr[i].date = this.$$.timeChange({date: Number(newArr[i].timeStamp) * 1000, type:"yyyy-mm-dd hh:mm"})
           console.log(newArr[i].time)
         } else {
-          newArr[i].date = this.$$.timeChange({date: newArr[i].time, type:'yyyy-mm-dd hh:mm'})
+          newArr[i].date = this.$$.timeChange({date: newArr[i].time, type:"yyyy-mm-dd hh:mm"})
         }
-        if (newArr[i].dataType !== 'DATABASE') {
+        if (newArr[i].dataType !== "DATABASE") {
           newArr[i].coin = newArr[i].tokenSymbol ? newArr[i].tokenSymbol : this.selectData.coin
           this.createDatabaseInfo(newArr[i])
         }
         if (newArr[i].fsnhash) {
           newArr[i].hash = newArr[i].fsnhash
         } else {
-          newArr[i].hash = newArr[i].hash.indexOf('0xx') === 0 ? newArr[i].fsnhash : newArr[i].hash
+          newArr[i].hash = newArr[i].hash.indexOf("0xx") === 0 ? newArr[i].fsnhash : newArr[i].hash
         }
-        if (this.selectData.coin === 'BTC') {
-          newArr[i].value2 = this.$$.fromWei(newArr[i].value, 'btc')
+        if (this.selectData.coin === "BTC") {
+          newArr[i].value2 = this.$$.fromWei(newArr[i].value, "btc")
         } else {
-          newArr[i].value2 = this.web3.fromWei(newArr[i].value, 'ether')
+          newArr[i].value2 = this.web3.fromWei(newArr[i].value, "ether")
         }
         this.historyData.push(newArr[i])
       }
@@ -409,14 +348,14 @@ export default {
           }
         }
       }
-      this.historyData.sort(compare('date'))
+      this.historyData.sort(compare("date"))
     },
     getBTChistory (data) {
       const that = this
       $.ajax({
-        type: 'GET',
-        url: 'https://api.blockcypher.com/v1/btc/test3/addrs/' + that.coinAddress,
-        dataType: 'json',
+        type: "GET",
+        url: "https://api.blockcypher.com/v1/btc/test3/addrs/" + that.coinAddress,
+        dataType: "json",
         success: function(res){
           let result = []
           if (res && res.txrefs && res.txrefs.length > 0) {
@@ -437,9 +376,9 @@ export default {
     },
     createDatabaseInfo (data) {
       $.ajax({
-        url: this.$$.serverURL + '/lilo/create',
-        type: 'post',
-        datatype: 'json',
+        url: this.$$.serverURL + "/lilo/create",
+        type: "post",
+        datatype: "json",
         data: data,
         success: function (res) {
         }
@@ -451,18 +390,18 @@ export default {
         return
       }
       $.ajax({
-        url: that.$$.serverURL + '/lilo/lockInHistory',
-        type: 'post',
-        datatype: 'json',
+        url: that.$$.serverURL + "/lilo/lockInHistory",
+        type: "post",
+        datatype: "json",
         data: {to: that.coinAddress},
         success: function (res) {
           for (let i = 0; i < res.info.length; i++) {
-            if (res.info[i].hash === '' || res.info[i].hash === undefined) {
-              res.info[i].hash = '0xx' + i
+            if (res.info[i].hash === "" || res.info[i].hash === undefined) {
+              res.info[i].hash = "0xx" + i
             }
-            res.info[i].dataType = 'DATABASE'
+            res.info[i].dataType = "DATABASE"
           }
-          if (that.selectData.coin === 'BTC') {
+          if (that.selectData.coin === "BTC") {
             that.getBTChistory(res.info)
           } else {
             that.getHistory(res.info)
@@ -476,10 +415,10 @@ export default {
     updateDatabaseInfo (data) {
       const that = this
       $.ajax({
-        url: that.$$.serverURL + '/lilo/lockInChangeState',
-        type: 'post',
-        datatype: 'json',
-        data: {hash: data.hash, fsnhash: data.fsnhash, statusFsn: 'Success'},
+        url: that.$$.serverURL + "/lilo/lockInChangeState",
+        type: "post",
+        datatype: "json",
+        data: {hash: data.hash, fsnhash: data.fsnhash, statusFsn: "Success"},
         success: function (res) {
           that.getDatabaseInfo()
         },

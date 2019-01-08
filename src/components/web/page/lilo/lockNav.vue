@@ -6,15 +6,26 @@
         <div class="logo"><img src="@/assets/image/Fusion.svg"></div>
         <div class="arrow flex-c"><i class="i"></i></div>
         <select class="select" v-model="selectVal" id="selectValData">
-          <option v-for="(item, index) in SetcoinAndUrl" :key="index" v-html="item.coin" :value="item.coin"></option>
+          <option
+            v-for="(item, index) in SetcoinAndUrl"
+            :key="index"
+            v-html="item.coin"
+            :value="item.coin"
+          ></option>
         </select>
       </div>
     </div>
 
     <div class="transferBtn_box">
       <div class="transferBtn_btn flex-sc">
-        <router-link to="/LILO/lockIn" class="tranBtn flex-c">Deposit<i class="arrow"></i></router-link>
-        <router-link to="/LILO/lockOut" class="tranBtn flex-c">Withdraw<i class="arrow"></i></router-link>
+        <router-link to="/LILO/lockIn" class="tranBtn flex-c">
+          Deposit
+          <i class="arrow"></i>
+        </router-link>
+        <router-link to="/LILO/lockOut" class="tranBtn flex-c">
+          Withdraw
+          <i class="arrow"></i>
+        </router-link>
       </div>
     </div>
 
@@ -29,18 +40,17 @@
 </template>
 
 <script>
-import Lilo from '@/assets/js/lilo'
+import Lilo from "@/assets/js/lilo"
 export default {
-  name: 'Transfer',
+  name: "Transfer",
   data () {
     return {
-      // selectData: '',
-      selectVal: '',
+      selectVal: "",
       SetcoinAndUrl: [],
-      walletAddress: '',
-      coinDataPage: '',
-      web3: '',
-      newWeb3: ''
+      walletAddress: "",
+      coinDataPage: "",
+      web3: "",
+      newWeb3: ""
     }
   },
   watch: {
@@ -49,10 +59,12 @@ export default {
     }
   },
   mounted () {
-    this.selectVal = this.$route.query.currency ? this.$route.query.currency : 'ETH'
+    this.selectVal = this.$route.query.currency
+      ? this.$route.query.currency
+      : "ETH"
     this.walletAddress = this.$store.state.addressInfo
     for (let i = 0; i < this.$store.state.coinInfo.length; i++) {
-      if (this.$store.state.coinInfo[i].coin !== 'FSN') {
+      if (this.$store.state.coinInfo[i].coin !== "FSN") {
         this.SetcoinAndUrl.push(this.$store.state.coinInfo[i])
       }
     }
@@ -71,11 +83,10 @@ export default {
               number: this.SetcoinAndUrl[i].number,
               token: this.SetcoinAndUrl[i].token
             }
-            this.$store.commit('storeDcrmAddress', val)
+            this.$store.commit("storeDcrmAddress", val)
           })
         }
       }
-      // }
     },
     setWeb3 () {
       this.$$.setWeb3(this)

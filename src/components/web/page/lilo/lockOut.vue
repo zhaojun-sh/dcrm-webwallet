@@ -36,7 +36,7 @@
             </thead>
             <tbody>
               <tr v-for="item in historyData" :key="item.index">
-                <td><span v-html="item.statusFsn" :class="item.statusFsn !== 'Success'?'red':''"></span></td>
+                <td><span v-html="item.statusFsn" :class="item.statusFsn !== 'Success' ? 'red': ''"></span></td>
                 <td><span v-html="selectData.coin"></span></td>
                 <td><span v-html="item.value"></span></td>
                 <td><span v-html="item.date"></span></td>
@@ -68,7 +68,7 @@
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
           <div class="modal-body">
-            <router-view @sendSignData='getSignData' :sendDataPage='dataPage'></router-view>
+            <router-view @sendSignData="getSignData" :sendDataPage="dataPage"></router-view>
           </div>
           <!-- <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -147,27 +147,27 @@
 </template>
 
 <script>
-import Lilo from '@/assets/js/lilo'
+import Lilo from "@/assets/js/lilo"
 export default {
-  name: 'receive',
-  props: ['selectData'],
+  name: "receive",
+  props: ["selectData"],
   data () {
     return {
-      addressTitle: '',
-      walletAddress: '',
-      coinAddress: '',
-      toAddress: '',
+      addressTitle: "",
+      walletAddress: "",
+      coinAddress: "",
+      toAddress: "",
       historyData: [],
-      sendAmound: '',
-      web3: '',
-      nonceNum: '',
-      gasPriceNum: '',
-      gasLimitNum: '',
-      balanceNum: '',
-      maxFee: '',
-      netWorkInfo: '',
+      sendAmound: "",
+      web3: "",
+      nonceNum: "",
+      gasPriceNum: "",
+      gasLimitNum: "",
+      balanceNum: "",
+      maxFee: "",
+      netWorkInfo: "",
       dataPage: {},
-      newWeb3: ''
+      newWeb3: ""
     }
   },
   watch: {
@@ -184,8 +184,8 @@ export default {
       this.getInitData()
     }
     this.walletAddress = this.$store.state.addressInfo
-    this.sendAmound = this.$$.thousandBit('0')
-    $('.keyPressBtn').keypress(function (e) {
+    this.sendAmound = this.$$.thousandBit("0")
+    $(".keyPressBtn").keypress(function (e) {
       if (e.which === 13) {
         that.privateSure()
       }
@@ -199,12 +199,12 @@ export default {
       this.setWeb3()
     },
     modalClick () {
-      $('#privateSure').on('hide.bs.modal', () => {
-        this.$router.push('/LILO/lockOut')
+      $("#privateSure").on("hide.bs.modal", () => {
+        this.$router.push("/LILO/lockOut")
       })
     },
     titleChange (bitType) {
-      this.addressTitle = bitType + ' Withdraw Address'
+      this.addressTitle = bitType + " Withdraw Address"
     },
     setWeb3 () {
       this.$$.setWeb3(this)
@@ -212,11 +212,11 @@ export default {
     },
     setBaseSendData () {
       try {
-        this.nonceNum = this.web3.eth.getTransactionCount(this.walletAddress, 'pending')
+        this.nonceNum = this.web3.eth.getTransactionCount(this.walletAddress, "pending")
       } catch (error) {
         this.nonceNum = this.$$.getWeb3({
-          method: 'eth_getTransactionCount',
-          params: [this.walletAddress, 'pending']
+          method: "eth_getTransactionCount",
+          params: [this.walletAddress, "pending"]
         }).result
       }
 
@@ -224,7 +224,7 @@ export default {
         this.gasPriceNum = this.web3.eth.gasPrice.toString(10)
       } catch (error) {
         this.gasPriceNum = this.$$.getWeb3({
-          method: 'eth_gasPrice',
+          method: "eth_gasPrice",
           params: []
         }).result.toString(10)
       }
@@ -235,11 +235,11 @@ export default {
       } catch (error) {
         try {
           getGasLimit = this.$$.getWeb3({
-            method: 'eth_estimateGas',
+            method: "eth_estimateGas",
             params: [{to: this.toAddress}]
           })
           if (getGasLimit.error) {
-            getGasLimit = 'Error'
+            getGasLimit = "Error"
           } else {
             getGasLimit = getGasLimit.result
           }
@@ -248,37 +248,37 @@ export default {
         }
       }
 
-      if (getGasLimit.toString().indexOf('Error') !== -1) {
+      if (getGasLimit.toString().indexOf("Error") !== -1) {
         this.$$.layerMsg({
           tip: getGasLimit,
           time: 4000,
-          bgColor: '#ea4b40',
-          icon: require('@/assets/image/Prompt.svg')
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
         })
         throw getGasLimit
       }
       this.gasLimitNum = getGasLimit * 6
-      if (this.selectData.coin === 'FSN') {
+      if (this.selectData.coin === "FSN") {
         try {
-          this.balanceNum = this.web3.fromWei(this.web3.eth.getBalance(this.$store.state.addressInfo), 'ether')
+          this.balanceNum = this.web3.fromWei(this.web3.eth.getBalance(this.$store.state.addressInfo), "ether")
         } catch (error) {
           this.balanceNum = this.$$.getWeb3({
-            method: 'eth_getBalance',
-            params: [this.$store.state.addressInfo, 'latest']
+            method: "eth_getBalance",
+            params: [this.$store.state.addressInfo, "latest"]
           }).result
-          this.balanceNum = this.web3.fromWei(this.balanceNum, 'ether')
+          this.balanceNum = this.web3.fromWei(this.balanceNum, "ether")
         }
       } else {
         this.newWeb3.lilo.dcrmGetBalance(this.$store.state.addressInfo, this.selectData.coin).then((res) => {
-          this.balanceNum = this.web3.fromWei(res, 'ether')
+          this.balanceNum = this.web3.fromWei(res, "ether")
         })
       }
-      this.maxFee = this.web3.fromWei(Number(this.gasLimitNum) * Number(this.gasPriceNum), 'ether')
+      this.maxFee = this.web3.fromWei(Number(this.gasLimitNum) * Number(this.gasPriceNum), "ether")
       try {
         this.netWorkInfo = this.web3.version.node
       } catch (error) {
         this.netWorkInfo = this.$$.getWeb3({
-          method: 'web3_clientVersion',
+          method: "web3_clientVersion",
           params: []
         }).result
       }
@@ -286,44 +286,44 @@ export default {
     getSignData (data) {
       if (data) {
         this.serializedTx = data
-        $('#privateSure').modal('hide')
-        $('#sendInfo').modal('show')
+        $("#privateSure").modal("hide")
+        $("#sendInfo").modal("show")
       } else {
-        $('#privateSure').modal('hide')
-        $('#sendInfo').modal('hide')
+        $("#privateSure").modal("hide")
+        $("#sendInfo").modal("hide")
         this.$$.layerMsg({
-          tip: 'Sign error!',
+          tip: "Sign error!",
           time: 3000,
-          bgColor: '#ea4b40',
-          icon: require('@/assets/image/Prompt.svg')
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
         })
       }
     },
     privateSure () {
       if (!this.toAddress) {
         this.$$.layerMsg({
-          tip: this.selectData.coin + ' Receiving Address is not null.',
+          tip: this.selectData.coin + " Receiving Address is not null.",
           time: 2000,
-          bgColor: '#ea4b40',
-          icon: require('@/assets/image/Prompt.svg')
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
         })
         return
       }
       if (this.toAddress.toLowerCase() === this.walletAddress.toLowerCase()) {
         this.$$.layerMsg({
-          tip: 'You can`t transfer money to yourself.',
+          tip: "You can`t transfer money to yourself.",
           time: 5000,
-          bgColor: '#ea4b40',
-          icon: require('@/assets/image/Prompt.svg')
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
         })
         return
       }
-      if (this.selectData.coin !== 'BTC' && this.toAddress.indexOf('0x') !== 0) {
+      if (this.selectData.coin !== "BTC" && this.toAddress.indexOf("0x") !== 0) {
         this.$$.layerMsg({
-          tip: 'The address needs to start with 0x',
+          tip: "The address needs to start with 0x",
           time: 5000,
-          bgColor: '#ea4b40',
-          icon: require('@/assets/image/Prompt.svg')
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
         })
         return
       }
@@ -332,17 +332,17 @@ export default {
         this.$$.layerMsg({
           tip: getAmountTip.msg,
           time: 3000,
-          bgColor: '#ea4b40',
-          icon: require('@/assets/image/Prompt.svg')
+          bgColor: "#ea4b40",
+          icon: this.$$.promptSvg
         })
         return
       }
       this.$$.loadingStart()
       this.setWeb3()
       this.setBaseSendData()
-      let to_value = this.web3.toWei(this.sendAmound, 'ether')
-      if (this.selectData.coin === 'BTC') {
-        to_value = this.$$.toWei(this.sendAmound, 'btc')
+      let to_value = this.web3.toWei(this.sendAmound, "ether")
+      if (this.selectData.coin === "BTC") {
+        to_value = this.$$.toWei(this.sendAmound, "btc")
       }
       this.newWeb3.lilo.dcrmGetAddr(this.walletAddress, this.selectData.coin).then((val) => {
         // console.log(val)
@@ -351,31 +351,31 @@ export default {
           gasPrice: Number(this.gasPriceNum),//Number类型 
           gasLimit: Number(this.gasLimitNum),
           from: this.walletAddress,
-          to: '0x00000000000000000000000000000000000000dc',
+          to: "0x00000000000000000000000000000000000000dc",
           value: Number(0),//Number类型
-          data: 'LOCKOUT:' + this.toAddress + ':' + to_value + ':' + this.selectData.coin,
-          sendType: 'LOCKOUT',
+          data: "LOCKOUT:" + this.toAddress + ":" + to_value + ":" + this.selectData.coin,
+          sendType: "LOCKOUT",
           coin: this.selectData.coin,
           url: this.$$.baseUrl,
           to_value: to_value,
           to_address: this.toAddress,
           to_from: this.coinAddress
         }
-        this.$router.push('/pwdLockOut')
-        $('#privateSure').modal('show')
+        this.$router.push("/pwdLockOut")
+        $("#privateSure").modal("show")
         this.$$.loadingEnd()
       })
     },
     MoreContent (e) {
-      $(e.target.parentNode).parents('tr').siblings('tr').find('.list').hide()
-      $(e.target.parentNode).find('.list').toggle()
+      $(e.target.parentNode).parents("tr").siblings("tr").find(".list").hide()
+      $(e.target.parentNode).find(".list").toggle()
     },
     pageRefresh () {
       if (this.selectData) {
         this.titleChange(this.selectData.coin)
       }
-      if (location.href.indexOf('lockOut') !== -1) {
-        $('.transferBtn_btn').find('a:eq(0)').removeClass('router-link-active')
+      if (location.href.indexOf("lockOut") !== -1) {
+        $(".transferBtn_btn").find("a:eq(0)").removeClass("router-link-active")
       }
     },
     sendAmoundInfo () {
@@ -384,14 +384,14 @@ export default {
       let dataBase = {
         date: this.dataPage.data,
         from: this.dataPage.to_from,
-        gas: '',
+        gas: "",
         gasPrice: this.dataPage.gasPrice,
-        fsnhash: '',
+        fsnhash: "",
         nonce: this.dataPage.nonce,
         timeStamp: new Date(),
         to: this.dataPage.to_address,
         value: this.dataPage.to_value,
-        statusFsn: '',
+        statusFsn: "",
         coin: this.dataPage.coin,
         data: this.dataPage.data,
         tokenSymbol: this.dataPage.coin
@@ -399,24 +399,24 @@ export default {
       this.web3.eth.sendRawTransaction(this.serializedTx, (err, hash) => {
         if (!err) {
           dataBase.fsnhash = hash
-          dataBase.statusFsn = 'success'
-          $('#sendInfo').modal('hide')
+          dataBase.statusFsn = "success"
+          $("#sendInfo").modal("hide")
           this.$$.layerMsg({
-            tip: 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： ' + hash,
+            tip: "Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use ETH Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： " + hash,
             time: 5000,
-            bgColor: '#5dba5a',
-            icon: require('@/assets/image/Prompt.svg')
+            bgColor: "#5dba5a",
+            icon: this.$$.promptSvg
           })
-          this.$store.commit('storeWalletLoadFlag', true)
+          this.$store.commit("storeWalletLoadFlag", true)
         } else {
           console.log(err)
-          dataBase.fsnhash = ''
-          dataBase.statusFsn = 'failure'
+          dataBase.fsnhash = ""
+          dataBase.statusFsn = "failure"
           this.$$.layerMsg({
             tip: err,
             time: 4000,
-            bgColor: '#ea4b40',
-            icon: require('@/assets/image/Prompt.svg')
+            bgColor: "#ea4b40",
+            icon: this.$$.promptSvg
           })
         }
         this.createDatabaseInfo(dataBase)
@@ -426,9 +426,9 @@ export default {
     createDatabaseInfo (data) {
       const that = this
       $.ajax({
-        url: that.$$.serverURL + '/lilo/create',
-        type: 'post',
-        datatype: 'json',
+        url: that.$$.serverURL + "/lilo/create",
+        type: "post",
+        datatype: "json",
         data: data,
         success: function (res) {
           // console.log(res)
@@ -440,16 +440,16 @@ export default {
       const that = this
       that.setWeb3()
       $.ajax({
-        url: that.$$.serverURL + '/lilo/lockOutHistory',
-        type: 'post',
-        datatype: 'json',
+        url: that.$$.serverURL + "/lilo/lockOutHistory",
+        type: "post",
+        datatype: "json",
         data: {from: that.coinAddress, coin: that.selectData.coin},
         success: function (res) {
           that.historyData = []
-          if (res.msg === 'success') {
+          if (res.msg === "success") {
             for (let i = 0; i < res.info.length; i++) {
-              res.info[i].date = that.$$.timeChange({date: res.info[i].date, type:'yyyy-mm-dd hh:mm'})
-              res.info[i].value = that.web3.fromWei(res.info[i].value, 'ether')
+              res.info[i].date = that.$$.timeChange({date: res.info[i].date, type:"yyyy-mm-dd hh:mm"})
+              res.info[i].value = that.web3.fromWei(res.info[i].value, "ether")
               res.info[i].statusFsn = that.getStatus(res.info[i])
               that.historyData.push(res.info[i])
             }
@@ -458,24 +458,24 @@ export default {
       })
     },
     getStatus (txhax) {
-      let statusFsn = ''
+      let statusFsn = ""
       if (txhax.fsnhash) {
         this.setWeb3()
         try {
           let receipt = this.web3.eth.getTransactionReceipt(txhax.fsnhash)
           if (receipt && receipt.status) {
-            statusFsn = 'Success'
+            statusFsn = "Success"
           } else {
-            statusFsn = 'Pending'
+            statusFsn = "Pending"
           }
         } catch (error) {
-          statusFsn = 'Failure'
+          statusFsn = "Failure"
         }
       } else {
         if (txhax.hash) {
-          statusFsn = 'Failure'
+          statusFsn = "Failure"
         } else {
-          statusFsn = 'Failure'
+          statusFsn = "Failure"
         }
       }
       return statusFsn

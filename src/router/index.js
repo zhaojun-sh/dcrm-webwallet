@@ -4,31 +4,50 @@ import store from '../store/store'
 
 // const index = resolve => require.ensure([], () => resolve(require('@/components/web/page/index')), 'group-wallet')
 
-const biticonView = resolve => require.ensure([], () => resolve(require('@/components/web/page/createWallet/index')), 'group-wallet')
-const createWallet = resolve => require.ensure([], () => resolve(require('@/components/web/page/createWallet/create')), 'group-wallet')
-const saveKeystore = resolve => require.ensure([], () => resolve(require('@/components/web/page/createWallet/savekeystore')), 'group-wallet')
-const importWallet = resolve => require.ensure([], () => resolve(require('@/components/web/page/createWallet/import')), 'group-wallet')
+const biticonView = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/createWallet/index')), 'group-wallet')
+const createWallet = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/createWallet/create')), 'group-wallet')
+const saveKeystore = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/createWallet/savekeystore')), 'group-wallet')
+const importWallet = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/createWallet/import')), 'group-wallet')
 
-const navLeft = resolve => require.ensure([], () => resolve(require('@/components/web/page/nav')), 'group-wallet')
-const myAssets = resolve => require.ensure([], () => resolve(require('@/components/web/page/myAssets/index')), 'group-wallet')
+const navLeft = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/nav')), 'group-wallet')
+const myAssets = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/myAssets/index')), 'group-wallet')
 
-const transfer = resolve => require.ensure([], () => resolve(require('@/components/web/page/transfer/index')), 'group-wallet')
-const tranReceive = resolve => require.ensure([], () => resolve(require('@/components/web/page/transfer/receive')), 'group-wallet')
-const tranSend = resolve => require.ensure([], () => resolve(require('@/components/web/page/transfer/send')), 'group-wallet')
+const transfer = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/transfer/index')), 'group-wallet')
+const tranReceive = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/transfer/receive')), 'group-wallet')
+const tranSend = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/transfer/send')), 'group-wallet')
 
-const lilo = resolve => require.ensure([], () => resolve(require('@/components/web/page/lilo/index')), 'group-wallet')
-const coinList = resolve => require.ensure([], () => resolve(require('@/components/web/page/lilo/coinList')), 'group-wallet')
-const lockIn = resolve => require.ensure([], () => resolve(require('@/components/web/page/lilo/lockIn')), 'group-wallet')
-const lockOut = resolve => require.ensure([], () => resolve(require('@/components/web/page/lilo/lockOut')), 'group-wallet')
-const lockNav = resolve => require.ensure([], () => resolve(require('@/components/web/page/lilo/lockNav')), 'group-wallet')
+const lilo = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/lilo/index')), 'group-wallet')
+const coinList = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/lilo/coinList')), 'group-wallet')
+const lockIn = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/lilo/lockIn')), 'group-wallet')
+const lockOut = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/lilo/lockOut')), 'group-wallet')
+const lockNav = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/lilo/lockNav')), 'group-wallet')
 
-const dapp = resolve => require.ensure([], () => resolve(require('@/components/web/page/dapp/index')), 'group-wallet')
+const dapp = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/dapp/index')), 'group-wallet')
 
-const pwdSure = resolve => require.ensure([], () => resolve(require('@/components/web/page/public/pwdSure')), 'group-wallet')
-const loading = resolve => require.ensure([], () => resolve(require('@/components/web/page/public/loading')), 'group-wallet')
+const pwdSure = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/public/pwdSure')), 'group-wallet')
+const loading = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/public/loading')), 'group-wallet')
 
-const backupWallet = resolve => require.ensure([], () => resolve(require('@/components/web/page/backupWallet/index')), 'group-wallet')
-const backupSure = resolve => require.ensure([], () => resolve(require('@/components/web/page/backupWallet/backupSure')), 'group-wallet')
+const backupWallet = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/backupWallet/index')), 'group-wallet')
+const backupSure = resolve =>
+  require.ensure([], () => resolve(require('@/components/web/page/backupWallet/backupSure')), 'group-wallet')
 
 // import index from '@/components/web/page/index'
 
@@ -228,7 +247,12 @@ const routers = new Router({
 })
 
 routers.beforeEach((to, from, next) => {
-  const showSearchURL = ['biticonView', 'createWallet', 'importWallet', 'saveKeystore']
+  const showSearchURL = [
+    'biticonView',
+    'createWallet',
+    'importWallet',
+    'saveKeystore'
+  ]
   // console.log(this.$store)
   // if (!this.$store.state.storePrivateKey) {
   //   this.$router.push('/')
@@ -243,7 +267,13 @@ routers.beforeEach((to, from, next) => {
     next()
     // console.log(1)
   } else {
-    if (to.path === '/' || to.path === '/importWallet' || to.path === '/createWallet' || to.path === '/saveKeystore' || to.path === '/backupSure') {
+    if (
+      to.path === '/' ||
+      to.path === '/importWallet' ||
+      to.path === '/createWallet' ||
+      to.path === '/saveKeystore' ||
+      to.path === '/backupSure'
+    ) {
       next()
       // console.log(2)
     } else {

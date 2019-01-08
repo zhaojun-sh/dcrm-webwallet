@@ -4,12 +4,29 @@
       <div class="receiveAddress_box">
         <h3 v-html="addressTitle"></h3>
         <div class="receiveAddress_pwd">
-          <input type="text" class="input-text input" readonly v-model="walletAddress" id="walletAdressHide" />
+          <input
+            type="text"
+            class="input-text input"
+            readonly
+            v-model="walletAddress"
+            id="walletAdressHide"
+          />
           <!-- <input type="text" v-model="walletAdress" id="walletAdressHide" class="inputOpacity"/> -->
         </div>
         <div class="receiveAddress_btn flex-c" id="receiveAddressBtn">
-          <button class="btn blue flex-c" @click="qrcode(coinAddress)"><div class="icon"><img src="@/assets/image/QRcode.svg"></div>Show QR code</button>
-          <button class="btn cyan flex-c" @click="copyAddress('walletAdressHide', 'receiveAddressBtn')" data-toggle="tooltip" data-placement="bottom" title="Copy clipboard">
+          <button class="btn blue flex-c" @click="qrcode(coinAddress)">
+            <div class="icon">
+              <img src="@/assets/image/QRcode.svg">
+            </div>
+            Show QR code
+          </button>
+          <button
+            class="btn cyan flex-c"
+            @click="copyAddress('walletAdressHide', 'receiveAddressBtn')"
+            data-toggle="tooltip"
+            data-placement="bottom"
+            title="Copy clipboard"
+          >
             <div class="icon"><img src="@/assets/image/copy.svg"></div>
             Copy clipboard
           </button>
@@ -33,10 +50,18 @@
             </thead>
             <tbody>
               <tr v-for="(item, index) in historyData" :key="index">
-                <td><span v-html="item.status" :class="item.status !== 'Success' ? 'red' : ''"></span></td>
-                <td><span v-html="item.coin"></span></td>
-                <td><span v-html="item.value"></span></td>
-                <td><span v-html="item.date"></span></td>
+                <td>
+                  <span v-html="item.status" :class="item.status !== 'Success' ? 'red' : ''"></span>
+                </td>
+                <td>
+                  <span v-html="item.coin"></span>
+                </td>
+                <td>
+                  <span v-html="item.value"></span>
+                </td>
+                <td>
+                  <span v-html="item.date"></span>
+                </td>
                 <td>
                   <div class="moreInfo_box" @click="MoreContent">
                     <span v-html="item.txhax" :title="item.info" class="ellipsis moreInfo_hax"></span>
@@ -53,7 +78,13 @@
         </div>
       </div>
 
-      <div class="modal fade bs-example-modal-md" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="qrcodeBox">
+      <div
+        class="modal fade bs-example-modal-md"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="mySmallModalLabel"
+        id="qrcodeBox"
+      >
         <div class="modal-dialog modal-md modal-dialog-centered" role="document">
           <div class="modal-content">
             <div class="qrcodeCont_box">
@@ -71,18 +102,18 @@
 </template>
 
 <script>
-import QRCode from 'qrcodejs2'
+import QRCode from "qrcodejs2"
 export default {
-  name: 'receive',
-  props: ['selectData'],
+  name: "receive",
+  props: ["selectData"],
   data () {
     return {
-      addressTitle: '',
-      walletAddress: '',
+      addressTitle: "",
+      walletAddress: "",
       historyData: [],
       refreshHistory: null,
-      coinAddress: '',
-      web3: '',
+      coinAddress: "",
+      web3: "",
       // count: 0
     }
   },
@@ -96,7 +127,7 @@ export default {
   mounted () {
     this.walletAddress = this.$store.state.addressInfo
     this.pageRefresh()
-    $(function () {
+    $(() => {
       $("[data-toggle='tooltip']").tooltip()
     })
     this.refreshHistory = setInterval(() => {
@@ -116,88 +147,95 @@ export default {
       if (this.selectData.coin) {
         this.titleChange(this.selectData.coin)
       }
-      if (location.href.indexOf('tranSend') === -1) {
-        $('.transferBtn_btn').find('a:eq(0)').addClass('router-link-active')
+      if (location.href.indexOf("tranSend") === -1) {
+        $(".transferBtn_btn").find("a:eq(0)").addClass("router-link-active")
       }
     },
     titleChange (bitType) {
-      this.addressTitle = bitType + ' Receiving Address'
+      this.addressTitle = bitType + " Receiving Address"
     },
     qrcode (cont) {
-      $('#qrcode').html('')
-      let qrcodeInit = new QRCode('qrcode', {
+      $("#qrcode").html("")
+      let qrcodeInit = new QRCode("qrcode", {
         width: 300,
         height: 340, // 高度
         text: cont // 二维码内容
-        // render: 'canvas' // 设置渲染方式（有两种方式 table和canvas，默认是canvas）
-        // background: '#f0f'
-        // foreground: '#ff0'
+        // render: "canvas" // 设置渲染方式（有两种方式 table和canvas，默认是canvas）
+        // background: "#f0f"
+        // foreground: "#ff0"
       })
-      $('#qrcodeBox').modal('show')
+      $("#qrcodeBox").modal("show")
     },
     copyAddress (id, textId) {
-      let copyText = $('#' + textId).find('.tooltip-inner').text()
+      let copyText = $("#" + textId).find(".tooltip-inner").text()
       document.getElementById(id).select()
-      document.execCommand('Copy')
-      $('#' + textId).find('.tooltip-inner').text('Copied')
+      document.execCommand("Copy")
+      $("#" + textId)
+        .find(".tooltip-inner")
+        .text("Copied")
       setTimeout(function () {
-        $('#' + textId).find('.tooltip-inner').text(copyText)
+        $("#" + textId)
+          .find(".tooltip-inner")
+          .text(copyText)
       }, 3000)
-      this.$$.layerMsg('Copy Success')
+      this.$$.layerMsg("Copy Success")
     },
     setWeb3 () {
       this.$$.setWeb3(this)
     },
     MoreContent (e) {
-      $(e.target.parentNode).parents('tr').siblings('tr').find('.list').hide()
-      $(e.target.parentNode).find('.list').toggle()
+      $(e.target.parentNode)
+        .parents("tr")
+        .siblings("tr")
+        .find(".list")
+        .hide()
+      $(e.target.parentNode)
+        .find(".list")
+        .toggle()
     },
     getSendHistory () {
-      const that = this
-      if (!that.walletAddress || !that.selectData.coin) {
+      if (!this.walletAddress || !this.selectData.coin) {
         return
       }
       $.ajax({
-        url: that.$$.serverURL + '/transfer/receiveHistory',
-        datatype: 'json',
-        type: 'post',
+        url: this.$$.serverURL + "/transfer/receiveHistory",
+        datatype: "json",
+        type: "post",
         data: {
-          to_address: that.walletAddress,
-          coin: that.selectData.coin
+          to_address: this.walletAddress,
+          coin: this.selectData.coin
         },
-        success: function (res) {
+        success: res => {
           console.log(res)
-          that.historyData = []
-          if (res.msg === 'success' && res.info.length > 0) {
+          this.historyData = []
+          if (res.msg === "success" && res.info.length > 0) {
             for (let i = 0; i < res.info.length; i++) {
-              if (res.info[i].coin === that.selectData.coin && res.info[i].txhax) {
-                res.info[i].date = that.$$.timeChange({date: res.info[i].date, type:'yyyy-mm-dd hh:mm'})
-                res.info[i].value = that.$$.thousandBit(res.info[i].value, 'no')
-                res.info[i].status = that.getStatus(res.info[i])
-                that.historyData.push(res.info[i])
+              if (res.info[i].coin === this.selectData.coin && res.info[i].txhax) {
+                res.info[i].date = this.$$.timeChange({date: res.info[i].date, type:"yyyy-mm-dd hh:mm"})
+                res.info[i].value = this.$$.thousandBit(res.info[i].value, "no")
+                res.info[i].status = this.getStatus(res.info[i])
+                this.historyData.push(res.info[i])
               }
             }
-          } else {
-
           }
         },
-        error: function (res) {
+        error: res => {
           console.log(res)
         }
       })
     },
     getStatus (txhax) {
-      let statusFsn = ''
+      let statusFsn = ""
       if (txhax.txhax) {
         this.setWeb3()
         let receipt = this.web3.eth.getTransactionReceipt(txhax.txhax)
         if (receipt && receipt.status) {
-          statusFsn = 'Success'
+          statusFsn = "Success"
         } else {
-          statusFsn = 'Pending'
+          statusFsn = "Pending"
         }
       } else {
-        statusFsn = 'Failure'
+        statusFsn = "Failure"
       }
       return statusFsn
     }
