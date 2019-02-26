@@ -1,10 +1,28 @@
 let $$ = {}
 
-let idNum = 0
+window.wallet = require('./wallet').default
+window.etherUnits = require('@/assets/js/etherUnits').default
+window.hd = {
+  HDKey: require('hdkey'),
+  bip39: require('bip39')
+}
+window.hdk = new window.hd.HDKey()
 // $$.baseUrl = 'http://54.169.254.177:40415'
 // $$.baseUrl = 'http://54.164.7.63:40415'
 // $$.baseUrl = window.location.protocol + '//54.164.7.63:40445'
-$$.baseUrl = window.location.protocol + '//api.dcrm.network'
+// $$.baseUrl = window.location.protocol + '//api.dcrm.network'
+if (process.env.NODE_ENV === 'development') {
+  $$.baseUrl = '/api'
+} else {
+  $$.baseUrl = window.location.protocol + '//api.dcrm.network'
+}
+
+// $$.bipPath = "m/44'/1'/0'/0"
+$$.bipPath = "m/44'/1'/0'/0"
+// import wallet from "@/assets/js/wallet"
+// $$.baseUrl = 'http://54.183.185.30:8018'
+$$.baseUrl = 'https://api.nodes.run'
+
 // $$.baseUrl = 'http://104.210.49.28:40445'
 // $$.baseUrl = window.location.protocol + '//104.210.49.28:40445'
 // $$.baseUrl = 'http://10.192.32.92:40445'
@@ -12,14 +30,21 @@ $$.baseUrl = window.location.protocol + '//api.dcrm.network'
 // $$.baseUrl = 'http://47.92.255.230:8111'
 
 // $$.serverURL = 'http://localhost:8087'
-// $$.serverURL = 'http://localhost:8085'
+$$.serverURL = 'http://localhost:8085'
 // $$.serverURL = 'https://localhost:8085'
 // $$.serverURL = 'http://54.164.7.63:8087'
 // $$.serverURL = 'https://wallet.dcrm.network:8085'
 // $$.serverURL = window.location.protocol + '//wallet.dcrm.network:8087'
-$$.serverURL = window.location.protocol + '//wallet.dcrm.network:8085'
+// $$.serverURL = window.location.protocol + '//wallet.dcrm.network:8085'
 
-$$.promptSvg = require('@/assets/image/Prompt.svg')
+$$.promptSvg = require('@etc/img/Prompt.svg')
+
+$$.color = {
+  Success: '#67C23A',
+  Warning: '#E6A23C',
+  Danger: '#F56C6C',
+  Info: '#909399'
+}
 
 $$.thousandBit = (num, dec = 2) => {
   num = Number(num)
@@ -89,6 +114,9 @@ $$.timeChange = (data) => {
 
 // 提示弹框
 $$.layerMsg = (layer) => {
+  if (document.getElementById('layer-tip')) {
+    document.body.removeChild(document.getElementById('layer-tip'))
+  }
   let data = {
     tip: layer.tip,
     time: layer.time ? layer.time : 3000,
@@ -139,8 +167,9 @@ $$.layerMsg = (layer) => {
   // _span.style.paddingRight = '144px'
   _span.style.padding = '18px 144px 18px 15px'
   _span.style.fontSize = '16px'
+  _span.style.wordBreak = 'break-all'
 
-  _i.innerHTML = '<img src="' + require('../image/Close.svg') + '" width=15 height=15>'
+  _i.innerHTML = '<img src="' + require('@etc/img/Close.svg') + '" width=15 height=15>'
   _i.style.width = '144px'
   _i.style.height = '100%'
   _i.style.position = 'absolute'
@@ -169,25 +198,46 @@ $$.layerMsg = (layer) => {
       _div.style.opacity = hideCount / 10
       if (hideCount < 0) {
         window.clearInterval(hideOpcity)
-        if ($('#layer-tip').length > 0) {
-          document.body.removeChild(_div)
+        // document.querySelectorAll('layer-tip')
+        // console.log(document.getElementById('layer-tip'))
+        if (document.getElementById('layer-tip')) {
+          document.body.removeChild(document.getElementById('layer-tip'))
         }
       }
     }, 10)
   }, data.time)
 }
 
+$$.errTip = (e) => {
+  $$.layerMsg({
+    tip: e,
+    time: 5000,
+    bgColor: $$.color.Danger,
+    icon: $$.promptSvg
+  })
+}
+
+$$.successTip = (e) => {
+  $$.layerMsg({
+    tip: e,
+    time: 8000,
+    bgColor: $$.color.Success,
+    icon: $$.promptSvg
+  })
+}
+
 $$.showSearchTop = () => {
   const hideSearchURL = ['biticonView', 'createWallet', 'importWallet', 'saveKeystore']
   let toPath = location.href.toUpperCase()
+  // console.log(toPath)
   for (let i = 0; i < hideSearchURL.length; i++) {
     if (toPath.indexOf(hideSearchURL[i].toUpperCase()) !== -1 || toPath.lastIndexOf('/') === (toPath.length - 1)) {
-      $('#topSearchView').show()
-      $('#topSetView').hide()
+      document.getElementById('topSearchView').style.display = 'block'
+      document.getElementById('topSetView').style.display = 'none'
       break
     } else {
-      $('#topSearchView').hide()
-      $('#topSetView').show()
+      document.getElementById('topSearchView').style.display = 'none'
+      document.getElementById('topSetView').style.display = 'block'
     }
   }
 }
@@ -200,9 +250,7 @@ $$.getBlob = (mime, str) => {
   }
   var str1 = (typeof str === 'undefined' ? 'undefined' : _typeof(str)) === 'object' ? JSON.stringify(str) : str
   if (str1 == null) return ''
-  // var blob = new Blob([str1], {
-  //   type: mime
-  // })
+
   let blob
   try {
     blob = new Blob([str1], {type: mime})
@@ -222,33 +270,16 @@ $$.getBlob = (mime, str) => {
   return window.URL.createObjectURL(blob)
 }
 
-// $$.web3 = function () {
-//   var Web3 = require('web3')
-//   if (typeof web3 !== 'undefined') {
-//     Web3 = new Web3(Web3.currentProvider)
-//   } else {
-//     // set the provider you want from Web3.providers
-//     // Web3 = new Web3(new Web3.providers.HttpProvider('http://47.107.50.83:8000/'))
-//     Web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/'))
-//   }
-//   return Web3
-// }
-// $$.web3 = require('web3')
-
-// $('.moreInfo_box').on('click', '.moreInfo_hax', function () {
-//   console.log(123)
-// })
-
 $$.loadingStart = (data) => {
   let initData = {
-    img: require('../image/wait.svg'),
+    img: require('@etc/img/wait.svg'),
     color: '#999',
     txt: data !== undefined ? data : 'Loading……'
   }
 
   if ((typeof data).toLowerCase() === 'object') {
     initData = {
-      img: data.img ? data.img : require('../image/wait.svg'),
+      img: data.img ? data.img : require('@etc/img/wait.svg'),
       color: data.color ? data.color : '#999',
       txt: data.img ? data.txt : 'Loading……'
     }
@@ -276,16 +307,6 @@ $$.loadingStart = (data) => {
   document.body.appendChild(_div)
 }
 
-$$.loadingEnd = () => {
-  // document.getElementsByClassName('OnLodaing').remove()
-  $('.OnLodaing').remove()
-}
-$$.loadingEndIndex = () => {
-  // document.getElementsByClassName('OnLodaing').remove()
-  $('.OnLodaingIndex').remove()
-  // console.log($('.OnLodaingIndex'))
-}
-
 $$.limitCoin = function (num, limit, type) {
   let callback = {
     flag: true,
@@ -310,82 +331,57 @@ $$.limitCoin = function (num, limit, type) {
   return callback
 }
 
-$$.web3 = function (data) {
-  let that = this
-  // console.log(data)
-  let dataInit = {
-    id: ++idNum,
-    jsonrpc: '2.0',
-    method: data.method,
-    params: data.params
-  }
-  // console.log(dataInit)
-  let callback = new Promise(function (resolve) {
-    $.ajax({
-      url: that.baseUrl,
-      type: 'post',
-      datatype: 'json',
-      contentType: 'application/json',
-      data: JSON.stringify(dataInit),
-      success: function (res) {
-        resolve(res)
-      },
-      error: function (res) {
-        resolve(res)
-      }
-    })
-  })
-  return callback
-  // console.log($('body'))
-}
-
-$$.getWeb3 = function (data) {
-  let that = this
-  // console.log(data)
-  let dataInit = {
-    id: ++idNum,
-    jsonrpc: '2.0',
-    method: data.method,
-    params: data.params
-  }
-  // console.log(dataInit)
-  let callback = function () {
-    let callbackData
-    $.ajax({
-      url: that.baseUrl,
-      type: 'post',
-      datatype: 'json',
-      contentType: 'application/json',
-      data: JSON.stringify(dataInit),
-      async: false,
-      success: function (res) {
-        callbackData = res
-        // console.log(res)
-      },
-      error: function (res) {
-        callbackData = res
-      }
-    })
-    return callbackData
-  }
-  return callback()
-}
-
-// import Lilo from 'lilo'
-// let Lilo = require('Lilo')
-$$.setWeb3 = function (vueWeb3) {
-  let that = this
+$$.setWeb3 = function (url) {
   let Web3 = require('web3')
   let web3
   try {
-    web3 = new Web3(new Web3.providers.HttpProvider(that.baseUrl))
+    web3 = new Web3(new Web3.providers.HttpProvider(url))
   } catch (error) {
     web3 = new Web3()
     console.log(error)
   }
-  vueWeb3.web3 = web3
-  // vueWeb3.newWeb3 = new Lilo(that.baseUrl)
+  web3._extend({
+    property: 'lilo',
+    methods: [
+      new web3._extend.Method({
+        name: 'dcrmReqAddr',
+        call: 'lilo_dcrmReqAddr',
+        params: 2,
+        inputFormatter: [null, null],
+        outputFormatter: null
+      }),
+      new web3._extend.Method({
+        name: 'dcrmConfirmAddr',
+        getter: 'lilo_dcrmConfirmAddr',
+        inputFormatter: [null, null],
+        outputFormatter: null
+      }),
+      new web3._extend.Method({
+        name: 'dcrmGetAddr',
+        call: 'lilo_dcrmGetAddr',
+        params: 2,
+        inputFormatter: [null, null],
+        outputFormatter: null
+      }),
+      new web3._extend.Method({
+        name: 'dcrmLockin',
+        call: 'lilo_dcrmLockin',
+        params: 3,
+        inputFormatter: [null, null, null],
+        outputFormatter: null
+      }),
+      new web3._extend.Method({
+        name: 'dcrmGetBalance',
+        call: 'lilo_dcrmGetBalance',
+        params: 2,
+        inputFormatter: [null, null],
+        outputFormatter: null
+      })
+    ]
+  })
+  window.v_web3 = web3
 }
+// $$.setWeb3($$.baseUrl)
 
 $$.coinExchange = function (coin) {
   coin = coin.toLowerCase()
@@ -411,6 +407,62 @@ $$.fromWei = function (num, coin) {
   let e = that.coinExchange(coin)
   num = isNaN(num) ? 0 : num
   return Number(num) * Math.pow(10, -e)
+}
+
+$$.walletRequirePass = (ethjson) => {
+  let jsonArr
+  try {
+    jsonArr = JSON.parse(ethjson)
+  } catch (err) {
+    let errtxt1 = 'This is not a valid wallet file. '
+    throw errtxt1
+  }
+  if (jsonArr.encseed != null) {
+    return true
+  } else if (jsonArr.Crypto != null || jsonArr.crypto != null) {
+    return true
+  } else if (jsonArr.hash != null && jsonArr.locked) {
+    return true
+  } else if (jsonArr.hash != null && !jsonArr.locked) {
+    return false
+  } else if (jsonArr.publisher === 'MyEtherWallet' && !jsonArr.encrypted) {
+    return false
+  } else {
+    let errtxt2 = 'Sorry! We don\'t recognize this type of wallet file. '
+    throw errtxt2
+  }
+}
+
+$$.fixPkey = (key) => {
+  if (key.indexOf('0x') === 0) {
+    return key.slice(2)
+  }
+  return key
+}
+
+$$.strToHexCharCode = (str) => {
+  if (!str) return ''
+  var hexCharCode = []
+  hexCharCode.push('0x')
+  for (var i = 0; i < str.length; i++) {
+    hexCharCode.push((str.charCodeAt(i)).toString(16))
+  }
+  return hexCharCode.join('')
+}
+
+$$.qrCode = (cont, id) => {
+  let QRCode = require('qrcodejs2')
+  document.getElementById(id).innerHTML = ''
+  let qrcodeInit = new QRCode(id, {
+    width: 270,
+    height: 270, // 高度
+    text: cont // 二维码内容
+    // render: "canvas" // 设置渲染方式（有两种方式 table和canvas，默认是canvas）
+    // background: "#f0f"
+    // foreground: "#ff0"
+  })
+  // console.log(qrcodeInit)
+  // qrcodeInit = null
 }
 
 export default $$

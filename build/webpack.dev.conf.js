@@ -10,6 +10,9 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
 
+const https = require('https')
+const fs = require('fs')
+
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
 
@@ -43,7 +46,11 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     watchOptions: {
       poll: config.dev.poll,
     },
-    disableHostCheck: true
+    disableHostCheck: true,
+    https: {
+      key: fs.readFileSync(path.join(__dirname, './keys/privkey.pem')),
+      cert: fs.readFileSync(path.join(__dirname, './keys/cert.pem'))
+    }
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -67,10 +74,10 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         ignore: ['.*']
       }
     ]),
-    new webpack.ProvidePlugin({
-      $:'jquery',
-      jquery:'jquery'
-    })
+    // new webpack.ProvidePlugin({
+    //   $:'jquery',
+    //   jquery:'jquery'
+    // })
   ]
 })
 

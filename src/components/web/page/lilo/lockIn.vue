@@ -1,8 +1,10 @@
 <template>
   <div>
-    <div class="receiveContent_box">
+    <div class="receiveContent_box"
+        v-loading="fullscreenLoading"
+        element-loading-text="Loading……">
       <div class="receiveAddress_box">
-        <h3 v-html="addressTitle"></h3>
+        <!-- <h3 v-html="addressTitle"></h3>
         <div class="receiveAddress_pwd">
           <input
             type="text"
@@ -11,89 +13,113 @@
             readonly="readonly"
             id="walletAdressHide"
           />
-          <!-- <input type="hidden" readonly v-model="privateKey" id="privateKeyHide" /> -->
-        </div>
+        </div> -->
+        <el-form label-position="top" label-width="80px">
+          <el-form-item :label="addressTitle">
+            <el-input v-model="coinAddress" id="walletAdressHide" class="font24"></el-input>
+          </el-form-item>
+        </el-form>
         <div class="receiveAddress_btn flex-c">
-          <button class="btn blue flex-c" @click="qrcode(coinAddress)"><div class="icon"><img src="@/assets/image/QRcode.svg"></div>Show QR code</button>
-          <button class="btn cyan flex-c" @click="copyAddress('#walletAdressHide')"><div class="icon"><img src="@/assets/image/copy.svg"></div>Copy clipboard</button>
+          <button class="btn blue flex-c" @click="qrcode(coinAddress)"><div class="icon"><img src="@etc/img/QRcode.svg"></div>{{LANG.BTN.SHOW_QR_CODE}}</button>
+          <button class="btn cyan flex-c" @click="copyAddress('walletAdressHide')">
+            <!-- <div class="icon"><img src="@etc/img/copy.svg"></div>{{LANG.BTN.COPY_CLIPBOARD}} -->
+            <div class="icon"><img src="@etc/img/copy.svg"></div>
+            <el-popover
+              trigger="hover"
+              :content="LANG.BTN.COPY_CLIPBOARD">
+              <div class="addreess" slot="reference">{{LANG.BTN.COPY_CLIPBOARD}}</div>
+              <!-- <el-button slot="reference">hover 激活</el-button> -->
+            </el-popover>
+          </button>
         </div>
       </div>
 
       <div class="tableHistory_box">
         <hgroup class="tableHistory_title">
-          <h3 class="title">History:</h3>
+          <h3 class="title">{{LANG.TITLE.HISTORY}}:</h3>
         </hgroup>
         <div class="tableHistory_table table-responsive">
-          <table class="table table-bordered table-hover">
-            <thead>
-              <tr>
-                <th width="5%">Status</th>
-                <th width="5%">Coin</th>
-                <th width="5%">Amount</th>
-                <th width="25%">Date</th>
-                <th width="">Information</th>
-                <th width="10%">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in historyData" :key="item.index">
-                <td><span v-html="item.statusFsn" :class="item.statusFsn !== 'Success' ? 'red' : ''"></span></td>
-                <td><span v-html="selectData.coin"></span></td>
-                <td><span v-html="item.value2"></span></td>
-                <td><span v-html="item.date"></span></td>
-                <td>
-                  <div class="moreInfo_box" @click="MoreContent">
-                    <span v-html="item.hash" :title="item.info" class="ellipsis moreInfo_hax"></span>
+          <el-table
+            :data="historyData"
+            empty-text="Null"
+            style="width: 100%">
+            <el-table-column
+              :label="LANG.THEAD.PUBLIC.STATUS"
+              width="80"
+            >
+              <template slot-scope="scope">
+                <span v-html="scope.row.statusFsn" :class="scope.row.statusFsn !== LANG.LABEL.SUCCESS ? 'red' : ''"></span>
+              </template>
+            </el-table-column>
+            <el-table-column :label="LANG.THEAD.COIN" prop="coin" width="80"></el-table-column>
+            <el-table-column :label="LANG.THEAD.PUBLIC.AMOUNT" prop="value2" width="120"></el-table-column>
+            <el-table-column :label="LANG.THEAD.PUBLIC.DATE" prop="date" width="180"></el-table-column>
+            <el-table-column :label="LANG.THEAD.PUBLIC.INFORMATION" min-width="360">
+              <template slot-scope="scope">
+                <el-collapse class="moreInfo_box" accordion v-model="activeNames">
+                  <el-collapse-item :title="scope.row.hash">
                     <ul class="list">
-                      <li>TXid：{{item.hash}}</li>
-                      <li>Adress：{{item.from}}</li>
+                      <li>{{LANG.LABEL.TXID}}：{{scope.row.hash}}</li>
+                      <li>{{LANG.LABEL.ADDRESS}}：{{scope.row.from}}</li>
                     </ul>
-                    <i class="arrow"></i>
-                  </div>
-                </td>
-                <td>
-                  <button class="btn" v-if="item.statusFsn === 'New'" @click="privateSure({nonce:item.nonce, gasPrice: item.gasPrice, gas: item.gas, value: item.value2,hash: item.hash})">Lockin</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  </el-collapse-item>
+                </el-collapse>
+              </template>
+            </el-table-column>
+            <el-table-column :label="LANG.THEAD.ACTIONS" width="100">
+              <template slot-scope="scope">
+                <el-button type="info" size="small" v-if="scope.row.statusFsn === 'New'" @click="privateSure({
+                  nonce: scope.row.nonce,
+                  gasPrice: scope.row.gasPrice,
+                  gas: scope.row.gas,
+                  value: scope.row.value2,
+                  hash: scope.row.hash
+                })">
+                  {{LANG.TITLE.LOCKIN}}
+                </el-button>
+                <!-- <button class="btn" v-if="scope.row.statusFsn === 'New'" @click="privateSure({
+                  nonce: scope.row.nonce,
+                  gasPrice: scope.row.gasPrice,
+                  gas: scope.row.gas,
+                  value: scope.row.value2,
+                  hash: scope.row.hash
+                })">
+                  {{LANG.TITLE.LOCKIN}}
+                </button> -->
+              </template>
+            </el-table-column>
+          </el-table>
         </div>
       </div>
 
-      <div class="modal fade bs-example-modal-md" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="qrcodeBox">
-        <div class="modal-dialog modal-md modal-dialog-centered" role="document">
-          <div class="modal-content">
-            <div class="qrcodeCont_box">
-              <div id="qrcode" class="flex-c"></div>
-              <div class="qrcodeCont_title">
-                <h3>Your Address</h3>
-              </div>
-            </div>
+      <el-dialog
+        :visible.sync="codeViewVisible"
+        width="380px"
+        >
+        <div class="qrcodeCont_box">
+          <div id="qrcode" class="flex-c"></div>
+          <div class="qrcodeCont_title">
+            <h3>{{LANG.TITLE.YOUR_ADDREAA}}</h3>
           </div>
         </div>
-      </div>
+      </el-dialog>
 
     </div>
 
-    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel" @click="modalClick">
-      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">LockIn</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          </div>
-          <div class="modal-body">
-            <router-view @sendSignData="getSignData" :sendDataPage="dataPage"></router-view>
-          </div>
-        </div>
-      </div>
-    </div>
+    <el-dialog
+      :title="LANG.TITLE.LOCKIN"
+      :visible.sync="privateSureVisible"
+      width="75%"
+      :before-close="modalClick"
+      >
+      <router-view @sendSignData="getSignData" :sendDataPage="dataPage" @elDialogView="getElDialogView"></router-view>
+    </el-dialog>
+
+
   </div>
 </template>
 
 <script>
-import QRCode from "qrcodejs2"
-import Lilo from "@/assets/js/lilo"
 export default {
   name: "receive",
   props: ["selectData"],
@@ -103,11 +129,13 @@ export default {
       walletAddress: "",
       coinAddress: "",
       historyData: [],
-      web3: "",
       dataPage: {},
       serializedTx: "",
-      newWeb3: "",
-      dcrmAddress: ""
+      dcrmAddress: "",
+      codeViewVisible: false,
+      privateSureVisible: false,
+      activeNames: "",
+      fullscreenLoading: true
     }
   },
   watch: {
@@ -121,82 +149,63 @@ export default {
     this.pageRefresh()
     this.walletAddress = this.$store.state.addressInfo
     if (this.selectData) {
-      this.getInitData()
+      setTimeout(() => {
+        this.getInitData()
+      }, 100)
     }
+    // this.getTRONhistory()
   },
   methods: {
     getInitData () {
       this.titleChange(this.selectData.coin)
-      this.setWeb3()
       this.dcrmAddress = this.coinAddress = this.selectData.address
       this.getDatabaseInfo()
+      this.fullscreenLoading = false
+    },
+    getElDialogView () {
+      this.modalClick()
     },
     modalClick () {
-      $("#privateSure").on("hide.bs.modal", () => {
-        this.$router.push("/LILO/lockIn")
-      })
+      this.$router.push("/LILO/lockIn")
+      this.privateSureVisible = false
     },
     titleChange (bitType) {
       this.addressTitle = bitType + " Deposit Address"
-    },
-    setWeb3 () {
-      this.$$.setWeb3(this)
-      this.newWeb3 = new Lilo(this.$$.baseUrl)
     },
     getSignData (data) {
       if (data) {
         this.serializedTx = data
         this.sendAmoundInfo()
-        $("#privateSure").modal("hide")
-        $("#sendInfo").modal("show")
       } else {
-        $("#privateSure").modal("hide")
-        $("#sendInfo").modal("hide")
-        this.$$.layerMsg({
-          tip: "Sign error!",
-          time: 3000,
-          bgColor: "#ea4b40",
-          icon: this.$$.promptSvg
-        })
+        this.$$.errTip(this.LANG.ERROR_TIP.TIP_6)
       }
+      this.privateSureVisible = false
     },
     sendAmoundInfo () {
-      this.setWeb3()
-      this.web3.eth.sendRawTransaction(this.serializedTx, (err, hash) => {
+      v_web3.eth.sendRawTransaction(this.serializedTx, (err, hash) => {
         if (!err) {
-          this.$$.layerMsg({
-            tip: "Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： " + hash,
-            time: 5000,
-            bgColor: "#5dba5a",
-            icon: this.$$.promptSvg
-          })
+          this.$$.successTip(this.LANG.SUCCESS_TIP.TIP_1 + hash)
           this.updateDatabaseInfo({
             hash: this.dataPage.hash,
             fsnhash: hash
           })
           this.$store.commit("storeWalletLoadFlag", true)
         } else {
-          this.$$.layerMsg({
-            tip: err,
-            time: 4000,
-            bgColor: "#ea4b40",
-            icon: this.$$.promptSvg
-          })
+          this.$$.errTip(err)
         }
       })
     },
     privateSure (data) {
-      this.setWeb3()
-      data.gasPrice = data.gasPrice ? data.gasPrice : this.web3.eth.gasPrice.toString(10)
-      data.gas = data.gas ? data.gas : this.web3.eth.estimateGas({to: this.toAddress})
+      data.gasPrice = data.gasPrice ? data.gasPrice : v_web3.eth.gasPrice.toString(10)
+      data.gas = data.gas ? data.gas : v_web3.eth.estimateGas({to: this.toAddress})
       let to_value
       if (this.selectData.coin === "BTC") {
         to_value = this.$$.toWei(data.value, "btc")
       } else {
-        to_value = this.web3.toWei(data.value, "ether")
+        to_value = v_web3.toWei(data.value, "ether")
       }
       this.dataPage = {
-        nonce: this.web3.eth.getTransactionCount(this.walletAddress),
+        nonce: v_web3.eth.getTransactionCount(this.walletAddress),
         gasPrice: Number(data.gasPrice),//Number类型 
         gasLimit: Number(data.gas) * 6,
         from: this.walletAddress,
@@ -209,78 +218,65 @@ export default {
       }
       console.log(this.dataPage)
       this.$router.push("/pwdLockIn")
-      $("#privateSure").modal("show")
-    },
-    MoreContent (e) {
-      $(e.target.parentNode).parents("tr").siblings("tr").find(".list").hide()
-      $(e.target.parentNode).find(".list").toggle()
+      this.privateSureVisible = true
     },
     qrcode (cont) {
-      $("#qrcode").html("")
-      let qrcodeInit = new QRCode("qrcode", {
-        width: 300,
-        height: 340, // 高度
-        text: cont // 二维码内容
-        // render: "canvas" // 设置渲染方式（有两种方式 table和canvas，默认是canvas）
-        // background: "#f0f"
-        // foreground: "#ff0"
-      })
-      $("#qrcodeBox").modal("show")
+      this.codeViewVisible = true
+			this.$nextTick(() => {
+        this.$$.qrCode(cont, "qrcode")
+			})
     },
     copyAddress (id) {
-      $(id).select()
+      document.getElementById(id).select()
       document.execCommand("Copy")
-      this.$$.layerMsg("Copy Success")
+      this.$message({
+        message: this.LANG.SUCCESS_TIP.TIP_0,
+        type: 'success'
+      })
     },
     pageRefresh () {
       if (this.selectData) {
         this.titleChange(this.selectData.coin)
       }
       if (location.href.indexOf("lockOut") === -1) {
-        $(".transferBtn_btn").find("a:eq(0)").addClass("router-link-active")
+        document.getElementById("tabBtnFirst").classList.add("router-link-active")
       }
     },
     getHistory (data) {
-      const that = this
-      $.ajax({
-        url: "https://api-rinkeby.etherscan.io/api?module=account&action=" + that.selectData.token + "&address=" + that.coinAddress,
-        type: "post",
-        datatype: "json",
-        success: function (res) {
-          if (res.result && res.result.length > 0 && (typeof res.result).toLowerCase() === "object") {
-            res.result = res.result
-          } else {
-            res.result = []
-          }
-          that.delRepeat(data, res.result)
+      $ajax.post("https://api-rinkeby.etherscan.io/api?module=account&action=" + this.selectData.token + "&address=" + this.coinAddress, Qs.stringify(data)
+      ).then(res => {
+        res = res.data
+        if (res.result && res.result.length > 0 && (typeof res.result).toLowerCase() === "object") {
+          res.result = res.result
+        } else {
+          res.result = []
         }
+        this.delRepeat(data, res.result)
       })
     },
     getStatus (txhax) {
       let statusFsn = ""
       if (txhax.fsnhash) {
-        this.setWeb3()
         try {
-          let receipt = this.web3.eth.getTransactionReceipt(txhax.fsnhash)
+          let receipt = v_web3.eth.getTransactionReceipt(txhax.fsnhash)
           if (receipt && receipt.status) {
-            statusFsn = "Success"
+            statusFsn = this.LANG.LABEL.SUCCESS
           } else {
-            statusFsn = "Failure"
+            statusFsn = this.LANG.LABEL.FAILURE
           }
         } catch (error) {
-          statusFsn = "Failure"
+          statusFsn = this.LANG.LABEL.FAILURE
         }
       } else {
         if (txhax.hash) {
-          statusFsn = "New"
+          statusFsn = this.LANG.LABEL.NEW
         } else {
-          statusFsn = "Failure"
+          statusFsn = this.LANG.LABEL.FAILURE
         }
       }
       return statusFsn
     },
     delRepeat (data, urldata) {
-      this.setWeb3()
       this.historyData = []
       let arrObj = []
       let newArr = []
@@ -315,7 +311,6 @@ export default {
           newArr[i].date = this.$$.timeChange({date: newArr[i].date, type:"yyyy-mm-dd hh:mm"})
         } else if (newArr[i].timeStamp) {
           newArr[i].date = this.$$.timeChange({date: Number(newArr[i].timeStamp) * 1000, type:"yyyy-mm-dd hh:mm"})
-          console.log(newArr[i].time)
         } else {
           newArr[i].date = this.$$.timeChange({date: newArr[i].time, type:"yyyy-mm-dd hh:mm"})
         }
@@ -331,7 +326,7 @@ export default {
         if (this.selectData.coin === "BTC") {
           newArr[i].value2 = this.$$.fromWei(newArr[i].value, "btc")
         } else {
-          newArr[i].value2 = this.web3.fromWei(newArr[i].value, "ether")
+          newArr[i].value2 = v_web3.fromWei(newArr[i].value, "ether")
         }
         this.historyData.push(newArr[i])
       }
@@ -351,79 +346,77 @@ export default {
       this.historyData.sort(compare("date"))
     },
     getBTChistory (data) {
-      const that = this
-      $.ajax({
-        type: "GET",
-        url: "https://api.blockcypher.com/v1/btc/test3/addrs/" + that.coinAddress,
-        dataType: "json",
-        success: function(res){
-          let result = []
-          if (res && res.txrefs && res.txrefs.length > 0) {
-            for (let i = 0; i < res.txrefs.length; i++) {
-              result.push({
-                to: res.address,
-                value: res.txrefs[i].value,
-                hash: res.txrefs[i].tx_hash,
-                time: res.txrefs[i].confirmed
-              })
-            }
+      $ajax.get("https://api.blockcypher.com/v1/btc/test3/addrs/" + this.coinAddress).then(res => {
+        res = res.data
+        let result = []
+        if (res && res.txrefs && res.txrefs.length > 0) {
+          for (let i = 0; i < res.txrefs.length; i++) {
+            result.push({
+              to: res.address,
+              value: res.txrefs[i].value,
+              hash: res.txrefs[i].tx_hash,
+              time: res.txrefs[i].confirmed
+            })
           }
-          that.delRepeat(data, result)
-        },
-        error: function (e) {
         }
+        this.delRepeat(data, result)
+      })
+    },
+    getTRONhistory (data) {
+      data = data ? data : []
+      let params = {"value" : "713c2cf6db2e35e8f25dcff932f1614228c24bef3583a4d01b3782a0c2f7fc27"}
+      $ajax.post("https://api.shasta.trongrid.io/walletsolidity/gettransactionbyid", Qs.stringify(params)
+      ).then(res => {
+        res = res.data
+        let result = []
+        if (res && res.txrefs && res.txrefs.length > 0) {
+          for (let i = 0; i < res.txrefs.length; i++) {
+            result.push({
+              to: res.address,
+              value: res.txrefs[i].value,
+              hash: res.txrefs[i].tx_hash,
+              time: res.txrefs[i].confirmed
+            })
+          }
+        }
+        this.delRepeat(data, result)
       })
     },
     createDatabaseInfo (data) {
-      $.ajax({
-        url: this.$$.serverURL + "/lilo/create",
-        type: "post",
-        datatype: "json",
-        data: data,
-        success: function (res) {
-        }
+      $ajax.post(this.$$.serverURL + "/lilo/create", Qs.stringify(data)
+      ).then(res => {
+
       })
     },
     getDatabaseInfo () {
-      const that = this
-      if (!that.coinAddress) {
+      if (!this.coinAddress) {
         return
       }
-      $.ajax({
-        url: that.$$.serverURL + "/lilo/lockInHistory",
-        type: "post",
-        datatype: "json",
-        data: {to: that.coinAddress},
-        success: function (res) {
-          for (let i = 0; i < res.info.length; i++) {
-            if (res.info[i].hash === "" || res.info[i].hash === undefined) {
-              res.info[i].hash = "0xx" + i
-            }
-            res.info[i].dataType = "DATABASE"
+      $ajax.post(this.$$.serverURL + "/lilo/lockInHistory", Qs.stringify({to: this.coinAddress})
+      ).then(res => {
+        res = res.data
+        for (let i = 0; i < res.info.length; i++) {
+          if (res.info[i].hash === "" || res.info[i].hash === undefined) {
+            res.info[i].hash = "0xx" + i
           }
-          if (that.selectData.coin === "BTC") {
-            that.getBTChistory(res.info)
-          } else {
-            that.getHistory(res.info)
-          }
-        },
-        error: function (res) {
-          that.getHistory([])
+          res.info[i].dataType = "DATABASE"
         }
+        if (this.selectData.coin === "BTC") {
+          this.getBTChistory(res.info)
+        } else if (this.selectData.coin === "TRON") {
+          this.getTRONhistory(res.info)
+        } else {
+          this.getHistory(res.info)
+        }
+      }).catch(err => {
+        this.getHistory([])
       })
     },
     updateDatabaseInfo (data) {
-      const that = this
-      $.ajax({
-        url: that.$$.serverURL + "/lilo/lockInChangeState",
-        type: "post",
-        datatype: "json",
-        data: {hash: data.hash, fsnhash: data.fsnhash, statusFsn: "Success"},
-        success: function (res) {
-          that.getDatabaseInfo()
-        },
-        error: function (res) {
-        }
+      // const that = this
+      $ajax.post(this.$$.serverURL + "/lilo/lockInHistory", Qs.stringify({to: that.coinAddress})
+      ).then(res => {
+        this.getDatabaseInfo()
       })
     }
   }

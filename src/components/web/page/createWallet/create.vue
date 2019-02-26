@@ -3,32 +3,33 @@
     <div class="newwallet_box">
 
       <div class="newWallet_title flex-c">
-        <h3 class="title">Create New Wallet</h3>
+        <h3 class="title">{{LANG.TITLE.CREATE_NEW_WALLET}}</h3>
       </div>
 
       <div class="createInfo_box">
         <div class="createInfo_input">
           <input
             type="password"
-            placeholder="Enter a password"
+            :placeholder="LANG.PLACEHOLDER.ENTER_PASSWORD"
             class="input-text input"
             v-model="password"
+            id="createInfoInput"
             @keyup="validPwd"
           >
         </div>
-        <div class="createInfo_danger">* Do NOT forget to save this!</div>
+        <div class="createInfo_danger">{{LANG.WARNING_TIP.TIP_0}}</div>
         <div class="createInfo_btn flex-c">
-          <button class="btn" @click="changePwd">Next step</button>
+          <button class="btn" @click="changePwd">{{LANG.BTN.NEXT_STEP}}</button>
         </div>
         <hgroup class="createInfo_tip">
           <h1
             class="h1"
-          >This password encrypts your private key. This does not act as a seed to generate your keys.</h1>
-          <h2 class="h2">You will need this password + your private key to unlock your wallet.</h2>
+          >{{LANG.CREATE_TIP.CREATE_TIP_0}}</h1>
+          <h2 class="h2">{{LANG.CREATE_TIP.CREATE_TIP_1}}</h2>
           <h3
             class="h3"
-          >Fusion DCRM Wallet does not hold your keys for you. We cannot access accounts, recover keys, 
-            <br/>reset passwords, nor reverse transactions. Protect your keys & always check that you are on correct URL. You are responsible for your security.
+          >{{LANG.CREATE_TIP.CREATE_TIP_2}}
+            <br/>{{LANG.CREATE_TIP.CREATE_TIP_3}}
           </h3>
         </hgroup>
       </div>
@@ -42,7 +43,6 @@
 </style>
 
 <script>
-import wallet from "@/assets/js/wallet"
 export default {
   name: "createWallet",
   data () {
@@ -65,12 +65,7 @@ export default {
     },
     changePwd () {
       if (this.password.length < 9) {
-        this.$$.layerMsg({
-          tip: "Your password must be at least 9 characters. Please ensure it is a strong password.",
-          time: 2000,
-          bgColor: "#ea4b40",
-          icon: this.$$.promptSvg
-        })
+        this.$$.errTip(this.LANG.ERROR_TIP.TIP_0)
       } else {
         this.createKey()
         let walletJSON = this.walletInit.toV3(this.password, {
@@ -85,11 +80,9 @@ export default {
     },
     validPwd (e) {
       if (this.password.length < 9) {
-        $(".createInfo_input")
-          .find(".input")
-          .css("border","2px solid #ea4b40")
+        document.getElementById("createInfoInput").style.border = "2px solid #ea4b40"
       } else {
-        $(".createInfo_input").find(".input").css("border","2px solid #2f7cd7")
+        document.getElementById("createInfoInput").style.border = "2px solid #2f7cd7"
         if (e.which === 13) {
           this.changePwd()
         }

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="contentHeader_box flex-bc">
-      <h1 class="contentHeader_title">Lockin / Lockout</h1>
+      <h1 class="contentHeader_title">{{LANG.TITLE.LOCKIN}} / {{LANG.TITLE.LOCKOUT}}</h1>
     </div>
 
     <div class="myAssetsSear_box flex-ec">
@@ -15,7 +15,7 @@
         />
         <div class="searchIcon">
           <div class="icon flex-c">
-            <img src="@/assets/image/search.png">
+            <img src="@etc/img/search.png">
           </div>
         </div>
       </div>
@@ -23,62 +23,55 @@
 
     <div class="contView_box">
       <div class="supCoinView_list lockView_list">
-        <ul>
-          <li v-for="(item, index) in bitIconTypeSearch" :key="index" class="col col-md-3">
+
+        <el-row :gutter="10">
+          <el-col :xs="12" :sm="8" :md="6" :lg="6" :xl="6"  v-for="(item, index) in bitIconTypeSearch" :key="index" class="item">
             <div class="iconImg"><img :src="item.logo"></div>
             <h4 class="title" v-html="item.nameFull"></h4>
             <div class="dappView_btn" v-if="item.nameFull !== 'MORE'">
-              <a class="setBtn" v-if="item.btnView === 2" @click="toUrlLock('/LILO/lockIn', item.currency)">Deposit</a>
-              <a class="setBtn" v-if="item.btnView === 2" @click="toUrlLock('/LILO/lockOut', item.currency)" :style="item.currency === 'ETH' ? '' : 'opacity:0.5'">Withdraw</a>
-              <a class="setBtn" v-if="item.btnView === 0" @click="privateSure(item.currency, item.btnView)">Request</a>
-              <a class="setBtn" v-if="item.btnView === 1" @click="privateSure(item.currency, item.btnView)" style="opacity:0.5">Pending</a>
+              <a class="setBtn" v-if="item.btnView === 2" @click="toUrlLock('/LILO/lockIn', item.currency)">{{LANG.BTN.DEPOSIT}}</a>
+              <a class="setBtn" v-if="item.btnView === 2" @click="toUrlLock('/LILO/lockOut', item.currency)" :style="item.currency === 'ETH' ? '' : 'opacity:0.5'">{{LANG.BTN.WITHDRAW}}</a>
+              <a class="setBtn" v-if="item.btnView === 0 && !$store.state.safeMode" @click="privateSure(item.currency, item.btnView)">{{LANG.BTN.REQUEST}}</a>
+              <a class="setBtn" v-if="item.btnView === 1 && !$store.state.safeMode" @click="privateSure(item.currency, item.btnView)" style="opacity:0.5">{{LANG.BTN.PENDING}}</a>
+              <a class="setBtn" v-if="item.btnView === 0 && $store.state.safeMode" style="opacity:0.5">{{LANG.BTN.REQUEST}}</a>
             </div>
             <div class="dappView_btn" v-if="item.nameFull === 'MORE'"></div>
             <div class="line"></div>
-          </li>
-        </ul>
+          </el-col>
+        </el-row>
       </div>
     </div>
 
-    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" @click="modalClick">
-      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">Unlock</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          </div>
-          <div class="modal-body">
-            <router-view @sendSignData="getSignData" :sendDataPage="dataPage"></router-view>
-          </div>
-        </div>
-      </div>
-    </div>
+    <el-dialog
+      :title="LANG.BTN.UNLOCK"
+      :visible.sync="privateSureVisible"
+      width="75%"
+      :before-close="modalClick"
+      >
+      <router-view @sendSignData="getSignData" :sendDataPage="dataPage" @elDialogView="getElDialogView"></router-view>
+    </el-dialog>
     
-    <div class="modal fade bs-example-modal-lg" id="confirmDcrm" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel">
-      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">Request address confirmation</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          </div>
-          <div class="modal-body">
-            <div class="">
-              Do you request?
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">No, get me out of here!</button>
-            <button type="button" class="btn btn-primary" @click="sendRawTransion(confirmData)">Yes, I am sure!</button>
-          </div>
-        </div>
-      </div>
-    </div>
 
+    <el-dialog
+      :title="LANG.TITLE.REQUEST_CONFIRM"
+      :visible.sync="confirmDcrmVisible"
+      width="60%"
+      :before-close="modalClick"
+      >
+      <div class="">
+        {{LANG.WARNING_TIP.TIP_1}}
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <!-- <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button> -->
+        <button type="button" class="btn btn-default" @click="modalClick">{{LANG.BTN.GET_OUT}}</button>
+        <button type="button" class="btn btn-primary" @click="sendRawTransion(confirmData)">{{LANG.BTN.YES_SURE}}</button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import Lilo from "@/assets/js/lilo"
 export default {
   name: "myAssets",
   data () {
@@ -86,8 +79,6 @@ export default {
       bitIconTypeData: [],
       bitIconTypeSearch: [],
       walletAddress: "",
-      web3: "",
-      newWeb3: "",
       balanceCoin: {
         FSN: "",
         ETH: ""
@@ -95,13 +86,15 @@ export default {
       dataPage: {},
       selectOption: [],
       searchContent: "",
-      confirmData: ""
+      confirmData: "",
+      privateSureVisible: false,
+      confirmDcrmVisible: false
     }
   },
   mounted () {
     this.walletAddress = this.$store.state.addressInfo
     this.getInitData()
-    if (this.$store.state.walletLoadFlag) {
+    if (this.$store.state.walletLoadFlag && !this.$store.state.safeMode) {
       this.getBalanceData()
     }
   },
@@ -110,18 +103,16 @@ export default {
       if (coin === "ETH" || url === "/LILO/lockIn") {
         this.$router.push({ path: url, query: { currency: coin }})
       } else {
-        this.$$.layerMsg({
-          tip: "Functional development!",
-          time: 3000,
-          bgColor: "#f15a4a",
-          icon: this.$$.promptSvg
-        })
+        this.$$.errTip(this.LANG.ERROR_TIP.TIP_1)
       }
     },
+    getElDialogView () {
+      this.modalClick()
+    },
     modalClick () {
-      $("#privateSure").on("hide.bs.modal", () => {
-        this.$router.push("/LILO")
-      })
+      this.$router.push("/LILO")
+      this.privateSureVisible = false
+      this.confirmDcrmVisible = false
     },
     searchInput () {
       this.bitIconTypeSearch = []
@@ -170,7 +161,7 @@ export default {
         })
       }
       bitCoinInfo.push({
-        logo: require("@/assets/image/MORE.svg"),
+        logo: require("@etc/img/MORE.svg"),
         nameSimplicity: "MORE",
         nameFull: "MORE",
         availbleBalance: this.$$.thousandBit(this.balanceCoin.ETH),
@@ -185,21 +176,11 @@ export default {
       })
       this.bitIconTypeSearch = this.bitIconTypeData = bitCoinInfo
     },
-    setWeb3 () {
-      this.$$.setWeb3(this)
-      this.newWeb3 = new Lilo(this.$$.baseUrl)
-    },
     privateSure (data, flag) {
       if (flag === 1) {
-        this.$$.layerMsg({
-          tip: "Please refresh the page to view!",
-          time: 3000,
-          bgColor: "#ea4b40",
-          icon: this.$$.promptSvg
-        })
+        this.$$.errTip(this.LANG.ERROR_TIP.TIP_9)
         return
       }
-      this.setWeb3()
       this.dataPage = {
         coin: data,
         sendType: "MYWALLET",
@@ -207,15 +188,13 @@ export default {
         nonce: "",
       }
       try {
-        this.dataPage.nonce = this.web3.eth.getTransactionCount(this.walletAddress, "pending")
+        this.dataPage.nonce = v_web3.eth.getTransactionCount(this.walletAddress, "pending")
       } catch (error) {
-        this.nonceNum = this.$$.getWeb3({
-          method: "eth_getTransactionCount",
-          params: [this.walletAddress, "pending"]
-        }).result
+        this.$$.errTip(error)
+        return
       }
       this.$router.push("/pwdCoinList")
-      $("#privateSure").modal("show")
+      this.privateSureVisible = true
     },
     getSignData (data) {
       if (data) {
@@ -223,29 +202,18 @@ export default {
           this.sendRawTransion(data)
         } else {
           this.confirmData = data
-          $("#confirmDcrm").modal("show")
+          this.confirmDcrmVisible = true
         }
-        $("#privateSure").modal("hide")
       } else {
-        $("#privateSure").modal("hide")
-        this.$$.layerMsg({
-          tip: "Sign error!",
-          time: 5000,
-          bgColor: "#ea4b40",
-          icon: this.$$.promptSvg
-        })
+        this.$$.errTip(this.LANG.ERROR_TIP.TIP_6)
       }
+      this.privateSureVisible = false
     },
     sendRawTransion (data) {
-      this.web3.eth.sendRawTransaction(data.serializedTx, (err, hash) => {
+      v_web3.eth.sendRawTransaction(data.serializedTx, (err, hash) => {
         if (err) {
           console.log(err)
-          this.$$.layerMsg({
-            tip: err,
-            time: 5000,
-            bgColor: "#ea4b40",
-            icon: this.$$.promptSvg
-          })
+          this.$$.errTip(err)
         } else {
           for (let i = 0; i < this.bitIconTypeData.length; i++) {
             if (data.coin === this.bitIconTypeData[i].currency) {
@@ -259,33 +227,49 @@ export default {
             coin: data.coin
           }
           this.$store.commit("storeCoinInfo", storeData)
-          $("#confirmDcrm").modal("hide")
-          this.$$.layerMsg({
-            tip: "Request success,Save your TX Hash in case you need it later：" + hash +", and refresh the page to view after 15 seconds.",
-            time: 3000,
-            bgColor: "#5dba5a",
-            icon: this.$$.promptSvg
-          })
+          this.modalClick()
+          this.$$.successTip(this.LANG.ERROR_TIP.TIP_10.FIRST + hash + this.LANG.ERROR_TIP.TIP_10.LAST)
         }
+        // this.confirmDcrmVisible = false
       })
     },
     getBalanceData () {
-      this.setWeb3()
-      for (let i = 0; i < this.bitIconTypeData.length; i++) {
-        if (this.bitIconTypeData[i].currency === "FSN" || this.bitIconTypeData[i].currency === "MORE") {
-          continue
+      
+      let balance_count = 0
+      let balance_setInterval = setInterval(() => {
+        if (balance_count >= this.bitIconTypeData.length) {
+          clearInterval(balance_setInterval)
+          this.$store.commit("storeWalletLoadFlag", false)
+          balance_count = 0
+          return
         }
-        this.newWeb3.lilo.dcrmGetBalance(this.walletAddress, this.bitIconTypeData[i].currency).then((res) => {
-          if (!isNaN(res)) {
-            this.setBalance(this.bitIconTypeData[i].currency, res, 2)
-            this.bitIconTypeData[i].btnView = 2
-          } else {
-            this.setBalance(this.bitIconTypeData[i].currency, 0, 0)
-            this.bitIconTypeData[i].btnView = 0
+        // console.log(balance_count)
+        if (this.bitIconTypeData[balance_count].currency === "FSN" || this.bitIconTypeData[balance_count].currency === "MORE") {
+          // continue
+        } else {
+          try {
+            this.setBalance(this.bitIconTypeData[balance_count].currency, v_web3.lilo.dcrmGetBalance(this.walletAddress, this.bitIconTypeData[balance_count].currency), 2)
+            this.bitIconTypeData[balance_count].btnView = 2
+          } catch (error) {
+            this.setBalance(this.bitIconTypeData[balance_count].currency, "", 0)
+            this.bitIconTypeData[balance_count].btnView = 0
           }
-        })
-      }
-      this.$store.commit("storeWalletLoadFlag", false)
+        }
+        balance_count ++
+      }, 80)
+      // for (let i = 0; i < this.bitIconTypeData.length; i++) {
+      //   if (this.bitIconTypeData[i].currency === "FSN" || this.bitIconTypeData[i].currency === "MORE") {
+      //     continue
+      //   }
+      //   try {
+      //     this.setBalance(this.bitIconTypeData[i].currency, v_web3.lilo.dcrmGetBalance(this.walletAddress, this.bitIconTypeData[i].currency), 2)
+      //     this.bitIconTypeData[i].btnView = 2
+      //   } catch (error) {
+      //     this.setBalance(this.bitIconTypeData[i].currency, "", 0)
+      //     this.bitIconTypeData[i].btnView = 0
+      //   }
+      // }
+      // this.$store.commit("storeWalletLoadFlag", false)
     },
     setBalance (coin, balance, flag) {
       let balanceChange, balanceUSD
@@ -298,49 +282,42 @@ export default {
       if (coin === "BTC") {
         balanceChange = this.$$.fromWei(balance, "btc")
       } else {
-        balanceChange = this.web3.fromWei(balance, "ether").toString()
+        balanceChange = v_web3.fromWei(balance, "ether").toString()
       }
-      balanceUSD = this.changeCoinDoller(coin, balanceChange)
-      balanceChange = balanceChange === 0 ? "0.00" : this.$$.thousandBit(balanceChange, "no")
-      storeData = {
-        balance: balanceChange,
-        balanceDollar: balanceUSD,
-        flag: flag,
-        coin: coin
-      }
-      this.$store.commit("storeCoinInfo", storeData)
-    },
-    changeCoinDoller (coin, balance) {
-      let dollerNum = 0
-      let coinData = this.$store.state.coinInfo
-      for (let i = 0; i < coinData.length; i++) {
-        if (coin === coinData[i].coin) {
-          dollerNum = this.getDoller(coinData[i].dollarURL)
-          break
+      // if (Number(balanceChange) === 0 || !balanceChange) {
+      if (isNaN(balanceChange)) {
+        return 0
+      } else {
+        let coinData = this.$store.state.coinInfo
+        for (let i = 0; i < coinData.length; i++) {
+          if (coin === coinData[i].coin) {
+            this.getDoller(coinData[i].dollarURL, balanceChange, coin, flag)
+            break
+          }
         }
       }
-      dollerNum = dollerNum * balance
-      return dollerNum
     },
-    getDoller (url) {
-      let callbackData = 0
-      $.ajax({
-        url: url,
-        type: "get",
-        datatype: "jsonp",
-        async: false,
-        success: function (res) {
-          if (res.length > 0) {
-            callbackData = res[0].price_usd
-          } else {
-            callbackData = 0
-          }
-        },
-        error: function (res) {
+    getDoller (url, balance, coin, flag) {
+      $ajax.get(url).then(res => {
+        res = res.data
+        let callbackData = 0
+        if (res.length > 0) {
+          callbackData = res[0].price_usd
+        } else {
           callbackData = 0
         }
+        let balanceUSD = callbackData * balance
+        let balanceGwei = balance
+        let storeData = {
+          balance: balanceGwei,
+          balanceDollar: balanceUSD,
+          flag: flag,
+          coin: coin
+        }
+        this.$store.commit("storeCoinInfo", storeData)
+      }).catch(err => {
+        callbackData = 0
       })
-      return callbackData
     }
   }
 }

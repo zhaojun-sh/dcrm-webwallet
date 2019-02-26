@@ -1,96 +1,86 @@
 <template>
-  <div style="background:#fff;min-height:100%">
+  <div style="background:#fff;min-height:100%"
+        v-loading="fullscreenLoading"
+        element-loading-text="Loading……">
     <div class="contentHeader_box flex-bc">
-      <h1 class="contentHeader_title">My Assets</h1>
+      <h1 class="contentHeader_title">{{LANG.NAV.MY_WALLET}}</h1>
       <h2 class="contentHeader_title">$ {{myAssetsTotal}}</h2>
     </div>
 
     <div class="myAssetsSear_box flex-ec">
       <div class="myAssetsSear_input">
         <input type="text" placeholder="FSN" class="input-text" @keyup="searchInput" v-model="searchContent"/>
-        <div class="searchIcon"><div class="icon flex-c"><img src="@/assets/image/search.png"></div></div>
+        <div class="searchIcon"><div class="icon flex-c"><img src="@etc/img/search.png"></div></div>
       </div>
     </div>
 
-    <div class="myAssetsTable_box table-responsive">
-      <table>
-        <thead>
-          <tr>
-            <th width="220">Coin</th>
-            <th>Available Balance</th>
-            <th>Freeze</th>
-            <th>Total Balance</th>
-            <th width="165">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(item, index) in bitIconTypeSearch" :key="index">
-            <td>
-              <div class="flex-sc">
-                <div class="logo"><img :src="item.logo"></div>
-                <div class="title">
-                  <h2 class="span" v-html="item.nameSimplicity"></h2>
-                  <h3 class="p" v-html="item.nameFull"></h3>
-                </div>
+    <div class="myAssetsTable_box">
+      <el-table
+        :data="bitIconTypeSearch"
+        style="width: 100%"
+        :height="tableH"
+        empty-text="Null"
+      >
+        <el-table-column :label="LANG.THEAD.COIN" width="190">
+          <template slot-scope="scope">
+            <div class="flex-sc">
+              <div class="logo"><img :src="scope.row.logo"></div>
+              <div class="title">
+                <h2 class="span" v-html="scope.row.nameSimplicity"></h2>
+                <h3 class="p" v-html="scope.row.nameFull"></h3>
               </div>
-            </td>
-            <td><span class="span" v-html="item.availbleBalance"></span></td>
-            <td><span class="span" v-html="item.freeze"></span></td>
-            <td><span class="span" v-html="item.totalBalance"></span><p class="p">$ {{item.totalBalanceDoller}}</p></td>
-            <td>
-              <div style="text-align:left">
-                <!-- {{item.btnView}} -->
-                <router-link :to="{path:'/Transfer/tranReceive', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView === 2">Receive</router-link>
-                <router-link :to="{path:'/Transfer/tranSend', query: {currency: item.currency}}" class="setBtn" v-if="item.btnView === 2">Send</router-link>
-                <a class="setBtn" v-if="item.btnView === 0" @click="privateSure(item.currency, item.btnView)">Request</a>
-                <a class="setBtn" v-if="item.btnView === 1" @click="privateSure(item.currency, item.btnView)" style="opacity:0.5">Pending</a>
-                <!-- <a class="setBtn" @click="privateSure(item.currency)">Request</a> -->
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" @click="modalClick">
-      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">Unlock</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          </div>
-          <div class="modal-body">
-            <router-view @sendSignData="getSignData" :sendDataPage="dataPage"></router-view>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal fade bs-example-modal-lg" id="confirmDcrm" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel">
-      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">Request address confirmation</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          </div>
-          <div class="modal-body">
-            <div class="">
-              Do you request?
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">No, get me out of here!</button>
-            <button type="button" class="btn btn-primary" @click="sendRawTransion(confirmData)">Yes, I am sure!</button>
-          </div>
-        </div>
-      </div>
+          </template>
+        </el-table-column>
+        <el-table-column :label="LANG.THEAD.ASSETS.AVAILABLE_BALANCE" prop="availbleBalance" width="200"></el-table-column>
+        <el-table-column :label="LANG.THEAD.ASSETS.FREEZE" prop="freeze" width="120"></el-table-column>
+        <el-table-column :label="LANG.THEAD.ASSETS.TOTAL_BALANCE" min-width="180">
+          <template slot-scope="scope">
+            <span class="span" v-html="scope.row.totalBalance"></span>
+            <p class="p">$ {{scope.row.totalBalanceDoller}}</p>
+          </template>
+        </el-table-column>
+        <el-table-column :label="LANG.THEAD.ACTIONS" width="200">
+          <template slot-scope="scope">
+            <div style="text-align:left">
+              <router-link :to="{path:'/Transfer/tranReceive', query: {currency: scope.row.currency}}" class="setBtn" v-if="scope.row.btnView === 2">{{LANG.BTN.RECEIVE}}</router-link>
+              <router-link :to="{path:'/Transfer/tranSend', query: {currency: scope.row.currency}}" class="setBtn" v-if="scope.row.btnView === 2">{{LANG.BTN.SEND}}</router-link>
+              <a class="setBtn" v-if="scope.row.btnView === 0 && !$store.state.safeMode" @click="privateSure(scope.row.currency, scope.row.btnView)">{{LANG.BTN.REQUEST}}</a>
+              <a class="setBtn" v-if="scope.row.btnView === 1 && !$store.state.safeMode" @click="privateSure(scope.row.currency, scope.row.btnView)" style="opacity:0.5">{{LANG.BTN.PENDING}}</a>
+              <a class="setBtn" v-if="scope.row.btnView === 0 && $store.state.safeMode" style="opacity:0.5">{{LANG.BTN.REQUEST}}</a>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
     </div>
 
+    <el-dialog
+      :title="LANG.BTN.UNLOCK"
+      :visible.sync="privateSureVisible"
+      width="75%"
+      :before-close="modalClick"
+    >
+      <router-view @sendSignData="getSignData" :sendDataPage="dataPage" @elDialogView="getElDialogView"></router-view>
+    </el-dialog>
+
+    <el-dialog
+      :title="LANG.TITLE.REQUEST_CONFIRM"
+      :visible.sync="confirmDcrmVisible"
+      width="60%"
+      :before-close="modalClick"
+    >
+      <div class="">
+        {{LANG.WARNING_TIP.TIP_1}}
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <button type="button" class="btn btn-default" @click="modalClick">{{LANG.BTN.GET_OUT}}</button>
+        <button type="button" class="btn btn-primary" @click="sendRawTransion(confirmData)">{{LANG.BTN.YES_SURE}}</button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import Lilo from "@/assets/js/lilo"
 export default {
   name: "myAssets",
   data () {
@@ -99,13 +89,16 @@ export default {
       bitIconTypeData: [],
       bitIconTypeSearch: [],
       walletAddress: "",
-      web3: "",
-      newWeb3: "",
       dataPage: {},
       selectOption: [],
       searchContent: "",
       refreshBalance: "",
-      confirmData: ""
+      confirmData: "",
+      privateSureVisible: false,
+      confirmDcrmVisible: false,
+      fullscreenLoading: true,
+      count: 0,
+      tableH: 0
     }
   },
   watch: {
@@ -115,21 +108,42 @@ export default {
   },
   mounted () {
     this.walletAddress = this.$store.state.addressInfo
+    // console.log(this.$store.state.addressInfo)
     this.getInitData()
-    this.setWeb3()
     
-    if (this.$store.state.walletLoadFlag) {
+    if (this.$store.state.walletLoadFlag && !this.$store.state.safeMode) {
       this.getBalanceData()
+    } else {
+      this.fullscreenLoading = false
     }
     this.refreshBalance = setInterval(() => {
-      this.getBalanceData()
+      if (!this.$store.state.safeMode) {
+        this.getBalanceData()
+      }
     }, 250000)
+    setTimeout(() => {
+      this.tableHeight()
+    }, 100)
+    window.onresize = () => {
+      this.tableHeight()
+    }
   },
   methods: {
+    getElDialogView () {
+      this.modalClick()
+    },
+    tableHeight () {
+      let headerH= document.querySelector('.headerTop_box').clientHeight,
+      countH= document.querySelector('.contentHeader_box').clientHeight,
+      searchH= document.querySelector('.myAssetsSear_box').clientHeight,
+      footH= document.querySelector('.footerBottom_box').clientHeight,
+      bodyH = document.body.clientHeight
+      this.tableH = bodyH - (headerH + countH + searchH + footH) - 70
+    },
     modalClick () {
-      $("#privateSure").on("hide.bs.modal", () => {
-        this.$router.push("/MyAssets")
-      })
+      this.$router.push("/MyAssets")
+      this.privateSureVisible = false
+      this.confirmDcrmVisible = false
     },
     myAssetsTotalBalance () {
       this.myAssetsTotal = 0
@@ -192,18 +206,9 @@ export default {
       this.myAssetsTotal = this.$$.thousandBit(this.myAssetsTotal, 2)
       this.bitIconTypeSearch = this.bitIconTypeData = bitCoinInfo
     },
-    setWeb3 () {
-      this.$$.setWeb3(this)
-      this.newWeb3 = new Lilo(this.$$.baseUrl)
-    },
     privateSure (data, flag) {
       if (flag === 1) {
-        this.$$.layerMsg({
-          tip: "Please refresh the page to view!",
-          time: 3000,
-          bgColor: "#ea4b40",
-          icon: this.$$.promptSvg
-        })
+        this.$$.errTip(this.LANG.ERROR_TIP.TIP_9)
         return
       }
       this.dataPage = {
@@ -213,45 +218,34 @@ export default {
         nonce: "",
       }
       try {
-        this.dataPage.nonce = this.web3.eth.getTransactionCount(this.walletAddress, "pending")
+        this.dataPage.nonce = v_web3.eth.getTransactionCount(this.walletAddress, "pending")
       } catch (error) {
-        this.nonceNum = this.$$.getWeb3({
-          method: "eth_getTransactionCount",
-          params: [this.walletAddress, "pending"]
-        }).result
+        this.$$.errTip(error)
+        return
       }
+      console.log(this.dataPage)
       this.$router.push("/pwdMyAssets")
-      $("#privateSure").modal("show")
+      this.privateSureVisible = true
     },
     getSignData (data) {
+      console.log(data)
       if (data) {
         if (data.nowFlag) {
           this.sendRawTransion(data)
         } else {
           this.confirmData = data
-          $("#confirmDcrm").modal("show")
+          this.confirmDcrmVisible = true
         }
-        $("#privateSure").modal("hide")
       } else {
-        $("#privateSure").modal("hide")
-        this.$$.layerMsg({
-          tip: "Sign error!",
-          time: 3000,
-          bgColor: "#ea4b40",
-          icon: this.$$.promptSvg
-        })
+        this.$$.errTip(this.LANG.ERROR_TIP.TIP_6)
       }
+      this.privateSureVisible = false
     },
     sendRawTransion (data) {
-      this.web3.eth.sendRawTransaction(data.serializedTx, (err, hash) => {
+      v_web3.eth.sendRawTransaction(data.serializedTx, (err, hash) => {
         if (err) {
           console.log(err)
-          this.$$.layerMsg({
-            tip: err,
-            time: 5000,
-            bgColor: "#ea4b40",
-            icon: this.$$.promptSvg
-          })
+          this.$$.errTip(err)
         } else {
           for (let i = 0; i < this.bitIconTypeData.length; i++) {
             if (data.coin === this.bitIconTypeData[i].currency) {
@@ -265,13 +259,8 @@ export default {
             coin: data.coin
           }
           this.$store.commit("storeCoinInfo", storeData)
-          $("#confirmDcrm").modal("hide")
-          this.$$.layerMsg({
-            tip: "Request success,Save your TX Hash in case you need it later：" + hash +", and refresh the page to view after 15 seconds.",
-            time: 3000,
-            bgColor: "#5dba5a",
-            icon: this.$$.promptSvg
-          })
+          this.modalClick()
+          this.$$.successTip(this.LANG.ERROR_TIP.TIP_10.FIRST + hash + this.LANG.ERROR_TIP.TIP_10.LAST)
         }
       })
     },
@@ -279,102 +268,114 @@ export default {
       if (!this.walletAddress) {
         return
       }
-      this.setWeb3()
+      let get_walletAddress = this.$store.state.addressInfo
       let coinInfo = this.$store.state.coinInfo
       this.myAssetsTotal = 0
-      for (let i = 0; i < coinInfo.length; i++) {
-        let coin = coinInfo[i].coin
+      let balance_count = 0
+      let balance_setInterval = setInterval(() => {
+        if (balance_count >= coinInfo.length) {
+          clearInterval(balance_setInterval)
+          this.$store.commit("storeWalletLoadFlag", false)
+          balance_count = 0
+          return
+        }
+        // console.log(balance_count)
+        let coin = coinInfo[balance_count].coin
         if (coin === "FSN") {
           try {
-            let balanceWei = this.web3.eth.getBalance(this.walletAddress)
+            let balanceWei = v_web3.eth.getBalance(this.walletAddress)
             this.setBalance(coin, balanceWei, 2)
           } catch (error) {
             this.setBalance(coin, 0, 2)
-            this.$$.layerMsg({
-              tip: error,
-              time: 3000,
-              bgColor: "#ea4b40",
-              icon: this.$$.promptSvg
-            })
+            this.$$.errTip(error)
           }
         } else {
-          // this.newWeb3.lilo.dcrmGetBalance(this.walletAddress, coin).then(function(res){
-          this.newWeb3.lilo.dcrmGetBalance(this.walletAddress, coin).then((res) => {
-            if (!isNaN(res)) {
-              this.setBalance(coin, res, 2)
-            } else {
-              this.setBalance(coin, 0, 0)
-            }
-          })
+          try {
+            this.setBalance(coin, v_web3.lilo.dcrmGetBalance(this.walletAddress, coin), 2)
+          } catch (error) {
+            this.setBalance(coin, "", 0)
+          }
         }
-      }
-      this.$store.commit("storeWalletLoadFlag", false)
+        balance_count ++
+        
+      }, 80)
+      // for (let i = 0; i < coinInfo.length; i++) {
+      //   let coin = coinInfo[i].coin
+      //   if (coin === "FSN") {
+      //     try {
+      //       let balanceWei = v_web3.eth.getBalance(this.walletAddress)
+      //       this.setBalance(coin, balanceWei, 2)
+      //     } catch (error) {
+      //       this.setBalance(coin, 0, 2)
+      //       this.$$.errTip(error)
+      //     }
+      //   } else {
+      //     try {
+      //       this.setBalance(coin, v_web3.lilo.dcrmGetBalance(this.walletAddress, coin), 2)
+      //     } catch (error) {
+      //       this.setBalance(coin, "", 0)
+      //     }
+      //   }
+      // }
+      // this.$store.commit("storeWalletLoadFlag", false)
     },
     setBalance (coin, balance, flag) {
-      let storeData = {
-        balance: "",
-        balanceDollar: "",
-        flag: "",
-        coin: coin
-      }
+      this.count ++
+      // console.log(this.count)
       let balanceWei = balance
       let balanceGwei = 0
       if (coin === "BTC") {
         balanceGwei = this.$$.fromWei(balanceWei, "btc")
       } else {
-        balanceGwei = this.web3.fromWei(balanceWei, "ether").toString()
+        balanceGwei = v_web3.fromWei(balanceWei, "ether").toString()
       }
-      let balanceUSD = this.changeCoinDoller(coin, balanceGwei)
-      this.myAssetsTotal = Number(this.myAssetsTotal) + Number(balanceUSD)
-      storeData = {
-        balance: balanceGwei,
-        balanceDollar: balanceUSD,
-        flag: flag,
-        coin: coin
-      }
-      balanceGwei = Number(balanceGwei) === 0 ? "0.00" : this.$$.thousandBit(balanceGwei, "no")
-      balanceUSD = Number(balanceUSD) === 0 ? "0.00" : this.$$.thousandBit(balanceUSD, 2)
-      for (let j = 0; j < this.bitIconTypeData.length; j++) {
-        if (this.bitIconTypeData[j].currency === coin) {
-          this.bitIconTypeData[j].availbleBalance = balanceGwei
-          this.bitIconTypeData[j].totalBalance = balanceGwei
-          this.bitIconTypeData[j].totalBalanceDoller = balanceUSD
-          this.bitIconTypeData[j].btnView = flag
-        }
-      }
-      this.$store.commit("storeCoinInfo", storeData)
-    },
-    changeCoinDoller (coin, balance) {
-      let dollerNum = 0
       let coinData = this.$store.state.coinInfo
-      for (let i = 0; i < coinData.length; i++) {
-        if (coin === coinData[i].coin) {
-          dollerNum = this.getDoller(coinData[i].dollarURL)
-          break
+      if (isNaN(balance)) {
+        return 0
+      } else {
+        for (let i = 0; i < coinData.length; i++) {
+          if (coin === coinData[i].coin) {
+            this.getDoller(coinData[i].dollarURL, balanceGwei, coin, flag)
+            break
+          }
         }
       }
-      dollerNum = dollerNum * balance
-      return dollerNum
+      if (this.count === coinData.length) {
+        this.fullscreenLoading = false
+        this.count = 0
+      }
     },
-    getDoller (url) {
-      let callbackData = 0
-      $.ajax({
-        url: url,
-        type: "get",
-        datatype: "jsonp",
-        async: false,
-        success: function (res) {
-          if (res.length > 0) {
-            callbackData = res[0].price_usd
-          } else {
-            callbackData = 0
-          }
-        },
-        error: function (res) {
+    getDoller (url, balance, coin, flag) {
+      $ajax.get(url).then(res => {
+        res = res.data
+        let callbackData = 0
+        if (res.length > 0) {
+          callbackData = res[0].price_usd
+        } else {
           callbackData = 0
         }
+        let balanceUSD = callbackData * balance
+        let balanceGwei = balance
+        let storeData = {
+          balance: balanceGwei,
+          balanceDollar: balanceUSD,
+          flag: flag,
+          coin: coin
+        }
+        this.myAssetsTotal = Number(this.myAssetsTotal) + Number(balanceUSD)
+        balanceGwei = Number(balanceGwei) === 0 ? "0.00" : this.$$.thousandBit(balanceGwei, "no")
+        balanceUSD = Number(balanceUSD) === 0 ? "0.00" : this.$$.thousandBit(balanceUSD, 2)
+        for (let j = 0; j < this.bitIconTypeData.length; j++) {
+          if (this.bitIconTypeData[j].currency === coin) {
+            this.bitIconTypeData[j].availbleBalance = balanceGwei
+            this.bitIconTypeData[j].totalBalance = balanceGwei
+            this.bitIconTypeData[j].totalBalanceDoller = balanceUSD
+            this.bitIconTypeData[j].btnView = flag
+            break
+          }
+        }
+        this.$store.commit("storeCoinInfo", storeData)
       })
-      return callbackData
     }
   },
   beforeDestroy () {

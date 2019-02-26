@@ -11,12 +11,6 @@ export default {
   name: "Transfer",
   data () {
     return {
-      // selectData: "",
-      selectVal: "",
-      SetcoinAndUrl: [],
-      coinDataPage: "",
-      web3: "",
-      newWeb3: ""
     }
   },
   mounted () {

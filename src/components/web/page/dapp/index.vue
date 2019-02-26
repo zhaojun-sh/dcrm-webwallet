@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="contentHeader_box flex-bc">
-      <h1 class="contentHeader_title">DAPP</h1>
+      <h1 class="contentHeader_title">{{LANG.NAV.DAPP}}</h1>
     </div>
 
     <div class="contView_box">
@@ -25,21 +25,21 @@ export default {
   data () {
     return {
       iconData: [
-        {icon: require("@/assets/image/dex.svg"), title: "DEX"},
-        {icon: require("@/assets/image/mining.svg"), title: "Mining"},
-        {icon: require("@/assets/image/TimeToken.svg"), title: "Time Token"},
-        {icon: require("@/assets/image/kyc.svg"), title: "KYC/AML"},
-        {icon: require("@/assets/image/pay.svg"), title: "Payment"},
-        {icon: require("@/assets/image/bond.svg"), title: "Bond"},
-        {icon: require("@/assets/image/abs.svg"), title: "ABS"},
-        {icon: require("@/assets/image/loan.svg"), title: "Loan"},
-        {icon: require("@/assets/image/dark.svg"), title: "Dark Pool"},
-        {icon: require("@/assets/image/etf.svg"), title: "ETF"},
-        {icon: require("@/assets/image/lssue.svg"), title: "Issue Asset"},
-        {icon: require("@/assets/image/stable.svg"), title: "Stable Coin"},
-        {icon: require("@/assets/image/custudy.svg"), title: "Custody"},
-        {icon: require("@/assets/image/lns.svg"), title: "Insurance"},
-        {icon: require("@/assets/image/MORE.svg"), title: "More"}
+        {icon: require("@etc/img/dex.svg"), title: "DEX"},
+        {icon: require("@etc/img/mining.svg"), title: "Mining"},
+        {icon: require("@etc/img/TimeToken.svg"), title: "Time Token"},
+        {icon: require("@etc/img/kyc.svg"), title: "KYC/AML"},
+        {icon: require("@etc/img/pay.svg"), title: "Payment"},
+        {icon: require("@etc/img/bond.svg"), title: "Bond"},
+        {icon: require("@etc/img/abs.svg"), title: "ABS"},
+        {icon: require("@etc/img/loan.svg"), title: "Loan"},
+        {icon: require("@etc/img/dark.svg"), title: "Dark Pool"},
+        {icon: require("@etc/img/etf.svg"), title: "ETF"},
+        {icon: require("@etc/img/lssue.svg"), title: "Issue Asset"},
+        {icon: require("@etc/img/stable.svg"), title: "Stable Coin"},
+        {icon: require("@etc/img/custudy.svg"), title: "Custody"},
+        {icon: require("@etc/img/lns.svg"), title: "Insurance"},
+        {icon: require("@etc/img/MORE.svg"), title: "More"}
       ]
     }
   },
@@ -48,12 +48,7 @@ export default {
       if (url === "/") {
         this.$router.push({ path: url, query: { currency: "" }})
       } else {
-        this.$$.layerMsg({
-          tip: "Functional development!",
-          time: 3000,
-          bgColor: "#f15a4a",
-          icon: this.$$.promptSvg
-        })
+        this.$$.errTip(this.LANG.ERROR_TIP.TIP_1)
       }
     },
   }

@@ -1,9 +1,9 @@
 <template>
   <div style="background:#fff">
     <div class="contentHeader_box flex-bc">
-      <h1 class="contentHeader_title">Lockin / Lockout</h1>
+      <h1 class="contentHeader_title">{{LANG.TITLE.LOCKIN}} / {{LANG.TITLE.LOCKOUT}}</h1>
       <div class="biticonSelect_box">
-        <div class="logo"><img src="@/assets/image/Fusion.svg"></div>
+        <div class="logo"><img src="@etc/img/Fusion.svg"></div>
         <div class="arrow flex-c"><i class="i"></i></div>
         <select class="select" v-model="selectVal" id="selectValData">
           <option
@@ -18,12 +18,12 @@
 
     <div class="transferBtn_box">
       <div class="transferBtn_btn flex-sc">
-        <router-link to="/LILO/lockIn" class="tranBtn flex-c">
-          Deposit
+        <router-link to="/LILO/lockIn" class="tranBtn flex-c" id="tabBtnFirst">
+          {{LANG.BTN.DEPOSIT}}
           <i class="arrow"></i>
         </router-link>
         <router-link to="/LILO/lockOut" class="tranBtn flex-c">
-          Withdraw
+          {{LANG.BTN.WITHDRAW}}
           <i class="arrow"></i>
         </router-link>
       </div>
@@ -40,7 +40,6 @@
 </template>
 
 <script>
-import Lilo from "@/assets/js/lilo"
 export default {
   name: "Transfer",
   data () {
@@ -48,14 +47,19 @@ export default {
       selectVal: "",
       SetcoinAndUrl: [],
       walletAddress: "",
-      coinDataPage: "",
-      web3: "",
-      newWeb3: ""
+      coinDataPage: ""
     }
   },
   watch: {
-    selectVal (cur, oold) {
-      this.getCoinInfo(cur)
+    selectVal (cur, old) {
+      if (cur !== old) {
+        // console.log(1)
+        // console.log(cur)
+        // console.log(old)
+        setTimeout(() => {
+          this.getCoinInfo(cur)
+        }, 100)
+      }
     }
   },
   mounted () {
@@ -68,29 +72,55 @@ export default {
         this.SetcoinAndUrl.push(this.$store.state.coinInfo[i])
       }
     }
-    this.getCoinInfo(this.selectVal)
+    if (!this.selectVal) {
+      // console.log(2)
+      // console.log(this.selectVal)
+      setTimeout(() => {
+        this.getCoinInfo(this.selectVal)
+      }, 100)
+    }
   },
   methods: {
     getCoinInfo (coin) {
+
+      // let address_count = 0
+      // let address_setInterval = setInterval(() => {
+      //   if (coin === this.SetcoinAndUrl[address_count].coin) {
+      //     console.log(address_count)
+      //     // if (address_count >= this.SetcoinAndUrl.length) {
+      //       //   this.$store.commit("storeDcrmAddress", get_address)
+      //     //   address_count = 0
+      //     //   return
+      //     // }
+      //     let get_address = v_web3.lilo.dcrmGetAddr(this.walletAddress, coin)
+      //     this.coinDataPage = {
+      //       coin: coin,
+      //       address: get_address,
+      //       limit: this.SetcoinAndUrl[address_count].limit,
+      //       number: this.SetcoinAndUrl[address_count].number,
+      //       token: this.SetcoinAndUrl[address_count].token
+      //     }
+      //     this.$store.commit("storeDcrmAddress", get_address)
+      //     address_count = 0
+      //     clearInterval(address_setInterval)
+      //     return
+      //   }
+      //   console.log(address_count)
+      //   address_count ++
+      // }, 80)
       for (let i = 0; i < this.SetcoinAndUrl.length; i++) {
         if (coin === this.SetcoinAndUrl[i].coin) {
-          this.setWeb3()
-          this.newWeb3.lilo.dcrmGetAddr(this.walletAddress, coin).then((val) => {
-            this.coinDataPage = {
-              coin: coin,
-              address: val,
-              limit: this.SetcoinAndUrl[i].limit,
-              number: this.SetcoinAndUrl[i].number,
-              token: this.SetcoinAndUrl[i].token
-            }
-            this.$store.commit("storeDcrmAddress", val)
-          })
+          let get_address = v_web3.lilo.dcrmGetAddr(this.walletAddress, coin)
+          this.coinDataPage = {
+            coin: coin,
+            address: get_address,
+            limit: this.SetcoinAndUrl[i].limit,
+            number: this.SetcoinAndUrl[i].number,
+            token: this.SetcoinAndUrl[i].token
+          }
+          // this.$store.commit("storeDcrmAddress", get_address)
         }
       }
-    },
-    setWeb3 () {
-      this.$$.setWeb3(this)
-      this.newWeb3 = new Lilo(this.$$.baseUrl)
     }
   }
 }

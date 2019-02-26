@@ -1,10 +1,10 @@
 <template>
   <div style="background:#fff">
     <div class="contentHeader_box flex-bc">
-      <h1 class="contentHeader_title">Receive / Send</h1>
+      <h1 class="contentHeader_title">{{LANG.BTN.RECEIVE}} / {{LANG.BTN.SEND}}</h1>
       <div class="biticonSelect_box">
         <div class="logo">
-          <img src="@/assets/image/Fusion.svg">
+          <img src="@etc/img/Fusion.svg">
         </div>
         <div class="arrow flex-c">
           <i class="i"></i>
@@ -22,12 +22,12 @@
 
     <div class="transferBtn_box">
       <div class="transferBtn_btn flex-sc">
-        <router-link to="/Transfer/tranReceive" class="tranBtn flex-c">
-          Receive
+        <router-link to="/Transfer/tranReceive" class="tranBtn flex-c" id="tabBtnFirst">
+          {{LANG.BTN.RECEIVE}}
           <i class="arrow"></i>
         </router-link>
         <router-link to="/Transfer/tranSend" class="tranBtn flex-c">
-          Send
+          {{LANG.BTN.SEND}}
           <i class="arrow"></i>
         </router-link>
       </div>
@@ -44,7 +44,6 @@
 </template>
 
 <script>
-import Lilo from "@/assets/js/lilo"
 export default {
   name: "Transfer",
   data () {
@@ -52,9 +51,7 @@ export default {
       // selectData: "",
       selectVal: "",
       SetcoinAndUrl: this.$store.state.coinInfo,
-      coinDataPage: {},
-      web3: "",
-      newWeb3: ""
+      coinDataPage: {}
     }
   },
   watch: {
@@ -78,23 +75,22 @@ export default {
           }
         } else {
           if (coin === this.SetcoinAndUrl[i].coin) {
-            this.setWeb3()
-            this.newWeb3.lilo.dcrmGetAddr(this.$store.state.addressInfo, coin).then((val) => {
-              this.coinDataPage = {
-                coin: coin,
-                address: val,
-                limit: this.SetcoinAndUrl[i].limit,
-                number: this.SetcoinAndUrl[i].number
-              }
-              this.$store.commit("storeDcrmAddress", val)
-            })
+            let get_dcrmGetAddr
+            if (this.$store.state.safeMode) {
+              get_dcrmGetAddr = ""
+            } else {
+              get_dcrmGetAddr = v_web3.lilo.dcrmGetAddr(this.$store.state.addressInfo, coin)
+            }
+            this.coinDataPage = {
+              coin: coin,
+              address: get_dcrmGetAddr,
+              limit: this.SetcoinAndUrl[i].limit,
+              number: this.SetcoinAndUrl[i].number
+            }
           }
         }
       }
-    },
-    setWeb3 () {
-      this.$$.setWeb3(this)
-      this.newWeb3 = new Lilo(this.$$.baseUrl)
+      console.log(this.coinDataPage)
     }
   }
 }

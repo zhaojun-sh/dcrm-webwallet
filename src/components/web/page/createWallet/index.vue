@@ -5,33 +5,34 @@
         <li>
           <router-link to="/createWallet" class="btnStyle btnBlue flex-c">
           <div class="icon">
-            <img src="@/assets/image/pageWhite.svg">
-            </div>Create wallet
+            <img src="@etc/img/pageWhite.svg">
+            </div>{{LANG.BTN.CREATE_WALLET}}
           </router-link>
         </li>
         <li>
           <router-link to="/importWallet" class="btnStyle btnWhite flex-c">
           <div class="icon">
-            <img src="@/assets/image/Importwallet-blue.svg">
-            </div>Import wallet
+            <img src="@etc/img/Importwallet-blue.svg">
+            </div>{{LANG.IMPORT_WALLET}}
           </router-link>
         </li>
       </ul>
     </div>
     <div class="supCoinView_box">
       <hgroup class="supCoinView_title">
-        <h3 class="title">Coins Supported</h3>
+        <h3 class="title">{{LANG.TITLE.COIN_SUPPORTED}}</h3>
       </hgroup>
       <div class="supCoinView_list">
-        <ul>
-          <li v-for="item in iconData" :key="item.index" class="col col-md-3">
+
+        <el-row :gutter="10">
+          <el-col :xs="12" :sm="8" :md="6" :lg="6" :xl="6" v-for="item in iconData" :key="item.index" class="item">
             <div class="iconImg">
               <img :src="item.icon">
             </div>
             <h4 class="title" v-html="item.title"></h4>
             <div class="line"></div>
-          </li>
-        </ul>
+          </el-col>
+        </el-row>
       </div>
     </div>
   </div>
@@ -46,40 +47,7 @@ export default {
   name: "",
   data () {
     return {
-      iconData: [
-        {
-          icon: require("@/assets/image/btc.svg"),
-          title: "Bitcoin (BTC)"
-        },
-        {
-          icon: require("@/assets/image/eth.svg"),
-          title: "Ethereum (ETH)"
-        },
-        {
-          icon: require("@/assets/image/fsn.svg"),
-          title: "FUSION (FSN)"
-        },
-        {
-          icon: require("@/assets/image/bnb.svg"),
-          title: "Binance (BNB)"
-        },
-        {
-          icon: require("@/assets/image/mkr.svg"),
-          title: "Maker (MKR)"
-        },
-        {
-          icon: require("@/assets/image/gusd.svg"),
-          title: "Gemini Dollar (GUSD)"
-        },
-        {
-          icon: require("@/assets/image/ht.svg"),
-          title: "HuobiToken (HT)"
-        },
-        {
-          icon: require("@/assets/image/bnt.svg"),
-          title: "Bancor (BNT)"
-        }
-      ]
+      iconData: []
     }
   },
   mounted () {
@@ -87,7 +55,14 @@ export default {
     if (toPath.lastIndexOf("/") === (toPath.length - 1)) {
       this.$store.commit("storeAddress", "")
     }
-    this.$$.loadingEndIndex()
+    for (let i = 0; i < this.$store.state.coinInfo.length; i++) {
+      this.iconData.push({
+        icon: this.$store.state.coinInfo[i].logo,
+        title: this.$store.state.coinInfo[i].title
+      })
+    }
+    // this.$$.loadingEndIndex()
+    // console.log(this.LANG)
   }
 }
 </script>

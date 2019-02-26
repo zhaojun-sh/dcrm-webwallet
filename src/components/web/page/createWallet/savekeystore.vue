@@ -3,9 +3,8 @@
     <div class="newwallet_box">
       <div class="contTip_box">
         <hgroup class="contTip_title flex-c">
-          <h3 class="title">
-            Save your 
-            <span>Keystore</span> File.
+          <h3 class="title" v-html="LANG.TITLE.SAVE_LEYSTORE_FILE">
+
           </h3>
         </hgroup>
         <div class="contTip_btn flex-c">
@@ -15,24 +14,21 @@
             :download="keystoreName"
             :href="keystoreURL"
             @click="downloadChange"
-          >Download Keystore File (UTC / JSON)</a>
+          >{{LANG.BTN.DOWNLOAD_KEYSTORE}}</a>
         </div>
       </div>
 
       <div class="contTip_box">
         <hgroup class="contTip_title noborder">
-          <p class="p">**Do not lose it!** It cannot be recovered if you lose it.
-            <br/>**Do not share it!** Your funds will be stolen if you use this file on a malicious/phishing site.
-            <br/>**Make a backup!** Secure it like the millions of dollars it may one day be worth.
+          <p class="p" v-html="LANG.SAVE_KEYSTORE_TIP.SAVE_KEYSTORE_TIP_0">
           </p>
         </hgroup>
         <div class="contTip_btn flex-c">
-          <button class="btn flex-c red" @click="goBackupWallet" id="understandBtn" disabled="disabled">I understand. Continue.</button>
+          <button class="btn flex-c red" @click="goBackupWallet" id="understandBtn" disabled="disabled">{{LANG.BTN.UNDERSTAND_CONTINUE}}</button>
         </div>
       </div>
       <div class="contTip_p">
-        <p>Fusion DCRM Wallet does not hold your keys for you. We cannot access accounts, recover keys,
-          <br>reset passwords, nor reverse transactions. Protect your keys & always check that you are on correct URL. You are responsible for your security.
+        <p v-html="LANG.SAVE_KEYSTORE_TIP.SAVE_KEYSTORE_TIP_1">
         </p>
       </div>
     </div>
@@ -66,7 +62,7 @@ export default {
       this.$router.push("/")
     },
     downloadChange () {
-      $("#understandBtn").removeAttr("disabled")
+      document.getElementById("understandBtn").removeAttribute("disabled")
     }
   }
 }

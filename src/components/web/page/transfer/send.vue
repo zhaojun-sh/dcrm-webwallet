@@ -1,156 +1,176 @@
 <template>
   <div>
-    <div class="receiveContent_box">
+    <div class="receiveContent_box"
+        v-loading="fullscreenLoading"
+        element-loading-text="Loading……">
       <div class="receiveAddress_box">
-        <h3 v-html="addressTitle"></h3>
-        <div class="receiveAddress_pwd">
-          <input
-            type="text"
-            class="input-text input"
-            v-model="toAddress"
-          />
-        </div>
 
-        <h3 class="mt-20">Amount:</h3>
-        <div class="receiveAddress_pwd">
-          <input
-            type="text"
-            class="input-text amount keyPressBtn"
-            v-model="sendAmound"
-            id="amountShow"
-          />
-          <label v-html="selectData.value" class="currency"></label>
-        </div>
 
+        <el-form label-position="top" label-width="80px">
+          <el-form-item :label="addressTitle + '：'">
+            <el-input v-model="toAddress" @change="toaddresGas"></el-input>
+          </el-form-item>
+          <el-form-item :label="LANG.LABEL.AMOUNT + '：'">
+            <el-input v-model="sendAmound" @keypress="keyPressBtn"></el-input>
+            <span :class="Number(balanceNum) === 0 ? 'color_red' : 'color_99'">{{Number(balanceNum) === 0 ? "Not a valid amount" : "Account Balance: " + balanceNum}}</span>
+          </el-form-item>
+          <el-form-item label="Advanced(Nonce & Gas Price & Gas Limit & Data):">
+            <el-switch
+              v-model="selfSet"
+              :active-value="true"
+              :inactive-value="false"
+            ></el-switch>
+          </el-form-item>
+          <div v-if="selfSet">
+            <el-form-item label="Nonce：">
+              <el-input v-model="nonceNum"></el-input>
+            </el-form-item>
+            <el-form-item label="Gas Price：">
+              <el-input v-model="gasPriceNum"></el-input>
+            </el-form-item>
+            <el-form-item label="Gas Limit：">
+              <el-input v-model="gasLimitNum"></el-input>
+            </el-form-item>
+            <el-form-item label="Hex Data：">
+              <el-input v-model="sendData" placeholder="0x"></el-input>
+            </el-form-item>
+            <el-form-item label="Signed Transaction：" v-if="serializedTxView">
+              <el-col :span="13">
+                <el-input type="textarea" v-model="serializedTxVal" placeholder="0x" :rows="12" style="margin-top:8px"></el-input>
+              </el-col>
+              <el-col class="line" :span="2"></el-col>
+              <el-col :span="11">
+                <div class="flex-ec">
+                  <div id="qrcode"></div>
+                </div>
+              </el-col>
+            </el-form-item>
+          </div>
+        </el-form>
         <div class="receiveAddress_btn flex-c">
-          <!-- <button class="btn blue flex-c W240 mt-10" @click="sendAmoundInfo">Send</button><br> -->
-          <button class="btn blue flex-c W240 mt-10" @click="privateSure">Send</button>
+          <button class="btn blue flex-c W240 mt-10" @click="privateSure">{{$store.state.safeMode ? LANG.BTN.GENERATE_INFORMATION : LANG.BTN.SEND}}</button>
+          <!-- <button class="btn blue flex-c W240 mt-10" @click="privateSure" v-if="$store.state.safeMode">{{LANG.BTN.GENERATE_INFORMATION}}</button> -->
         </div>
       </div>
 
       <div class="tableHistory_box">
         <hgroup class="tableHistory_title">
-          <h3 class="title">History:</h3>
+          <h3 class="title">{{LANG.TITLE.HISTORY}}:</h3>
         </hgroup>
         <div class="tableHistory_table table-responsive">
-          <table class="table table-bordered table-hover table-striped">
-            <thead>
-              <tr>
-                <th width="5%">Status</th>
-                <th width="5%">Coin</th>
-                <th width="20%">Amount</th>
-                <th width="30%">Date</th>
-                <th width="40%">Information</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in historyData" :key="item.index">
-                <td><span v-html="item.status" :class="item.status !== 'Success' ? 'red' : ''"></span></td>
-                <td><span v-html="item.coin"></span></td>
-                <td><span v-html="item.value" class="nowrap"></span></td>
-                <td><span v-html="item.date" class="nowrap"></span></td>
-                <td>
-                  <div class="moreInfo_box" @click="MoreContent">
-                    <span v-html="item.txhax" :title="item.info" class="ellipsis moreInfo_hax"></span>
+          <el-table
+            :data="historyData"
+            style="width: 100%"
+            empty-text="Null"
+          >
+            <el-table-column
+              :label="LANG.THEAD.PUBLIC.STATUS"
+              width="80"
+            >
+              <template slot-scope="scope">
+                <span v-html="scope.row.status" :class="scope.row.status !== LANG.LABEL.SUCCESS ? 'red' : ''"></span>
+              </template>
+            </el-table-column>
+            <el-table-column :label="LANG.THEAD.COIN" prop="coin" width="80"></el-table-column>
+            <el-table-column :label="LANG.THEAD.PUBLIC.AMOUNT" prop="value" width="120"></el-table-column>
+            <el-table-column :label="LANG.THEAD.PUBLIC.DATE" prop="date" width="180"></el-table-column>
+            <el-table-column :label="LANG.THEAD.PUBLIC.INFORMATION" min-width="360">
+              <template slot-scope="scope">
+                <el-collapse class="moreInfo_box" accordion v-model="activeNames">
+                  <el-collapse-item :title="scope.row.hash">
                     <ul class="list">
-                      <li>TXid：{{item.txhax}}</li>
-                      <li>Adress：{{item.to_address}}</li>
+                      <li>{{LANG.LABEL.TXID}}：{{scope.row.hash}}</li>
+                      <li>{{LANG.LABEL.ADDRESS}}：{{scope.row.to}}</li>
                     </ul>
-                    <i class="arrow"></i>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  </el-collapse-item>
+                </el-collapse>
+              </template>
+            </el-table-column>
+          </el-table>
         </div>
       </div>
     </div>
 
-    <div class="modal fade bs-example-modal-lg" id="privateSure" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel" @click="modalClick">
-      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">Send Ether & Tokens</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          </div>
-          <div class="modal-body">
-            <router-view @sendSignData="getSignData" :sendDataPage="dataPage"></router-view>
-          </div>
-        </div>
-      </div>
-    </div>
+    <el-dialog
+      title="Send Ether & Tokens"
+      :visible.sync="privateSureVisible"
+      width="75%"
+      :before-close="modalClick"
+      >
+      <router-view @sendSignData="getSignData" :sendDataPage="dataPage" @elDialogView="getElDialogView"></router-view>
+    </el-dialog>
 
-    <div class="modal fade bs-example-modal-lg" id="sendInfo" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel">
-      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">You are about to send...</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          </div>
-          <div class="modal-body">
-            <div class="sendInfo_box">
-              <ul>
-                <li>
-                  <h3>To Address:</h3>
-                  <span>{{toAddress}}</span>
-                </li>
-                <li>
-                  <h3>From Address:</h3>
-                  <span>{{walletAddress}}</span>
-                </li>
-                <li>
-                  <h3>Amount to Send:</h3>
-                  <span>{{sendAmound}}</span>
-                </li>
-                <li>
-                  <h3>Account Balance:</h3>
-                  <span>{{Number(balanceNum)}} {{selectData.value}}</span>
-                </li>
-                <li>
-                  <h3>Coin:</h3>
-                  <span>{{selectData.value}}</span>
-                </li>
-                <li>
-                  <h3>Network:</h3>
-                  <span>{{netWorkInfo}}</span>
-                </li>
-                <li>
-                  <h3>Gas Limit:</h3>
-                  <span>{{gasLimitNum}}</span>
-                </li>
-                <li>
-                  <h3>Gas Price:</h3>
-                  <span>{{gasPriceNum}}</span>
-                </li>
-                <li>
-                  <h3>Max TX Fee:</h3>
-                  <span>{{maxFee}}</span>
-                </li>
-                <li>
-                  <h3>Nonce:</h3>
-                  <span>{{nonceNum}}</span>
-                </li>
-                <li>
-                  <h3>Data:</h3>
-                  <span>{{dataPage.data || "(none)"}}</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">No, get me out of here!</button>
-            <button type="button" class="btn btn-primary" @click="sendAmoundInfo">Yes, I am sure! Make transaction.</button>
-          </div>
-        </div>
+    <el-dialog
+      :title="LANG.TITLE.TO_SEND"
+      :visible.sync="sendInfoVisible"
+      width="60%"
+      :before-close="modalClick"
+      >
+      <div class="sendInfo_box">
+        <ul>
+          <li>
+            <h3>To Address:</h3>
+            <span>{{toAddress}}</span>
+          </li>
+          <li>
+            <h3>From Address:</h3>
+            <span>{{walletAddress}}</span>
+          </li>
+          <li>
+            <h3>Amount to Send:</h3>
+            <span>{{sendAmound}}</span>
+          </li>
+          <li>
+            <h3>Account Balance:</h3>
+            <span>{{Number(balanceNum)}} {{selectData.coin}}</span>
+          </li>
+          <li>
+            <h3>Coin:</h3>
+            <span>{{selectData.coin}}</span>
+          </li>
+          <li>
+            <h3>Network:</h3>
+            <span>{{netWorkInfo}}</span>
+          </li>
+          <li>
+            <h3>Gas Limit:</h3>
+            <span>{{gasLimitNum}}</span>
+          </li>
+          <li>
+            <h3>Gas Price:</h3>
+            <span>{{gasPriceNum}}</span>
+          </li>
+          <li>
+            <h3>Max TX Fee:</h3>
+            <span>{{maxFee}}</span>
+          </li>
+          <li>
+            <h3>Nonce:</h3>
+            <span>{{nonceNum}}</span>
+          </li>
+          <li>
+            <h3>Data:</h3>
+            <span>{{dataPage.data || "(none)"}}</span>
+          </li>
+        </ul>
       </div>
-    </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="info" size="small" @click="modalClick">{{LANG.BTN.GET_OUT}}</el-button>
+        <el-button type="primary" size="small" @click="sendAmoundInfo">{{LANG.BTN.YES_SURE}}</el-button>
+        <!-- <button type="button" class="btn btn-default" @click="modalClick">{{LANG.BTN.GET_OUT}}</button>
+        <button type="button" class="btn btn-primary" @click="sendAmoundInfo">{{LANG.BTN.YES_SURE}}</button> -->
+      </span>
+    </el-dialog>
 
   </div>
 </template>
 
+<style>
+/* .receiveAddress_box .el-form--label-top .el-form-item__label{padding:0;line-height: 24px;} */
+</style>
+
+
 <script>
-// let Web3 = require("web3")
-import Lilo from "@/assets/js/lilo"
 export default {
   name: "receive",
   props: ["selectData"],
@@ -162,8 +182,6 @@ export default {
       historyData: [],
       walletAddress: "",
       sendAmound: "",
-      web3: "",
-      newWeb3: "",
       gasPriceNum: "",
       gasLimitNum: "",
       balanceNum: "",
@@ -172,7 +190,15 @@ export default {
       serializedTx: "",
       maxFee: "",
       netWorkInfo: "",
-      refreshHistory: null
+      refreshHistory: null,
+      sendInfoVisible: false,
+      privateSureVisible: false,
+      activeNames: "",
+      selfSet: false,
+      sendData: "0x",
+      fullscreenLoading: true,
+      serializedTxView: false,
+      serializedTxVal: ""
     }
   },
   watch: {
@@ -186,69 +212,103 @@ export default {
     this.walletAddress = this.$store.state.addressInfo
     this.pageRefresh()
     if (this.selectData.coin) {
-      this.getInitData()
+      setTimeout(() => {
+        this.getInitData()
+      }, 100)
     }
-    this.sendAmound = this.$$.thousandBit("0", 2)
     this.refreshHistory = setInterval(() => {
-      this.getSendHistory()
+      if (!this.$store.state.safeMode) {
+        this.getSendHistory()
+      }
     }, 20000)
-    $(".keyPressBtn").keypress(e => {
+    if (this.$store.state.safeMode) {
+      this.selfSet = this.$store.state.safeMode
+    }
+  },
+  methods: {
+    getElDialogView () {
+      this.modalClick()
+    },
+    keyPressBtn (e) {
       if (e.which === 13) {
         this.privateSure()
       }
-    })
-  },
-  methods: {
+    },
+    toaddresGas() {
+      if (this.$store.state.safeMode) {
+        return
+      }
+      try {
+        this.gasLimitNum = v_web3.eth.estimateGas({to: this.toAddress})
+      } catch (error) {
+        this.$$.errTip(error)
+        return
+      }
+    },
     getInitData () {
       this.coinAddress = this.selectData.address
       this.titleChange(this.selectData.coin)
+      if (this.$store.state.safeMode) {
+        this.fullscreenLoading = false
+        return
+      }
       this.getSendHistory()
+      try {
+        this.nonceNum = v_web3.eth.getTransactionCount(this.$store.state.addressInfo, "pending")
+      } catch (error) {
+        this.$$.errTip(error)
+        return
+      }
+      try {
+        this.gasPriceNum = v_web3.eth.gasPrice.toString(10)
+      } catch (error) {
+        this.$$.errTip(error)
+        return
+      }
+      if (this.selectData.coin === "FSN") {
+        try {
+          this.balanceNum = v_web3.fromWei(v_web3.eth.getBalance(this.coinAddress), "ether")
+        } catch (error) {
+          this.$$.errTip(error)
+          return
+        }
+      } else {
+        let get_dcrmGetBalance
+        try {
+          get_dcrmGetBalance = v_web3.lilo.dcrmGetBalance(this.$store.state.addressInfo, this.selectData.coin)
+        } catch (error) {
+          get_dcrmGetBalance = 0
+        }
+        this.balanceNum = v_web3.fromWei(get_dcrmGetBalance, "ether")
+      }
+      this.fullscreenLoading = false
+      // this.setBaseSendData()
     },
     modalClick () {
-      $("#privateSure").on("hide.bs.modal", () => {
-        this.$router.push("/Transfer/tranSend")
-      })
+      this.$router.push("/Transfer/tranSend")
+      this.privateSureVisible = false
+      this.sendInfoVisible = false
     },
     privateSure () {
       if (!this.toAddress) {
-        this.$$.layerMsg({
-          tip: this.selectData.coin + " Send Address is not null.",
-          time: 2000,
-          bgColor: "#ea4b40",
-          icon: this.$$.promptSvg
-        })
+        this.$$.errTip(this.selectData.coin + this.LANG.ERROR_TIP.TIP_2)
         return
       }
       if (this.toAddress.toLowerCase() === this.walletAddress.toLowerCase()) {
-        this.$$.layerMsg({
-          tip: "You can`t transfer money to yourself.",
-          time: 5000,
-          bgColor: "#ea4b40",
-          icon: this.$$.promptSvg
-        })
+        this.$$.errTip(this.selectData.coin + this.LANG.ERROR_TIP.TIP_4)
         return
       }
       if (this.selectData.coin !== "BTC" && this.toAddress.indexOf("0x") !== 0) {
-        this.$$.layerMsg({
-          tip: "The address needs to start with 0x",
-          time: 5000,
-          bgColor: "#ea4b40",
-          icon: this.$$.promptSvg
-        })
+        this.$$.errTip(this.selectData.coin + this.LANG.ERROR_TIP.TIP_5)
         return
       }
       let getAmountTip = this.$$.limitCoin(this.sendAmound, this.selectData.limit, this.selectData.number)
       if (getAmountTip.flag) {
-        this.$$.layerMsg({
-          tip: getAmountTip.msg,
-          time: 3000,
-          bgColor: "#ea4b40",
-          icon: this.$$.promptSvg
-        })
+        this.$$.errTip(getAmountTip.msg)
         return
       }
       this.setBaseSendData()
-      let to_value = this.web3.toWei(this.sendAmound, "ether")
+      let to_value = v_web3.toWei(this.sendAmound, "ether")
       if (this.selectData.coin === "BTC") {
         to_value = this.$$.toWei(this.sendAmound, "btc")
       }
@@ -259,228 +319,138 @@ export default {
         from: this.walletAddress,
         to: this.toAddress,
         value: Number(to_value),//Number类型,
-        url: this.$$.baseUrl,
         coin: this.selectData.coin
       }
       if (this.selectData.coin !== "FSN") {
-        this.dataPage.data = "TRANSACTION:" + this.toAddress + ":" + to_value + ":" + this.selectData.coin
+        this.dataPage.data = this.sendData ? this.sendData : "TRANSACTION:" + this.toAddress + ":" + to_value + ":" + this.selectData.coin
         this.dataPage.sendType = "SENDDCRM"
         this.dataPage.to = "0x00000000000000000000000000000000000000dc"
         this.dataPage.value = "0"
       }
+      this.privateSureVisible = true
       this.$router.push("/pwdSend")
-      $("#privateSure").modal("show")
     },
     getSignData (data) {
       if (data) {
-        this.serializedTx = data
-        $("#privateSure").modal("hide")
-        $("#sendInfo").modal("show")
+        if (data.type && data.type === "METAMASK" && !this.$store.state.safeMode) {
+          this.sendDatabase(data)
+        } else if (this.$store.state.safeMode) {
+          this.serializedTxVal = data.serializedTx ? data.serializedTx : data
+          this.serializedTxView = true
+          this.sendInfoVisible = false
+          this.qrcode(this.serializedTxVal)
+        } else {
+          this.serializedTx = data
+          this.sendInfoVisible = true
+        }
       } else {
-        $("#privateSure").modal("hide")
-        $("#sendInfo").modal("hide")
-        this.$$.layerMsg({
-          tip: "Sign error!",
-          time: 3000,
-          bgColor: "#ea4b40",
-          icon: this.$$.promptSvg
-        })
+        this.sendInfoVisible = false
+        this.$$.errTip(this.selectData.coin + this.LANG.ERROR_TIP.TIP_6)
       }
+      this.privateSureVisible = false
+    },
+    qrcode (cont) {
+      this.serializedTxView = true
+			this.$nextTick(() => {
+        this.$$.qrCode(cont, "qrcode")
+			})
     },
     titleChange (bitType) {
       this.addressTitle = bitType + " Send Address"
     },
-    MoreContent (e) {
-      $(e.target.parentNode).parents("tr").siblings("tr").find(".list").hide()
-      $(e.target.parentNode).find(".list").toggle()
-    },
     pageRefresh () {
       if (location.href.indexOf("tranSend") !== -1) {
-        $(".transferBtn_btn").find("a:eq(0)").removeClass("router-link-active")
+        document.getElementById("tabBtnFirst").classList.remove("router-link-active")
       }
     },
     changeAmount () {
       this.sendAmound = this.$$.thousandChange(this.sendAmound, 18)
     },
-    setWeb3 () {
-      this.$$.setWeb3(this)
-      this.newWeb3 = new Lilo(this.$$.baseUrl)
-    },
     setBaseSendData () {
-      this.setWeb3()
-
-      let to_value = this.web3.toWei(this.sendAmound, "ether")
-      let getGasLimit
+      let to_value = v_web3.toWei(this.sendAmound, "ether")
+      this.maxFee = v_web3.fromWei(Number(this.gasLimitNum) * Number(this.gasPriceNum), "ether")
       try {
-        getGasLimit = this.web3.eth.estimateGas({to: this.toAddress})
+        this.netWorkInfo = v_web3.version.node
       } catch (error) {
-        try {
-          getGasLimit = this.$$.getWeb3({
-            method: "eth_estimateGas",
-            params: [{to: this.toAddress}]
-          })
-          if (getGasLimit.error) {
-            getGasLimit = "Error"
-          } else {
-            getGasLimit = getGasLimit.result
-          }
-        } catch (error) {
-          getGasLimit = error
-        }
-      }
-      if (getGasLimit && getGasLimit.toString().indexOf("Error") !== -1) {
-        this.$$.layerMsg({
-          tip: getGasLimit,
-          time: 4000,
-          bgColor: "#ea4b40",
-          icon: this.$$.promptSvg
-        })
-        throw getGasLimit
-      }
-
-      try {
-        this.nonceNum = this.web3.eth.getTransactionCount(this.walletAddress, "pending")
-      } catch (error) {
-        this.nonceNum = this.$$.getWeb3({
-          method: "eth_getTransactionCount",
-          params: [this.walletAddress, "pending"]
-        }).result
-      }
-
-      try {
-        this.gasPriceNum = this.web3.eth.gasPrice.toString(10)
-      } catch (error) {
-        this.gasPriceNum = this.$$.getWeb3({
-          method: "eth_gasPrice",
-          params: []
-        }).result.toString(10)
-      }
-
-      this.gasLimitNum = getGasLimit * 6
-      if (this.selectData.coin === "FSN") {
-        try {
-          this.balanceNum = this.web3.fromWei(this.web3.eth.getBalance(this.coinAddress), "ether")
-        } catch (error) {
-          this.balanceNum = this.$$.getWeb3({
-            method: "eth_getBalance",
-            params: [this.coinAddress, "latest"]
-          }).result
-          this.balanceNum = this.web3.fromWei(this.balanceNum, "ether")
-        }
-      } else {
-        this.newWeb3.lilo.dcrmGetBalance(this.$store.state.addressInfo, this.selectData.coin).then((res) => {
-          this.balanceNum = this.web3.fromWei(res, "ether")
-        })
-      }
-      this.maxFee = this.web3.fromWei(Number(this.gasLimitNum) * Number(this.gasPriceNum), "ether")
-      try {
-        this.netWorkInfo = this.web3.version.node
-      } catch (error) {
-        this.netWorkInfo = this.$$.getWeb3({
-          method: "web3_clientVersion",
-          params: []
-        }).result
+        this.$$.errTip(error)
+        return
       }
     },
     sendAmoundInfo () {
-      this.setWeb3()
       let dataBase = {
-        value: Number(this.$$.thousandToNum(this.sendAmound)),
-        coin: this.selectData.coin,
-        to_address: this.toAddress,
-        from_address: this.walletAddress,
-        date: new Date(),
         txhax: "",
         status: ""
       }
-      this.web3.eth.sendRawTransaction(this.serializedTx, (err, hash) => {
+      v_web3.eth.sendRawTransaction(this.serializedTx, (err, hash) => {
         if (!err) {
           dataBase.txhax = hash
-          dataBase.status = "success"
-          $("#sendInfo").modal("hide")
-          this.$$.layerMsg({
-            tip: "Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use FSN Gas Station to see what gas price is optimal. 4) Save your TX Hash in case you need it later： " + hash,
-            time: 5000,
-            bgColor: "#5dba5a",
-            icon: this.$$.promptSvg
-          })
+          dataBase.status = this.LANG.LABEL.SUCCESS
+          this.sendInfoVisible = false
+          this.$$.successTip(this.LANG.SUCCESS_TIP.TIP_1 + hash)
           this.$store.commit("storeWalletLoadFlag", true)
         } else {
           console.log(err)
           dataBase.txhax = ""
-          dataBase.status = "failure"
-          this.$$.layerMsg({
-            tip: err,
-            time: 4000,
-            bgColor: "#ea4b40",
-            icon: this.$$.promptSvg
-          })
+          dataBase.status = this.LANG.LABEL.FAILURE
+          this.$$.errTip(err)
         }
         this.sendDatabase(dataBase)
+        this.modalClick()
       })
     },
     sendDatabase (data) {
-      $.ajax({
-        url: this.$$.serverURL + "/transfer/create",
-        datatype: "json",
-        type: "post",
-        data: {
-          value: data.value,
-          coin: data.coin,
-          to_address: data.to_address,
-          from_address: data.from_address,
-          date: data.date,
-          txhax: data.txhax,
+      $ajax.post(this.$$.serverURL + "/transfer/create", Qs.stringify({
+          value: Number(this.$$.thousandToNum(this.sendAmound)),
+          coin: this.selectData.coin,
+          to: this.toAddress,
+          from: this.walletAddress,
+          timestamp: Date.parse(new Date()) / 1000,
+          hash: data.txhax,
           status: data.status
-        },
-        success: res => {
-          if (res.msg === "success") {
-            this.getSendHistory()
-          }
+        })
+      ).then(res => {
+        res = res.data
+        if (res.msg === "success") {
+          this.getSendHistory()
         }
       })
     },
     getSendHistory () {
+      if (this.$store.state.safeMode) {
+        return
+      }
       if (!this.walletAddress || !this.selectData.coin) {
         return
       }
-      $.ajax({
-        url: this.$$.serverURL + "/transfer/history",
-        datatype: "json",
-        type: "post",
-        data: {
-          from_address: this.walletAddress,
+      $ajax.post(this.$$.serverURL + "/transfer/history", Qs.stringify({
+          from: this.walletAddress,
           coin: this.selectData.coin
-        },
-        success: res => {
-          // console.log(res)
-          this.historyData = []
-          if (res.msg === "success" && res.info.length > 0) {
-            for (let i = 0; i < res.info.length; i++) {
-              res.info[i].date = this.$$.timeChange({date: res.info[i].date, type:"yyyy-mm-dd hh:mm"})
-              res.info[i].value = this.$$.thousandBit(res.info[i].value, "no")
-              res.info[i].status = this.getStatus(res.info[i])
-            }
-            this.historyData = res.info
+        })
+      ).then(res => {
+        // console.log(res)
+        res = res.data
+        this.historyData = []
+        if (res.msg === "success" && res.info.length > 0) {
+          for (let i = 0; i < res.info.length; i++) {
+            res.info[i].date = this.$$.timeChange({date: res.info[i].timestamp, type:"yyyy-mm-dd hh:mm"})
+            res.info[i].value = this.$$.thousandBit(res.info[i].value, "no")
+            res.info[i].status = this.getStatus(res.info[i])
           }
-        },
-        error: res => {
-          console.log(res)
+          this.historyData = res.info
         }
       })
     },
     getStatus (txhax) {
       let statusFsn = ""
-      if (txhax.txhax) {
-        this.setWeb3()
-        let receipt = this.web3.eth.getTransactionReceipt(txhax.txhax)
+      if (txhax.hash) {
+        let receipt = v_web3.eth.getTransactionReceipt(txhax.hash)
         if (receipt && receipt.status) {
-          statusFsn = "Success"
+          statusFsn = this.LANG.LABEL.SUCCESS
         } else {
-          statusFsn = "Pending"
+          statusFsn = this.LANG.LABEL.PENDING
         }
       } else {
-        statusFsn = "Failure"
+        statusFsn = this.LANG.LABEL.FAILURE
       }
       return statusFsn
     }

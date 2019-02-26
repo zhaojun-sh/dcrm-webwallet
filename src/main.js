@@ -1,25 +1,42 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
+
+import {
+  Button,
+  Collapse,
+  CollapseItem,
+  Dialog,
+  Icon,
+  Message,
+  Tooltip,
+  Radio,
+  RadioGroup,
+  Form,
+  FormItem,
+  Input,
+  Row,
+  Col,
+  Table,
+  TableColumn,
+  Popover,
+  Loading,
+  Switch,
+  Select,
+  Option
+} from 'element-ui'
+
 import Vuex from 'vuex'
 import axios from 'axios'
 import App from './App'
-// import App from '@/components/web/page/index'
 import router from './router'
 import store from './store/store'
 
-// import $ from 'jquery'
 import $$ from './assets/js/methods'
-import web3 from './assets/js/lilo'
-// import './assets/css/bootstrap.min.css'
+
+import 'element-ui/lib/theme-chalk/index.css'
 import './assets/css/css.css'
 import './assets/css/style.css'
-// import '../node_modules/bootstrap/dist/js/bootstrap.min.js'
-// import './assets/js/bootstrap.js'
-// import 'https://cdn.staticfile.org/twitter-bootstrap/4.1.0/css/bootstrap.min.css'
-// import 'https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js'
-// import 'https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js'
-// import './assets/js/web3.min.js'
 import FastClick from 'fastclick'
 
 if ('addEventListener' in document) {
@@ -27,18 +44,66 @@ if ('addEventListener' in document) {
     FastClick.attach(document.body)
   }, false)
 }
+axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded'
+
 Vue.use('axios')
-// axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+
+Vue.use(Button)
+Vue.use(Dialog)
+Vue.use(Collapse)
+Vue.use(CollapseItem)
+Vue.use(Icon)
+Vue.component(Message.name, Message)
+Vue.use(Tooltip)
+Vue.use(Radio)
+Vue.use(RadioGroup)
+Vue.use(Form)
+Vue.use(FormItem)
+Vue.use(Input)
+Vue.use(Row)
+Vue.use(Col)
+Vue.use(Table)
+Vue.use(TableColumn)
+Vue.use(Popover)
+Vue.use(Loading)
+Vue.use(Switch)
+Vue.use(Select)
+Vue.use(Option)
+
+Vue.use(Vuex)
+
 Vue.config.productionTip = false
+
+let setLanguage = (lang) => {
+  let langData
+  if (lang === 'en') {
+    langData = langEn
+  } else if (lang === 'zh') {
+    langData = langZh
+  } else {
+    langData = langEn
+  }
+  Vue.prototype.LANG = langData
+}
+
+let languageType = localStorage.getItem('WALLET_LANGUAGE_TYPE')
+let langZh = require('@/assets/js/language/zh')
+let langEn = require('@/assets/js/language/en')
+setLanguage(languageType)
+
 Vue.prototype.$$ = $$
 Vue.prototype.$http = axios
-Vue.use(Vuex)
+Vue.prototype.$message = Message
+Vue.prototype.changeLang = (lang) => {
+  setLanguage(lang)
+}
+
+window.$ajax = axios
+window.Qs = require('qs')
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
-  web3,
-  // $,
   store,
   components: { App },
   template: '<App/>'

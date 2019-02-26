@@ -36,7 +36,8 @@ module.exports = {
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
       '@': resolve('src'),
-      'bootstrap':resolve('src/assets/bootstrap')
+      '@etc': resolve('static'),
+      // 'bootstrap':resolve('src/assets/bootstrap')
     }
   },
   module: {
@@ -76,16 +77,16 @@ module.exports = {
           name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
         }
       },
-      {
-        test: require.resolve('jquery'),
-        use: [{
-          loader: 'expose-loader',
-          options: 'jQuery'
-        },{
-          loader: 'expose-loader',
-          options: '$'
-        }]
-      }
+      // {
+      //   test: require.resolve('jquery'),
+      //   use: [{
+      //     loader: 'expose-loader',
+      //     options: 'jQuery'
+      //   },{
+      //     loader: 'expose-loader',
+      //     options: '$'
+      //   }]
+      // }
     ]
   },
   node: {

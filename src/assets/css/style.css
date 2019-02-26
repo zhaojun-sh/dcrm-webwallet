@@ -3,14 +3,20 @@ body{display:block;padding:0;margin:0;}
 #app{overflow: hidden;width:100%;height:100%;width:100vw;height:100vh;}
 .boxContent{overflow: hidden;width:100%;height:100%;width:100vw;height:100vh;position:relative;}
 .boxConntent1{width:100%;height:100%;position:relative;}
-.headerTop_box{width:100%;height:92px;position:absolute;top:0;left:0;padding:0 5%;background: #fff;border-bottom:2px solid #eee;}
+.headerTop_box{width:100%;height:92px;position:absolute;top:0;left:0;padding:0 2%;background: #fff;border-bottom:2px solid #eee;}
 .logo{width:350px;height: 40px;}
 .logo .logoImg{width:100%;height: 100%;}
 .logo img{max-width:100%;max-height: 100%;}
 .headerTop_serBox{width:215px;height:40px;position: relative;}
 .headerTop_serBox .wifi{width: 13px;height:10px;position: absolute;left:28px;top:16px;}
 .headerTop_serBox .select{width:100%;height:100%;border-radius:20px;padding:0 52px;color:#666666;position: absolute;top:0;left: 0;background:none;border:1px solid #706e9f;}
+.headerTop_serBox .select .el-input__inner{border: none;height: 38px;padding:0;}
+.headerTop_serBox .select .el-input__suffix{display:none}
 .headerTop_serBox .arrow{width:0;height:0;display:block;border-top:6.5px solid #706e9f;border-left:4px solid transparent;border-right:4px solid transparent;position: absolute;top:19px;right:40px;}
+
+.headerTop_langBox{width: 100px;}
+/* .headerTop_langBox .el-select{width: 100px} */
+.headerTop_langBox .el-input__inner{border:none;}
 
 .headerTop_setBox{width:50%;display: none;}
 .headerTop_setBox ul{width:100%;}
@@ -19,7 +25,7 @@ body{display:block;padding:0;margin:0;}
 .headerTop_setBox ul li .setBtn{width:16px;height:16px;}
 .headerTop_setBox ul li:first-child .setBtn{width:200px;}
 .headerTop_setBox ul li .setBtn img{max-width:100%;max-height:100%;}
-.headerTop_setBox ul li .addreess{font-size:16px;color:#392d6d;width:300px;white-space: nowrap;text-align:right;padding-right:10px}
+.headerTop_setBox ul li .addreess{font-size:16px;color:#392d6d;width:180px;white-space: nowrap;text-align:right;padding-right:10px}
 
 #boxContent_box{width:100%;position:absolute;top:92px;right:0;bottom:65px;left:0;background:none;overflow: auto;overflow-x: hidden;}
 
@@ -38,23 +44,22 @@ body{display:block;padding:0;margin:0;}
 .walletBtn_box ul li .btnBlue{background: #2f7cd7;color:#fff;}
 .walletBtn_box ul li .btnWhite{background:#fff;color:#2f7cd7;}
 
-.supCoinView_box{width:100%;height:484px;background:#fff;margin:0 auto 63px;overflow:hidden;padding:0 48px;}
+.supCoinView_box{width:100%;background:#fff;margin:0 auto 63px;overflow:hidden;padding:0 48px;}
 .supCoinView_title{width:100%;text-align:center;margin:35px 0 5px;}
 .supCoinView_title .title{font-size:30px;line-height:52px;}
 .supCoinView_list{width:100%;}
 .supCoinView_list ul{overflow: hidden;}
-.supCoinView_list ul li{position:relative;text-align:center;float: left;padding:0px 0 43px;margin-top:50px;border-bottom:2px solid #eee;overflow: hidden}
-.supCoinView_list ul li .iconImg{width:67px;height:67px;margin:auto;}
-.supCoinView_list ul li .iconImg img{display: block;width:100%;height:100%;}
-.supCoinView_list ul li .title{font-size:16px;color:#999;line-height:24px;margin-top:4px;font-weight:bold;white-space: nowrap}
-.supCoinView_list ul li .line{width:2px;height:48px;background:#eeeeee;position:absolute;top:10px;right:0;}
-.supCoinView_list ul li:nth-child(4n) .line{display: none;}
-.supCoinView_list ul li:nth-last-child(1),.supCoinView_list ul li:nth-last-child(2),.supCoinView_list ul li:nth-last-child(3),.supCoinView_list ul li:nth-last-child(4){border:none;}
-.supCoinView_list ul li:nth-child(1),.supCoinView_list ul li:nth-child(2),.supCoinView_list ul li:nth-child(3),.supCoinView_list ul li:nth-child(4){border-bottom:2px solid #eee;}
+.supCoinView_list .item{position:relative;text-align:center;float: left;padding:0px 0 43px;margin-top:50px;border-bottom:2px solid #eee;overflow: hidden}
+.supCoinView_list .item .iconImg{width:67px;height:67px;margin:auto;}
+.supCoinView_list .item .iconImg img{display: block;width:100%;height:100%;}
+.supCoinView_list .item .title{font-size:16px;color:#999;line-height:24px;margin-top:4px;font-weight:bold;white-space: nowrap}
+.supCoinView_list .item .line{width:2px;height:48px;background:#eeeeee;position:absolute;top:10px;right:0;}
+.supCoinView_list .item:nth-child(4n) .line{display: none;}
+.supCoinView_list .item:nth-last-child(1),.supCoinView_list .item:nth-last-child(2),.supCoinView_list .item:nth-last-child(3),.supCoinView_list .item:nth-last-child(4){border: 2px solid transparent;}
+.supCoinView_list .item:nth-child(1),.supCoinView_list .item:nth-child(2),.supCoinView_list .item:nth-child(3),.supCoinView_list .item:nth-child(4){border-bottom:2px solid #eee;}
 
 .navBox{padding-left:230px;}
 .navLeft_box{width:230px;height:100%;background:#004a7c;position:absolute;bottom:0;left:0;padding-top:32px;}
-.navLeft_box ul{}
 .navLeft_box ul li{width:100%;margin-bottom:10px;}
 .navLeft_box ul li .item{width:100%;height:37px;padding-left:20px;color:#fff;font-size:16px;}
 .navLeft_box ul li .router-link-active{border-left:2px solid #fff;background:#00395f;}
@@ -104,8 +109,9 @@ body{display:block;padding:0;margin:0;}
 .transferCont_absolute{padding:0 55px;position: absolute;top:164px;left:0;right:0;bottom:0;padding-bottom:22px;background:#fff;}
 .transferCont_box{width:100%;height:100%;border-bottom:1px solid #ddd;overflow: auto;overflow-x: hidden;}
 
-.receiveContent_box{width:100%;padding:0 21px;margin:68px 0 0px;padding-bottom:21px}
+.receiveContent_box{width:100%;padding:0 21px;margin:48px 0 0px;padding-bottom:21px}
 .receiveAddress_box{width:100%;border-bottom:1px solid #ddd;}
+.receiveAddress_box .el-form--label-top .el-form-item__label{padding:0;line-height: 24px;}
 .receiveAddress_pwd{width:100%;height:37px;position:relative;}
 .receiveAddress_pwd .input{width:100%;height:100%;text-align:center;font-size:28px;font-weight:bold;border:1px solid #dddddd;}
 .receiveAddress_pwd .amount{width:100%;height:100%;font-size:20px;border:1px solid #dddddd;padding-right:70px;}
@@ -118,7 +124,7 @@ body{display:block;padding:0;margin:0;}
 .receiveAddress_btn .cyan{background:#285b7e;}
 
 
-.qrcodeCont_box{padding:50px;}
+.qrcodeCont_box{padding:0px;}
 .qrcodeCont_title{text-align:center;font-size:16px;margin-top:20px;}
 
 .tableHistory_box{width:100%;}
@@ -127,17 +133,22 @@ body{display:block;padding:0;margin:0;}
 .tableHistory_table{width:100%;margin-top:10px;margin-bottom:50px;}
 .tableHistory_table table{width:100%;}
 .tableHistory_table table thead tr th{color:#999999;}
-.tableHistory_table table tbody tr td{color:#333;font-size:16px;line-height:34px;}
+.tableHistory_table table tbody tr td{color:#333;line-height:34px;}
 .tableHistory_table table tbody tr td .red{color:#ff5959;}
+.tableHistory_table table tbody tr td .cell{font-size:14px!important;}
 
 .moreInfo_box{width:100%;position:relative;}
-.moreInfo_box .moreInfo_hax{width:100%;max-width:300px;cursor:pointer;}
-.moreInfo_box .list{width:95%;background:#fff;border:1px solid #eee;display:none;}
+/* .moreInfo_box .moreInfo_hax{width:100%;max-width:300px;cursor:pointer;} */
+.moreInfo_box .el-collapse-item__header{width:100%;cursor:pointer;display: block;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;border: none;font-size:14px!important;padding-right: 30px;}
+.moreInfo_box .el-icon-arrow-right{position: absolute;top:17px;right: 0;}
+.moreInfo_box .el-collapse-item__content{padding: 0;}
+.moreInfo_box.el-collapse{border: none}
+.moreInfo_box .list{width:100%;background:#fff;border:1px solid #eee;}
 .moreInfo_box .list li{width:100%;word-break: break-all;border-bottom:1px solid #eee;padding:10px;line-height: 24px;}
 .moreInfo_box .list li:last-child{border-bottom:none}
 /* .moreInfo_box:hover .list{display:block;z-index:99;} */
 .moreInfo_box .list li:hover{background: #eee;}
-.moreInfo_box .arrow{width:11px;height:6px;background:url('../image/Expand.svg') center no-repeat;background-size:100%;display: block;position:absolute;top:17px;right:0;margin-top:-3px;}
+.moreInfo_box .arrow{width:11px;height:6px;background:url('/static/img/Expand.svg') center no-repeat;background-size:100%;display: block;position:absolute;top:17px;right:0;margin-top:-3px;}
 
 .contView_box{width:100%;background:#fff;overflow:hidden;padding:0 48px 63px;position: absolute;top:88px;right:0;left: 0;bottom: 0;overflow: auto;overflow-x: hidden;}
 .dappView_title{width:100%;text-align:center;margin:35px 0 5px;}
@@ -153,7 +164,7 @@ body{display:block;padding:0;margin:0;}
 /* .dappView_list ul li:nth-last-child(1),.dappView_list ul li:nth-last-child(2),.dappView_list ul li:nth-last-child(3),.dappView_list ul li:nth-last-child(4),.dappView_list ul li:nth-last-child(5){border:2px solid transparent;}
 .dappView_list ul li:nth-child(1),.dappView_list ul li:nth-child(2),.dappView_list ul li:nth-child(3),.dappView_list ul li:nth-child(4),.dappView_list ul li:nth-child(5){border-bottom:2px solid #eee;} */
 
-.lockView_list ul li{padding-bottom:20px;}
+.lockView_list .item{padding-bottom:20px;}
 .dappView_btn{width: 100%;height: 44px;}
 .dappView_btn .setBtn{width:66px;height:24px;border:1px solid #dddddd;display:inline-block;line-height:24px;text-align:center;color:#004a7c;font-size:12px;margin:20px 0 0 14px;cursor:pointer}
 
@@ -184,8 +195,7 @@ body{display:block;padding:0;margin:0;}
 
 .selectType_box{width:100%;padding:30px 0;}
 .selectType_type{width:282px;height:100%;padding-left:0px;}
-.selectType_type ul{}
-.selectType_type ul li{width:100%;padding:21px 0;}
+.selectType_type ul li{width:100%;padding:15px 0;}
 .selectType_type ul li .input{display:none;}
 .selectType_type ul li .labelStyle{cursor: pointer;}
 .selectType_type ul li .labelStyle .radioBox{width: 12px;height: 12px;margin-right:10px;}
@@ -194,11 +204,25 @@ body{display:block;padding:0;margin:0;}
 .selectType_type ul li input:checked + .labelStyle .radio{width:8px;height:8px;border:2px solid #2f7cd7;box-shadow: 0px 0px 4px #2f7cd7;}
 .selectType_type ul li input:checked + .labelStyle p{color:#2f7cd7}
 
+.selectAddr_type{width:100%;padding:30px 0;}
+.selectAddr_type ul li{width:100%;padding:15px 0;}
+.selectAddr_type ul li .input{display:none;}
+.selectAddr_type ul li .labelStyle{cursor: pointer;}
+.selectAddr_type ul li .labelStyle .radioBox{width: 12px;height: 12px;margin-right:10px;}
+.selectAddr_type ul li .labelStyle .radio{width:12px;height:12px;border:2px solid #666;border-radius: 100%;display: block}
+.selectAddr_type ul li .labelStyle .p{font-size:16px;font-weight:bold;color:#666;line-height:24px;white-space:nowrap;}
+.selectAddr_type ul li input:checked + .labelStyle .radio{width:8px;height:8px;border:2px solid #2f7cd7;box-shadow: 0px 0px 4px #2f7cd7;}
+.selectAddr_type ul li input:checked + .labelStyle p{color:#2f7cd7}
+
 .selectType_content{width:968px;border-left:2px solid #eeeeee;min-height: 300px;}
 .selectType_contentBox{width:510px;margin:45px auto;}
+.selectType_contentBox .el-radio{display: block;height: 36px;}
+.selectType_contentBox .el-form--label-top .el-form-item__label{padding:0;line-height: 24px;}
+/* .selectType_contentBox .el-form-item{margin-bottom: 0;} */
 .selectType_keystore{display: none;}
 .selectType_contTitle{width:100%;text-align:center;}
 .selectType_contTitle .title{font-size:24px;color:#333;}
+.selectType_contTip{width: 80%;padding: 10px;border: 1px solid #ea4b40;background: rgba(255,68,8,.1);color: #ea4b40;margin: auto;}
 .selectType_KSbtn{width:100%;height:33px;position:relative;text-align:center;line-height: 33px;background:#163a65;cursor: pointer;}
 .selectType_KSbtn .p{color:#fff;font-size:16px;font-weight:bold;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;padding:0 15px;}
 .selectType_KSbtn .file{position:absolute;top:0;left:0;width:100%;height:100%;opacity: 0;cursor: pointer;}
@@ -240,7 +264,6 @@ body{display:block;padding:0;margin:0;}
 .pwdSure_box .selectType_content{width:70%}
 
 .sendInfo_box{width:100%;}
-.sendInfo_box ul{}
 .sendInfo_box ul li{width:100%;overflow: hidden;}
 .sendInfo_box ul li h3{width:30%;float: left;text-align:right;padding:5px 5px;font-weight: bold;}
 .sendInfo_box ul li span{width:70%;float: left;padding:5px 5px;}
@@ -273,9 +296,9 @@ body{display:block;padding:0;margin:0;}
   .walletBtn_box{padding:30px 0}
   .walletBtn_box ul li{margin: 10px 0;}
   .supCoinView_box{height: auto;padding:0 15px;}
-  .supCoinView_list ul li:nth-last-child(1), .supCoinView_list ul li:nth-last-child(2), .supCoinView_list ul li:nth-last-child(3), .supCoinView_list ul li:nth-last-child(4){border-bottom: 2px solid #eee;}
-  .supCoinView_list ul li.col{width:50%;}
-  .supCoinView_list ul li .line{display:none;}
+  .supCoinView_list .item:nth-last-child(1), .supCoinView_list .item:nth-last-child(2), .supCoinView_list .item:nth-last-child(3), .supCoinView_list .item:nth-last-child(4){border-bottom: 2px solid #eee;}
+  .supCoinView_list .item.col{width:50%;}
+  .supCoinView_list .item .line{display:none;}
   .selectType_contentBox,.pwdSure_box .selectType_content{width:90%;}
 
   .createInfo_input{width: 90%;}

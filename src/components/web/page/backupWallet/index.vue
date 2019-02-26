@@ -1,13 +1,13 @@
 <template>
   <div>
     <div class="contentHeader_box flex-bc">
-      <h1 class="contentHeader_title">My Wallet</h1>
+      <h1 class="contentHeader_title">{{LANG.NAV.MY_WALLET}}</h1>
     </div>
 
     <div class="contView_box backupInfo_box">
       <div class="backupInfo_top">
         <div class="backupCont_box">
-          <h3 class="title">Your Address</h3>
+          <h3 class="title">{{LANG.TITLE.YOUR_ADDREAA}}</h3>
           <div class="backupCont_input">
             <input
               type="text"
@@ -18,13 +18,13 @@
             />
           </div>
           <div v-if="keystoreHide">
-            <p class="tip">Keystore File (UTC / JSON · Recommended · Encrypted)</p>
-            <a class="btn" :download="keystoreName" :href="keystoreURL">Download</a>
+            <p class="tip">{{LANG.BTN.DOWNLOAD_KEYSTORE1}}</p>
+            <a class="btn" :download="keystoreName" :href="keystoreURL">{{LANG.BTN.DOWNLOAD}}</a>
           </div>
         </div>
 
         <div class="backupCont_box" id="receiveAddressBtn">
-          <h3 class="title">Private Key (unencrypted)</h3>
+          <h3 class="title">{{LANG.TITLE.PRIVATE_KEY_UNENCRYPTED}}</h3>
           <div class="backupCont_input">
             <input
               type="password"
@@ -40,9 +40,17 @@
               id="privateKeyInfo"
               style="opacity: 0;"
             />
-            <div class="eyesBox showAndHideEyes" id="eyesView"><div class="eyes"><img src="@/assets/image/Visible.svg"></div></div>
+            <div class="eyesBox showAndHideEyes" id="eyesView" @click="showAndHideEyes"><div class="eyes"><img src="@etc/img/Visible.svg" id="eyesViewId"></div></div>
           </div>
-          <button class="btn" @click="copyAddress('privateKeyInfo', 'receiveAddressBtn')" data-toggle="tooltip" data-placement="bottom" title="Copy clipboard">Copy clipboard</button>
+          <button class="btn" @click="copyAddress('privateKeyInfo', 'receiveAddressBtn')" data-toggle="tooltip" data-placement="bottom" :title="LANG.BTN.COPY_CLIPBOARD">
+            <!-- {{LANG.BTN.COPY_CLIPBOARD}} -->
+            <el-popover
+              trigger="hover"
+              :content="LANG.BTN.COPY_CLIPBOARD">
+              <div class="addreess" slot="reference">{{LANG.BTN.COPY_CLIPBOARD}}</div>
+              <!-- <el-button slot="reference">hover 激活</el-button> -->
+            </el-popover>
+          </button>
         </div>
       </div>
 
@@ -50,16 +58,16 @@
         <ul>
           <li>
             <div class="qrcodeView_cont">
-              <h3 class="title">Your Address</h3>
+              <h3 class="title">{{LANG.TITLE.YOUR_ADDREAA}}</h3>
               <div id="addressQrcode"></div>
             </div>
           </li>
           <li>
             <div class="qrcodeView_cont">
-              <h3 class="title">Private Key (unencrypted)</h3>
+              <h3 class="title">{{LANG.TITLE.PRIVATE_KEY_UNENCRYPTED}}</h3>
               <div id="privateQrcode" data-eyes="1"></div>
-              <div class="qrcodeView_black"></div>
-              <div class="qrcodeView_eyes showAndHideEyes"><img src="@/assets/image/Visible.svg"></div>
+              <div class="qrcodeView_black" id="qrcodeViewBlack"></div>
+              <div class="qrcodeView_eyes showAndHideEyes" @click="showAndHideEyes"><img src="@etc/img/Visible.svg" id="qrcodeViewId"></div>
             </div>
           </li>
         </ul>
@@ -74,7 +82,6 @@
 </style>
 
 <script>
-import QRCode from "qrcodejs2"
 export default {
   name: "Transfer",
   data () {
@@ -88,40 +95,35 @@ export default {
   },
   mounted () {
     this.pageRefresh()
-    $(".showAndHideEyes").click(() => {
-      let pwdAndTxt = $("#privateKey").attr("type")
-      $("#privateQrcode").html("")
-      if (pwdAndTxt === "password") {
-        $("#privateKey").attr("type", "text")
-        $("#eyesView").find("img").attr("src", require("@/assets/image/Hide.svg"))
-        this.qrcode(this.privateKey, "privateQrcode")
-        $(".qrcodeView_eyes").find("img").attr("src", require("@/assets/image/Hide.svg"))
-        $("#privateQrcode").attr("data-eyes", "0")
-        $(".qrcodeView_black").hide()
-      } else {
-        $("#privateKey").attr("type", "password")
-        $("#eyesView").find("img").attr("src", require("@/assets/image/Visible.svg"))
-        $(".qrcodeView_eyes").find("img").attr("src", require("@/assets/image/Visible.svg"))
-        $("#privateQrcode").attr("data-eyes", "1")
-        $(".qrcodeView_black").show()
-      }
-    })
-
-    if (!this.$store.state.privateKey) {
+    if (!this.$store.state.addressInfo) {
       this.$router.push("/importWallet")
     }
   },
   methods: {
-    qrcode (cont, id) {
-      let qrcodeInit = new QRCode(id, {
-        width: 270,
-        height: 270, // 高度
-        text: cont // 二维码内容
-        // render: "canvas" // 设置渲染方式（有两种方式 table和canvas，默认是canvas）
-        // background: "#f0f"
-        // foreground: "#ff0"
-      })
-      // console.log(qrcodeInit)
+    showAndHideEyes () {
+      let privateKey_id = document.getElementById('privateKey'),
+          eyesView_id = document.getElementById('eyesViewId'),
+          privateQrcode_id = document.getElementById('privateQrcode'),
+          qrcodeView_id = document.getElementById('qrcodeViewId'),
+          qrcodeView_black_id = document.getElementById('qrcodeViewBlack')
+      let eyes_hide = require("@etc/img/Hide.svg"),
+          eyes_visible = require("@etc/img/Visible.svg")
+      let pwdAndTxt = privateKey_id.getAttribute("type")
+      privateQrcode_id.innerHTML = ""
+      if (pwdAndTxt === "password") {
+        privateKey_id.setAttribute("type", "text")
+        eyesViewId.src = eyes_hide
+        qrcodeView_id.src = eyes_hide
+        privateQrcode_id.setAttribute("data-eyes", "0")
+        qrcodeView_black_id.style.display = "none"
+        this.$$.qrCode(this.privateKey, "privateQrcode")
+      } else {
+        privateKey_id.setAttribute("type", "password")
+        eyesViewId.src = eyes_visible
+        qrcodeView_id.src = eyes_visible
+        privateQrcode_id.setAttribute("data-eyes", "1")
+        qrcodeView_black_id.style.display = "block"
+      }
     },
     pageRefresh () {
       this.walletAdress = this.$store.state.addressInfo
@@ -132,21 +134,19 @@ export default {
         this.keystoreHide = true
       }
       if (this.walletAdress) {
-        this.qrcode(this.walletAdress, "addressQrcode")
+        this.$$.qrCode(this.walletAdress, "addressQrcode")
       }
       if (this.privateKey) {
-        this.qrcode(this.privateKey, "privateQrcode")
+        this.$$.qrCode(this.privateKey, "privateQrcode")
       }
     },
     copyAddress (id, textId) {
-      let copyText = $("#" + textId).find(".tooltip-inner").text()
       document.getElementById(id).select()
       document.execCommand("Copy")
-      $("#" + textId).find(".tooltip-inner").text("Copied")
-      setTimeout(function () {
-        $("#" + textId).find(".tooltip-inner").text(copyText)
-      }, 3000)
-      this.$$.layerMsg("Copy Success")
+      this.$message({
+        message: this.LANG.SUCCESS_TIP.TIP_0,
+        type: 'success'
+      })
     },
   },
   destroyed () {
